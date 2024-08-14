@@ -1,0 +1,13 @@
+{
+    "name": "atendesigngroup/drupal-kickstart",
+    "description": "A starter install of an Aten Design Group Drupal website.",
+    "type": "project",
+    "authors": [
+        {
+            "name": "James Nettik",
+            "email": "james.nettik@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
