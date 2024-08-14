@@ -22,3 +22,10 @@ Drupal project and referenced by with the issue number. For example:
 
 In rare cases where a local patch is needed, keep the `.patch` or `.diff` file
 in the repo's `/patches` folder.
+
+### Development Instructions
+
+There a series of scripts for testing updates to the installer:
+
+* `composer test:ak-installer`: Runs a test install. Places files on the Desktop.
+* `composer cleanup:ak-installer`: Removes the installed directory. Gets ran before new installs.
