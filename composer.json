@@ -84,5 +84,9 @@
             "recipes/{$name}": ["type:drupal-recipe"]
         },
         "patches-file": "./composer.patches.json"
+    },
+    "scripts": {
+      "test:ak-installer": "./scripts/aten-kickstart-install-test.sh",
+      "cleanup:ak-installer": "rm -rf ~/Desktop/ak-test"
     }
 }
