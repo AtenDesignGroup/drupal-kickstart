@@ -25,6 +25,10 @@ in the repo's `/patches` folder.
 
 ### Development Instructions
 
+To add or update packages to this base install, pass the `--no-update` flag into
+the `composer require` or `composer update` commands. This will ensure no
+`package.json` file is created and dependencies are not installed.
+
 There a series of scripts for testing updates to the installer:
 
 * `composer test:ak-installer`: Runs a test install. Places files on the Desktop.
