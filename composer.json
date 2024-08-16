@@ -35,7 +35,8 @@
         "drupal/metatag": "^2.0",
         "drupal/multiple_selects": "^1.1",
         "drupal/pathauto": "^1.13",
-        "drupal/redirect": "^1.10"
+        "drupal/redirect": "^1.10",
+        "drupal/tab_toolbar": "^1.0"
     },
     "require-dev": {
         "drupal/coder": "^8.3",
@@ -84,9 +85,17 @@
               "web-root": "web/"
           }
         },
+        "installer-types": [
+            "npm-asset",
+            "bower-asset"
+        ],
         "installer-paths": {
             "web/core": ["type:drupal-core"],
-            "web/libraries/{$name}": ["type:drupal-library"],
+            "web/libraries/{$name}": [
+                "type:npm-asset",
+                "type:bower-asset",
+                "type:drupal-library"
+            ],
             "web/modules/contrib/{$name}": ["type:drupal-module"],
             "web/profiles/contrib/{$name}": ["type:drupal-profile"],
             "web/themes/contrib/{$name}": ["type:drupal-theme"],
