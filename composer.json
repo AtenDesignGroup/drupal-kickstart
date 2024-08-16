@@ -36,7 +36,8 @@
         "drupal/multiple_selects": "^1.1",
         "drupal/pathauto": "^1.13",
         "drupal/redirect": "^1.10",
-        "drupal/tab_toolbar": "^1.0"
+        "drupal/tab_toolbar": "^1.0",
+        "drush/drush": "^13.0"
     },
     "require-dev": {
         "drupal/coder": "^8.3",
