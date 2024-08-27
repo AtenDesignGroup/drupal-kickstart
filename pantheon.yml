@@ -1,0 +1,25 @@
+# Put overrides to your pantheon.upstream.yml file here.
+# For more information, see: https://pantheon.io/docs/pantheon-yml/
+api_version: 1
+php_version: 8.3
+enforce_https: full+subdomains
+database:
+  version: 10.6
+# Github Actions is handling the composer build.
+build_step: false
+web_docroot: true
+protected_web_paths:
+  - /private/
+  - /sites/default/files/private/
+  - /sites/default/files/config/
+workflows:
+  deploy:
+    after:
+      - type: webphp
+        description: "Invoke the processes after code has been deployed."
+        script: private/hooks/afterDeploy.php
+  sync_code:
+    after:
+      - type: webphp
+        description: "Invoke the processes after code has been pushed."
+        script: private/hooks/afterSync.php

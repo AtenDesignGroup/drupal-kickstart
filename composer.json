@@ -37,7 +37,8 @@
         "drupal/pathauto": "^1.13",
         "drupal/redirect": "^1.10",
         "drupal/tab_toolbar": "^1.0",
-        "drush/drush": "^13.0"
+        "drush/drush": "^13.0",
+        "pantheon-systems/drupal-integrations": "^10.0"
     },
     "require-dev": {
         "drupal/coder": "^8.3",
@@ -62,6 +63,9 @@
     },
     "extra": {
         "drupal-scaffold": {
+          "allowed-packages": [
+              "pantheon-systems/drupal-integrations"
+          ],
           "file-mapping": {
               "[web-root]/.htaccess": false,
               "[web-root]/README.txt": false,
