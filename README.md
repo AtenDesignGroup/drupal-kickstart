@@ -2,6 +2,14 @@
 
 Starter repo for a Drupal website.
 
+## Getting Started
+
+To start a new Drupal project, run the following command:
+
+```
+composer create-project atendesigngroup/drupal-kickstart
+```
+
 ## Development Workflow
 
 Projects built using this starter project make a number of assumptions. First
