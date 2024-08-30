@@ -1,3 +1,7 @@
 {
-    "patches": {}
+    "patches": {
+      "drupal/markerio": {
+        "#3467208: Add missing default config": "https://git.drupalcode.org/project/markerio/-/merge_requests/5.patch"
+      }
+    }
 }
