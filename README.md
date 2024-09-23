@@ -1,3 +1,7 @@
+# Deprecated
+
+Consolodated this repo with https://github.com/AtenDesignGroup/drupal-project.
+
 # Aten Drupal Kickstart Documentation
 
 Starter repo for a Drupal website.
