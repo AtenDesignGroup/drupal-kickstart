@@ -1,0 +1,59 @@
+name: Playwright VRT
+
+on:
+  # Manual trigger for running tests
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Baseline will run against the baseline URL to refresh snapshots. Test will run against a provided pantheonsite.io URL.'
+        required: true
+        type: choice
+        options:
+          - test
+          - baseline
+        default: 'test'
+      refresh_environment:
+        description: 'Refresh environment before testing?'
+        required: false
+        type: boolean
+        default: false
+      test_url:
+        description: 'URL to test (only for test mode) - Must be a pantheonsite.io URL'
+        required: false
+
+  # Weekly baseline refresh (every Monday at 2 AM UTC)
+  schedule:
+    - cron: '0 2 * * 1'
+
+jobs:
+  # Manual test run
+  run-tests:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'test'
+    uses: AtenDesignGroup/aten-actions/.github/workflows/playwright.yml@main
+    with:
+      test-mode: 'test'
+      test-url: ${{ inputs.test_url }}
+      pantheon-site: ${{ vars.PANTHEON_SITE }}
+      playwright-browsers: 'chromium firefox webkit'
+      refresh-environment: ${{ inputs.refresh_environment && 'true' || 'false' }}
+      refresh-source-environment: ${{ vars.PANTHEON_MULTIDEV_CLONE_ENV }}
+      workflow-filename: 'playwright-tests.yml'
+    secrets:
+      pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      github-token: ${{ secrets.GHPAC_TOKEN }}
+
+  # Weekly baseline refresh (also supports manual refresh)
+  refresh-baseline:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'baseline')
+    uses: AtenDesignGroup/aten-actions/.github/workflows/playwright.yml@main
+    with:
+      test-mode: 'baseline'
+      playwright-browsers: 'chromium firefox webkit'
+      refresh-environment: ${{ inputs.refresh_environment && 'true' || 'false' }}
+      refresh-source-environment: ${{ vars.PANTHEON_MULTIDEV_CLONE_ENV }}
+      baseline-url: ${{ vars.PLAYWRIGHT_BASELINE_URL }}
+      pantheon-site: ${{ vars.PANTHEON_SITE }}
+    secrets:
+      pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}

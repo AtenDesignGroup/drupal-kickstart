@@ -1,0 +1,32 @@
+name: Pantheon Daily Backup
+
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC (adjust timezone as needed)
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  PANTHEON_TEST_ENV: 'test'
+
+jobs:
+  backup-test-environment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Remote SSH
+        uses: AtenDesignGroup/aten-actions/.github/actions/setup-remote-ssh@main
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Setup Pantheon Terminus and PHP
+        uses: AtenDesignGroup/aten-actions/.github/actions/setup-pantheon-terminus@main
+        with:
+          pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_TOKEN }}
+          php-version: ${{ vars.PHP_VERSION }}
+
+      - name: Create Pantheon Test Environment Backup
+        run: |
+          echo "Creating backup for test environment..."
+          terminus backup:create ${{ vars.PANTHEON_SITE }}.${{ env.PANTHEON_TEST_ENV }} --element=all
+          echo "Backup creation initiated successfully"
