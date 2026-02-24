@@ -1,0 +1,13 @@
+#!/bin/bash
+## Description: Build theme assets.
+## Usage: theme-build [flags] [args]
+## Example: "theme-build"
+cd "${DDEV_COMPOSER_ROOT}/${THEME_PATH}"
+
+# Install dependencies if node_modules doesn't exist
+if [ ! -d "node_modules" ]; then
+  echo "node_modules not found. Running npm install..."
+  npm install
+fi
+
+npm run build $@

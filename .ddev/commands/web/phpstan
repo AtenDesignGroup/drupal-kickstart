@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+#ddev-generated
+## Command provided by https://github.com/ddev/ddev-drupal-contrib
+## Description: Run phpstan inside the web container
+## Usage: phpstan [flags] [args]
+## Example: "ddev phpstan" or "ddev phpstan -n"
+## ExecRaw: true
+## MutagenSync: true
+
+set -eu -o pipefail
+
+if ! command -v phpstan >/dev/null; then
+  echo "phpstan is not available. You may need to 'ddev composer install'"
+  exit 1
+fi
+cd "${DDEV_COMPOSER_ROOT}" || exit
+phpstan analyze "$@"

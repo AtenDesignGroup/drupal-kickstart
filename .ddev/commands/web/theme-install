@@ -1,0 +1,5 @@
+#!/bin/bash
+## Description: Run npm install in the theme directory.
+## Usage: theme-install [flags] [args]
+## Example: "theme-install"
+cd "${DDEV_COMPOSER_ROOT}/${THEME_PATH}" && npm install $@
