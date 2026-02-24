@@ -1,0 +1,39 @@
+# Local development services.
+#
+# To activate this feature, follow the instructions at the top of the
+# 'example.settings.local.php' file, which sits next to this file.
+parameters:
+  # Twig debugging and development settings.
+  twig.config:
+    # Enable Twig debug output (shows template suggestions and file paths).
+    debug: true
+    # Automatically reload Twig templates when they change.
+    auto_reload: true
+    # Disable Twig template caching.
+    cache: false
+
+  # Add cache debugging headers to responses.
+  http.response.debug_cacheability_headers: true
+
+  # Disable CSS/JS aggregation for easier debugging.
+  # Note: You also need to disable aggregation in settings.local.php:
+  # $config['system.performance']['css']['preprocess'] = FALSE;
+  # $config['system.performance']['js']['preprocess'] = FALSE;
+
+services:
+  # Null cache backend - disables caching for development.
+  cache.backend.null:
+    class: Drupal\Core\Cache\NullBackendFactory
+
+  # Lenient config schema checker - warns instead of throwing exceptions.
+  logger.channel.config_schema:
+    parent: logger.channel_base
+    arguments: ['config_schema']
+  config.schema_checker:
+    class: Drupal\Core\Config\Development\LenientConfigSchemaChecker
+    arguments:
+      - '@config.typed'
+      - '@messenger'
+      - '@logger.channel.config_schema'
+    tags:
+      - { name: event_subscriber }
