@@ -1,0 +1,19 @@
+{
+  "name": "playwright-vrt",
+  "version": "1.0.0",
+  "description": "Standalone Playwright visual regression tests for Aten top navigation.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:baseline": "npx playwright test --update-snapshots",
+    "test:report": "npx playwright show-report"
+  },
+  "author": "AtenDesignGroup",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.58.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}
