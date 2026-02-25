@@ -330,30 +330,24 @@ fi
 # =============================================================================
 header "Installing Composer Dependencies"
 
-# Drush
+# Register the local drupal-base recipe as a path repository so Composer can
+# resolve its composer.json dependencies (gin, metatag, redis, pathauto, etc.)
+ddev composer config repositories.drupal-base \
+  '{"type":"path","url":"recipes/drupal-base","options":{"symlink":false}}'
+
+# Requiring the recipe pulls in all packages declared in recipes/drupal-base/composer.json
+ddev composer require \
+  "AtenDesignGroup/drupal-base:*" \
+  --no-interaction
+info "Drupal Base recipe packages installed"
+
+# Drush — a tooling dep, not part of the recipe
 ddev composer require \
   "drush/drush:^13" \
   --no-interaction
 info "drush/drush installed"
 
-# Contrib packages
-ddev composer require \
-  "drupal/gin:^3.0" \
-  "drupal/gin_login:^2.0" \
-  "drupal/config_ignore:^3.0" \
-  "drupal/pathauto:^1.0" \
-  "drupal/redirect:^1.0" \
-  "drupal/robotstxt:^1.0" \
-  "drupal/menu_block:^1.0" \
-  "drupal/csp:^1.0" \
-  "drupal/metatag:^2.0" \
-  "drupal/redis:^2.0@alpha" \
-  --no-interaction
-info "Contrib packages installed"
-
-# Dev dependencies — use -W to allow transitive dependency upgrades
-# drupal/core-dev requires phpunit which needs a newer sebastian/diff than
-# what the contrib packages locked above; -W lets Composer resolve it cleanly.
+# Dev dependencies — -W allows transitive upgrades (phpunit needs newer sebastian/diff)
 ddev composer require --dev \
   "drupal/core-dev:^11" \
   --with-all-dependencies \
