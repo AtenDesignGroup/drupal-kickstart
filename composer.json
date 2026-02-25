@@ -1,0 +1,81 @@
+{
+    "name": "drupal/kickstart-project",
+    "description": "Drupal 11 kickstart project — managed by drupal-kickstart.sh.",
+    "type": "project",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/drupal",
+    "support": {
+        "docs": "https://www.drupal.org/docs/user_guide/en/index.html"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ],
+    "require": {
+        "composer/installers": "^2.0",
+        "drupal/core-composer-scaffold": "^11",
+        "drupal/core-project-message": "^11",
+        "drupal/core-recommended": "^11",
+        "drush/drush": "^13",
+        "drupal/gin": "^3.0",
+        "drupal/gin_login": "^2.0",
+        "drupal/config_ignore": "^3.0",
+        "drupal/pathauto": "^1.0",
+        "drupal/redirect": "^1.0",
+        "drupal/robotstxt": "^1.0",
+        "drupal/menu_block": "^1.0",
+        "drupal/csp": "^1.0",
+        "drupal/metatag": "^2.0",
+        "drupal/redis": "^2.0@alpha"
+    },
+    "require-dev": {
+        "drupal/core-dev": "^11"
+    },
+    "conflict": {
+        "drupal/drupal": "*"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "drupal/core-composer-scaffold": true,
+            "drupal/core-project-message": true,
+            "phpstan/extension-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "php-http/discovery": true
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "drupal-scaffold": {
+            "locations": {
+                "web-root": "web/"
+            }
+        },
+        "installer-paths": {
+            "web/core": ["type:drupal-core"],
+            "web/libraries/{$name}": ["type:drupal-library"],
+            "web/modules/contrib/{$name}": ["type:drupal-module"],
+            "web/profiles/contrib/{$name}": ["type:drupal-profile"],
+            "web/themes/contrib/{$name}": ["type:drupal-theme"],
+            "drush/Commands/contrib/{$name}": ["type:drupal-drush"],
+            "web/modules/custom/{$name}": ["type:drupal-custom-module"],
+            "web/profiles/custom/{$name}": ["type:drupal-custom-profile"],
+            "web/themes/custom/{$name}": ["type:drupal-custom-theme"]
+        },
+        "drupal-core-project-message": {
+            "include-keys": ["homepage", "support"],
+            "post-create-project-cmd-message": [
+                "<bg=blue;fg=white>                                                         </>",
+                "<bg=blue;fg=white>  Congratulations, you've installed the Drupal codebase  </>",
+                "<bg=blue;fg=white>  from the drupal/recommended-project template!           </>",
+                "<bg=blue;fg=white>                                                         </>",
+                "<bg=blue;fg=white>  Next step: Install Drupal using the kickstart script.   </>",
+                "<bg=blue;fg=white>                                                         </>"
+            ]
+        }
+    }
+}
