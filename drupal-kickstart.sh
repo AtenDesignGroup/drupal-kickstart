@@ -136,6 +136,8 @@ fi
 if [[ "$RESUME" == "yes" ]]; then
   # Derive theme path from loaded values — no prompts needed
   THEME_PATH="${WEB_PATH}/themes/custom/${THEME_NAME}"
+  # Provide default for THEME_DESC if missing from an older .kickstart.env
+  THEME_DESC="${THEME_DESC:-${PROJECT_NAME} Theme}"
   header "Resuming with saved configuration"
 else
   header "Project Configuration"
@@ -147,6 +149,10 @@ else
   # Theme name
   DEFAULT_THEME="${THEME_NAME:-${PROJECT_NAME}_theme}"
   prompt THEME_NAME "Theme name" "$DEFAULT_THEME"
+
+  # Theme description (used by the prototype theme generator)
+  DEFAULT_THEME_DESC="${THEME_DESC:-${PROJECT_NAME} Theme}"
+  prompt THEME_DESC "Theme description" "$DEFAULT_THEME_DESC"
 
   # Web path (docroot)
   DEFAULT_WEB="${WEB_PATH:-web}"
@@ -185,6 +191,7 @@ if [[ "$RESUME" != "yes" ]]; then
 # Generated: $(date)
 PROJECT_NAME="${PROJECT_NAME}"
 THEME_NAME="${THEME_NAME}"
+THEME_DESC="${THEME_DESC}"
 WEB_PATH="${WEB_PATH}"
 PANTHEON="${PANTHEON}"
 SOLR="${SOLR}"
@@ -205,6 +212,7 @@ echo
 echo -e "    ${BOLD}Project name    :${RESET} ${PROJECT_NAME}"
 echo -e "    ${BOLD}Web path        :${RESET} ${WEB_PATH}"
 echo -e "    ${BOLD}Theme name      :${RESET} ${THEME_NAME}"
+echo -e "    ${BOLD}Theme desc      :${RESET} ${THEME_DESC}"
 echo -e "    ${BOLD}Theme path      :${RESET} ${THEME_PATH}"
 echo -e "    ${BOLD}PHP version     :${RESET} ${PHP_VERSION}"
 echo -e "    ${BOLD}Node version    :${RESET} ${NODE_VERSION}"
@@ -234,6 +242,7 @@ ddev config \
   --project-type=drupal11 \
   --docroot="${WEB_PATH}" \
   --php-version="${PHP_VERSION}" \
+  --create-docroot \
   --project-tld=test
 
 info "DDEV configured (docroot: ${WEB_PATH}, PHP: ${PHP_VERSION})"
@@ -301,35 +310,66 @@ ddev start
 info "DDEV started — ${PROJECT_NAME}.test"
 
 # =============================================================================
-# 11. COMPOSER INSTALL
+# 11. SCAFFOLD DRUPAL PROJECT
 # =============================================================================
-header "Installing Drupal 11 Dependencies"
+header "Scaffolding Drupal 11 Project"
 
-# If the user chose a docroot other than 'web', update composer.json scaffold
-# and installer-paths to use the correct directory before running install.
-if [[ "$WEB_PATH" != "web" ]]; then
-  sed -i.bak "s|\"web/\"|\"${WEB_PATH}/\"|g; s|\"web/core\"|\"${WEB_PATH}/core\"|g; s|\"web/libraries|\"${WEB_PATH}/libraries|g; s|\"web/modules|\"${WEB_PATH}/modules|g; s|\"web/profiles|\"${WEB_PATH}/profiles|g; s|\"web/themes|\"${WEB_PATH}/themes|g" composer.json && rm -f composer.json.bak
-  info "composer.json scaffold paths updated to ${WEB_PATH}/"
+if [[ ! -f "${WEB_PATH}/index.php" ]]; then
+  info "Running composer create-project in container..."
+  # --no-install: create composer.json + composer.lock scaffold without vendor/
+  # We rsync everything — no exclusions needed since there's no repo composer.json
+  ddev exec bash -c "composer create-project 'drupal/recommended-project:^11' /tmp/dp --no-install --no-interaction"
+  ddev exec bash -c "rsync -a /tmp/dp/ /var/www/html/"
+  info "Drupal scaffold created"
+else
+  info "Drupal scaffold already present — skipping create-project"
 fi
 
-ddev composer install --no-interaction
-info "Drupal 11 dependencies installed"
+# =============================================================================
+# 12. COMPOSER DEPENDENCIES
+# =============================================================================
+header "Installing Composer Dependencies"
+
+# Drush
+ddev composer require \
+  "drush/drush:^13" \
+  --no-interaction
+info "drush/drush installed"
+
+# Contrib packages
+ddev composer require \
+  "drupal/gin:^3.0" \
+  "drupal/gin_login:^2.0" \
+  "drupal/config_ignore:^3.0" \
+  "drupal/pathauto:^1.0" \
+  "drupal/redirect:^1.0" \
+  "drupal/robotstxt:^1.0" \
+  "drupal/menu_block:^1.0" \
+  "drupal/csp:^1.0" \
+  "drupal/metatag:^2.0" \
+  "drupal/redis:^2.0@alpha" \
+  --no-interaction
+info "Contrib packages installed"
+
+# Dev dependencies — use -W to allow transitive dependency upgrades
+# drupal/core-dev requires phpunit which needs a newer sebastian/diff than
+# what the contrib packages locked above; -W lets Composer resolve it cleanly.
+ddev composer require --dev \
+  "drupal/core-dev:^11" \
+  --with-all-dependencies \
+  --no-interaction
+info "Dev dependencies installed"
 
 # =============================================================================
-# 12. REDIS DRUPAL MODULE + settings.local.php
+# 13. REDIS SETTINGS
 # =============================================================================
-header "Setting Up Redis Drupal Caching"
+header "Configuring Redis Cache Settings"
 
-# drupal/redis is already declared in composer.json and installed by step 11.
-# No separate require needed — just configure settings.local.php.
-
-# Ensure sites/default path exists
 SITES_DEFAULT="${WEB_PATH}/sites/default"
 mkdir -p "$SITES_DEFAULT"
 
 SETTINGS_LOCAL="${SITES_DEFAULT}/settings.local.php"
 
-# Create settings.local.php if it doesn't exist
 if [[ ! -f "$SETTINGS_LOCAL" ]]; then
   cat > "$SETTINGS_LOCAL" <<'SETTINGS_HEADER'
 <?php
@@ -343,7 +383,6 @@ SETTINGS_HEADER
   info "Created ${SETTINGS_LOCAL}"
 fi
 
-# Append Redis config block if not already present
 if ! grep -q "redis.connection" "$SETTINGS_LOCAL"; then
   cat >> "$SETTINGS_LOCAL" <<'REDIS_BLOCK'
 
@@ -356,38 +395,30 @@ if (!defined('MAINTENANCE_MODE')) {
   $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
 }
 REDIS_BLOCK
-  info "Redis config block appended to ${SETTINGS_LOCAL}"
+  info "Redis config written to ${SETTINGS_LOCAL}"
 else
   warn "Redis config already present in ${SETTINGS_LOCAL} — skipped"
 fi
 
 # =============================================================================
-# 13. PANTHEON (optional)
+# 14. SITE INSTALL
 # =============================================================================
-if [[ "$PANTHEON" == "yes" ]]; then
-  header "Installing Pantheon Modules"
-  ddev composer require drupal/pantheon_advanced_page_cache --no-interaction
-  info "drupal/pantheon_advanced_page_cache installed"
-  warn "Additional Pantheon setup (Live/Dev environment linking) must be done manually."
-fi
-
-# =============================================================================
-# 14. ATEN STARTERKIT
-# =============================================================================
-header "Running Aten Starterkit"
+header "Installing Drupal"
 
 STARTERKIT_CMD=".ddev/commands/web/aten-starterkit"
+SITE_INSTALL_CMD=".ddev/commands/web/site-install"
 if [[ -f "$STARTERKIT_CMD" ]]; then
   ddev aten-starterkit
   info "aten-starterkit complete"
+elif [[ -f "$SITE_INSTALL_CMD" ]]; then
+  SITE_NAME="${PROJECT_NAME}" ddev site-install
+  info "Drupal installed via ddev site-install (admin/admin)"
 else
-  warn "ddev aten-starterkit command not found at ${STARTERKIT_CMD}."
-  warn "Falling back to a standard Drupal site install..."
   ddev drush site:install --yes \
     --site-name="${PROJECT_NAME}" \
     --account-name=admin \
     --account-pass=admin
-  info "Drupal installed via drush site:install (admin/admin)"
+  info "Drupal installed (admin/admin)"
 fi
 
 # =============================================================================
@@ -395,26 +426,112 @@ fi
 # =============================================================================
 header "Applying Drupal Base Recipe"
 
-# Verify Drupal is bootstrapped (i.e. site:install ran successfully) before
-# attempting the recipe — drush recipe requires a working database connection.
 if ! ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
   warn "Drupal is not bootstrapped — skipping recipe."
-  warn "Run 'ddev drush site:install' then 'ddev drush recipe /var/www/html/recipes/drupal-base' manually."
+  warn "Run 'ddev drush recipe /var/www/html/recipes/drupal-base' manually."
 elif [[ ! -d "recipes/drupal-base" ]]; then
   warn "recipes/drupal-base not found — skipping."
-  warn "Run 'ddev drush recipe /var/www/html/recipes/drupal-base' manually when ready."
 else
-  # Apply the recipe — container path /var/www/html maps to the project root
   ddev drush recipe /var/www/html/recipes/drupal-base
   info "Drupal Base recipe applied"
-
-  # Export config after recipe so it's committed to the repo
   ddev drush cex -y
-  info "Config exported to sync directory"
+  info "Configuration exported"
 fi
 
 # =============================================================================
-# 16. DONE
+# 16. PROTOTYPE THEME
+# =============================================================================
+header "Generating Custom Theme"
+
+GENERATOR="vendor/drupal/prototype/generator.php"
+ddev composer require 'drupal/prototype:^5.3' --no-interaction
+info "drupal/prototype installed"
+
+if ddev exec test -f "/var/www/html/${GENERATOR}"; then
+  ddev exec php "/var/www/html/${GENERATOR}" \
+    -n "${THEME_NAME}" \
+    -d "${THEME_DESC}" \
+    -p "${WEB_PATH}/themes/custom" \
+    -a short
+  info "Theme '${THEME_NAME}' generated at ${THEME_PATH}"
+  ddev drush pm:enable "${THEME_NAME}" -y
+  info "Theme '${THEME_NAME}' enabled"
+else
+  warn "generator.php not found at ${GENERATOR} — theme generation skipped."
+  warn "Run manually: ddev exec php /var/www/html/${GENERATOR} -n ${THEME_NAME} -d '${THEME_DESC}' -p ${WEB_PATH}/themes/custom -a short"
+fi
+
+ddev composer remove drupal/prototype --no-interaction
+info "drupal/prototype removed from require"
+
+# =============================================================================
+# 17. PANTHEON (optional)
+# =============================================================================
+if [[ "$PANTHEON" == "yes" ]]; then
+  header "Installing Pantheon"
+
+  # -- Composer packages -------------------------------------------------------
+  ddev composer require \
+    'drupal/pantheon_advanced_page_cache:^2.3' \
+    'pantheon-systems/drupal-integrations:^11' \
+    'drupal/search_api_pantheon:^8.4' \
+    'drupal/pantheon_secrets:^1.0' \
+    --no-interaction
+  info "Pantheon Composer packages installed"
+
+  # drupal-integrations is a non-standard package — must be explicitly allowed
+  ddev composer config extra.allowed-packages.pantheon-systems/drupal-integrations true
+  info "pantheon-systems/drupal-integrations added to extra.allowed-packages"
+
+  # -- Pantheon recipe ---------------------------------------------------------
+  if [[ -d "recipes/drupal-pantheon" ]]; then
+    if ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
+      ddev drush recipe /var/www/html/recipes/drupal-pantheon
+      info "Drupal Pantheon recipe applied"
+      ddev drush cex -y
+      info "Configuration exported"
+    else
+      warn "Drupal not bootstrapped — run 'ddev drush recipe /var/www/html/recipes/drupal-pantheon' manually."
+    fi
+  else
+    warn "recipes/drupal-pantheon not found — skipping recipe."
+  fi
+
+  # -- pantheon.yml ------------------------------------------------------------
+  if [[ ! -f "pantheon.yml" ]]; then
+    cp assets/pantheon/pantheon.yml pantheon.yml
+    sed -i.bak "s/^php_version:.*/php_version: ${PHP_VERSION}/" pantheon.yml \
+      && rm -f pantheon.yml.bak
+    info "pantheon.yml copied (PHP ${PHP_VERSION})"
+  else
+    warn "pantheon.yml already exists — skipped (verify php_version: ${PHP_VERSION})"
+  fi
+
+  # -- settings.platform.php --------------------------------------------------
+  PLATFORM_SETTINGS="${WEB_PATH}/sites/default/settings.platform.php"
+  if [[ ! -f "$PLATFORM_SETTINGS" ]]; then
+    cp assets/pantheon/settings.platform.php "$PLATFORM_SETTINGS"
+    info "settings.platform.php copied to ${WEB_PATH}/sites/default/"
+  else
+    warn "settings.platform.php already exists — skipped."
+  fi
+
+  # -- Quicksilver scripts ----------------------------------------------------
+  QS_SRC="assets/pantheon/quicksilver/pantheon-drupal-quicksilver"
+  QS_DEST="${WEB_PATH}/private/scripts/quicksilver"
+  if [[ -d "$QS_SRC" ]]; then
+    mkdir -p "$QS_DEST"
+    cp -r "${QS_SRC}/." "$QS_DEST/"
+    info "Quicksilver scripts copied to ${QS_DEST}"
+  else
+    warn "Quicksilver source not found at ${QS_SRC} — skipped."
+  fi
+
+  warn "Complete Pantheon environment linking must be done manually."
+fi
+
+# =============================================================================
+# 18. DONE
 # =============================================================================
 echo
 echo -e "${GREEN}${BOLD}============================================================${RESET}"
@@ -428,7 +545,7 @@ if [[ -n "$JIRA_SHORT" ]]; then
 fi
 echo
 echo -e "  ${YELLOW}${BOLD}Next steps:${RESET}"
-echo -e "  1. Run ${BOLD}ddev drush en redis -y && ddev drush cr${RESET} after Drupal install"
+echo -e "  1. Run ${BOLD}ddev drush en redis -y && ddev drush cr${RESET} to activate Redis caching"
 if [[ "$PANTHEON" == "yes" ]]; then
   echo -e "  2. Complete Pantheon environment linking manually"
 fi

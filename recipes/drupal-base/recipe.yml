@@ -1,5 +1,5 @@
 name: 'Drupal Base'
-description: 'A recipe tailored to best practices for kickstarting a new Drupal 10 project.'
+description: 'A recipe tailored to best practices for kickstarting a new Drupal 11 project.'
 type: 'Site'
 
 install:

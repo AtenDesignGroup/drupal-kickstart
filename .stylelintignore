@@ -1,0 +1,7 @@
+# Exclude build and compiled files
+**/build/**
+**/node_modules/**
+**/vendor/**
+
+# Exclude minified files
+**/*.min.css
