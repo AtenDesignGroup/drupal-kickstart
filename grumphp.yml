@@ -1,0 +1,58 @@
+grumphp:
+  testsuites:
+    git_commit_msg:
+      tasks:
+        - git_commit_message
+
+    git_pre_commit:
+      tasks:
+        - phpcs
+        - composer
+        - eslint
+        - stylelint
+
+  tasks:
+    # Refer to phpcs.xml
+    phpcs:
+    composer:
+      file: ./composer.json
+      strict: false
+      no_check_all: true
+      no_check_lock: false
+      no_check_publish: false
+      with_dependencies: false
+    # https://github.com/phpro/grumphp/blob/v2.x/doc/tasks/phpcsfixer.md
+    phpcsfixer:
+      triggered_by: ['php']
+    # ESLint for JavaScript linting
+    eslint:
+      bin: node_modules/.bin/eslint
+      triggered_by: ['js', 'jsx', 'ts', 'tsx']
+      whitelist_patterns:
+        - /^web\/modules\/custom\/.*\.(js|jsx|ts|tsx)$/
+        - /^web\/themes\/custom\/.*\/components\/.*\.(js|jsx|ts|tsx)$/
+        - /^web\/themes\/custom\/.*\/libraries\/.*\.(js|jsx|ts|tsx)$/
+      config: eslint.config.js
+    # Stylelint for CSS/SCSS linting
+    stylelint:
+      bin: node_modules/.bin/stylelint
+      triggered_by: ['css', 'scss', 'sass']
+      whitelist_patterns:
+        - /^web\/modules\/custom\/.*\.(css|scss|sass)$/
+        - /^web\/themes\/custom\/.*\.(css|scss|sass)$/
+      config: .stylelintrc.cjs
+    # https://github.com/phpro/grumphp/blob/v2.x/doc/tasks/git_commit_message.md
+    git_commit_message:
+      allow_empty_message: false
+      enforce_capitalized_subject: true
+      enforce_no_subject_punctuations: false
+      enforce_no_subject_trailing_period: true
+      enforce_single_lined_subject: true
+      type_scope_conventions: []
+      max_body_width: 0
+      max_subject_width: 0
+      matchers:
+        Must contain JIRA issue number: /(JIRA-\d+|GitHub Actions Build)/
+      case_insensitive: true
+      multiline: true
+      additional_modifiers: ''
