@@ -1,0 +1,33 @@
+#!/bin/bash
+## Description: Sanitize the database (PII removal) then restore admin credentials.
+## Usage: sanitize-db [flags] [args]
+## Example: "sanitize-db"
+## Example: "sanitize-db --sanitize-email=example.com --sanitize-password=sanitized"
+
+# Default values for sanitization options
+SANITIZE_EMAIL="${SANITIZE_EMAIL:-example.com}"
+SANITIZE_PASSWORD="${SANITIZE_PASSWORD:-sanitized}"
+
+# Admin credentials to restore after sanitization
+ADMIN_USER="${ADMIN_USER:-admin}"
+ADMIN_PASS="${ADMIN_PASS:-admin}"
+ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.com}"
+
+echo "Sanitizing database (all user emails and passwords will be scrambled)..."
+
+drush sql-sanitize \
+  --yes \
+  --sanitize-email="${SANITIZE_EMAIL}" \
+  --sanitize-password="${SANITIZE_PASSWORD}" \
+  "$@"
+
+echo "Restoring admin user (uid=1) credentials..."
+
+# Reset admin password to a known local value
+drush user:password "${ADMIN_USER}" "${ADMIN_PASS}"
+
+# Reset admin email to a known local value
+drush user:email "${ADMIN_USER}" "${ADMIN_EMAIL}" 2>/dev/null \
+  || drush sql:query "UPDATE users_field_data SET mail='${ADMIN_EMAIL}' WHERE uid=1;"
+
+echo "Done. Admin login: ${ADMIN_USER} / ${ADMIN_PASS} (${ADMIN_EMAIL})"
