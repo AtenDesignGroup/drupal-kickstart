@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: call_to_action
+label: 'Call to action'
+icon_uuid: null
+icon_default: null
+description: 'Use a <em>call to action</em> to encourage users to take an action.'
+behavior_plugins: {  }
