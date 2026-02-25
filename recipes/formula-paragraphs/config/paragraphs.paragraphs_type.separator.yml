@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: separator
+label: Separator
+icon_uuid: null
+icon_default: null
+description: 'Use a <em>separator</em> to break up long stretches of content.'
+behavior_plugins: {  }

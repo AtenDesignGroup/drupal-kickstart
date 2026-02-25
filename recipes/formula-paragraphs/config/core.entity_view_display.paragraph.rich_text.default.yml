@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.rich_text.field_formatted_text
+    - paragraphs.paragraphs_type.rich_text
+  module:
+    - nomarkup
+    - text
+id: paragraph.rich_text.default
+targetEntityType: paragraph
+bundle: rich_text
+mode: default
+content:
+  field_formatted_text:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

@@ -1,0 +1,27 @@
+{
+    "name": "AtenDesignGroup/drupal-base",
+    "description": "A recipe tailored to best practices for kickstarting a new Drupal 11 project.",
+    "keywords": ["recipe", "Drupal base install", "best practices", "simple install"],
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "AtenDesignGroup",
+            "homepage": "https://atendesigngroup.com",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "drupal/config_ignore": "^3.0",
+        "drupal/csp": "^1.0",
+        "drupal/field_group": "^3.0",
+        "drupal/gin": "^3.0",
+        "drupal/gin_login": "^2.0",
+        "drupal/gin_toolbar": "^1.0",
+        "drupal/pathauto": "^1.0",
+        "drupal/menu_block": "^1.0",
+        "drupal/metatag": "^1.0",
+        "drupal/redirect": "^1.0",
+        "drupal/robotstxt": "^1.0"
+    }
+}
