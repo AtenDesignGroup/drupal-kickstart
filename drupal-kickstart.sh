@@ -318,7 +318,7 @@ if [[ ! -f "${WEB_PATH}/index.php" ]]; then
   info "Running composer create-project in container..."
   # --no-install: create composer.json + composer.lock scaffold without vendor/
   # We rsync everything — no exclusions needed since there's no repo composer.json
-  ddev exec bash -c "composer create-project 'drupal/recommended-project:^11' /tmp/dp --no-install --no-interaction"
+  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:^11' /tmp/dp --no-interaction"
   ddev exec bash -c "rsync -a /tmp/dp/ /var/www/html/"
   info "Drupal scaffold created"
 else
@@ -330,6 +330,27 @@ fi
 # =============================================================================
 header "Installing Composer Dependencies"
 
+# Merge repo customizations (scripts, patches, extra config) from
+# composer.custom.json into the create-project generated composer.json.
+if [[ -f "composer.custom.json" ]]; then
+  ddev exec bash -c "php -r \"
+    \\\$base   = json_decode(file_get_contents('/var/www/html/composer.json'), true);
+    \\\$custom = json_decode(file_get_contents('/var/www/html/composer.custom.json'), true);
+    \\\$merged = array_replace_recursive(\\\$base, \\\$custom);
+    file_put_contents(
+      '/var/www/html/composer.json',
+      json_encode(\\\$merged, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL
+    );
+  \""
+  info "composer.custom.json merged into composer.json"
+fi
+
+# Set minimum-stability to dev so the local path repo (drupal-base) is resolvable.
+# prefer-stable ensures all other packages still resolve to stable releases.
+ddev composer config minimum-stability dev
+ddev composer config prefer-stable true
+info "Composer stability configured (dev + prefer-stable)"
+
 # Register the local drupal-base recipe as a path repository so Composer can
 # resolve its composer.json dependencies (gin, metatag, redis, pathauto, etc.)
 ddev composer config repositories.drupal-base \
@@ -337,7 +358,7 @@ ddev composer config repositories.drupal-base \
 
 # Requiring the recipe pulls in all packages declared in recipes/drupal-base/composer.json
 ddev composer require \
-  "AtenDesignGroup/drupal-base:*" \
+  "atendesigngroup/drupal-base:@dev" \
   --no-interaction
 info "Drupal Base recipe packages installed"
 
@@ -416,24 +437,7 @@ else
 fi
 
 # =============================================================================
-# 15. DRUPAL BASE RECIPE
-# =============================================================================
-header "Applying Drupal Base Recipe"
-
-if ! ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
-  warn "Drupal is not bootstrapped — skipping recipe."
-  warn "Run 'ddev drush recipe /var/www/html/recipes/drupal-base' manually."
-elif [[ ! -d "recipes/drupal-base" ]]; then
-  warn "recipes/drupal-base not found — skipping."
-else
-  ddev drush recipe /var/www/html/recipes/drupal-base
-  info "Drupal Base recipe applied"
-  ddev drush cex -y
-  info "Configuration exported"
-fi
-
-# =============================================================================
-# 16. PROTOTYPE THEME
+# 15. PROTOTYPE THEME
 # =============================================================================
 header "Generating Custom Theme"
 
@@ -459,69 +463,27 @@ ddev composer remove drupal/prototype --no-interaction
 info "drupal/prototype removed from require"
 
 # =============================================================================
+# 16. DRUPAL BASE RECIPE
+# =============================================================================
+header "Applying Drupal Base Recipe"
+
+if ! ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
+  warn "Drupal is not bootstrapped — skipping recipe."
+  warn "Run 'ddev drush recipe /var/www/html/recipes/drupal-base' manually."
+elif [[ ! -d "recipes/drupal-base" ]]; then
+  warn "recipes/drupal-base not found — skipping."
+else
+  ddev drush recipe /var/www/html/recipes/drupal-base
+  info "Drupal Base recipe applied"
+  ddev drush cex -y
+  info "Configuration exported"
+fi
+
+# =============================================================================
 # 17. PANTHEON (optional)
 # =============================================================================
 if [[ "$PANTHEON" == "yes" ]]; then
-  header "Installing Pantheon"
-
-  # -- Composer packages -------------------------------------------------------
-  ddev composer require \
-    'drupal/pantheon_advanced_page_cache:^2.3' \
-    'pantheon-systems/drupal-integrations:^11' \
-    'drupal/search_api_pantheon:^8.4' \
-    'drupal/pantheon_secrets:^1.0' \
-    --no-interaction
-  info "Pantheon Composer packages installed"
-
-  # drupal-integrations is a non-standard package — must be explicitly allowed
-  ddev composer config extra.allowed-packages.pantheon-systems/drupal-integrations true
-  info "pantheon-systems/drupal-integrations added to extra.allowed-packages"
-
-  # -- Pantheon recipe ---------------------------------------------------------
-  if [[ -d "recipes/drupal-pantheon" ]]; then
-    if ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
-      ddev drush recipe /var/www/html/recipes/drupal-pantheon
-      info "Drupal Pantheon recipe applied"
-      ddev drush cex -y
-      info "Configuration exported"
-    else
-      warn "Drupal not bootstrapped — run 'ddev drush recipe /var/www/html/recipes/drupal-pantheon' manually."
-    fi
-  else
-    warn "recipes/drupal-pantheon not found — skipping recipe."
-  fi
-
-  # -- pantheon.yml ------------------------------------------------------------
-  if [[ ! -f "pantheon.yml" ]]; then
-    cp assets/pantheon/pantheon.yml pantheon.yml
-    sed -i.bak "s/^php_version:.*/php_version: ${PHP_VERSION}/" pantheon.yml \
-      && rm -f pantheon.yml.bak
-    info "pantheon.yml copied (PHP ${PHP_VERSION})"
-  else
-    warn "pantheon.yml already exists — skipped (verify php_version: ${PHP_VERSION})"
-  fi
-
-  # -- settings.platform.php --------------------------------------------------
-  PLATFORM_SETTINGS="${WEB_PATH}/sites/default/settings.platform.php"
-  if [[ ! -f "$PLATFORM_SETTINGS" ]]; then
-    cp assets/pantheon/settings.platform.php "$PLATFORM_SETTINGS"
-    info "settings.platform.php copied to ${WEB_PATH}/sites/default/"
-  else
-    warn "settings.platform.php already exists — skipped."
-  fi
-
-  # -- Quicksilver scripts ----------------------------------------------------
-  QS_SRC="assets/pantheon/quicksilver/pantheon-drupal-quicksilver"
-  QS_DEST="${WEB_PATH}/private/scripts/quicksilver"
-  if [[ -d "$QS_SRC" ]]; then
-    mkdir -p "$QS_DEST"
-    cp -r "${QS_SRC}/." "$QS_DEST/"
-    info "Quicksilver scripts copied to ${QS_DEST}"
-  else
-    warn "Quicksilver source not found at ${QS_SRC} — skipped."
-  fi
-
-  warn "Complete Pantheon environment linking must be done manually."
+  ddev setup-pantheon --php-version="${PHP_VERSION}"
 fi
 
 # =============================================================================
