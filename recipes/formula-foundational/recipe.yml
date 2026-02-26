@@ -1,0 +1,59 @@
+name: '🦄 🌈  Formula: Foundational'
+description: 'Recipe to build foundational functionality in Drupal.'
+type: 'Site'
+
+install:
+  # Core modules
+  - config
+  - datetime
+  - entity_reference_revisions
+  - field_ui
+  - help
+  - link
+  - media
+  - media_library
+  - menu_link_content
+  - menu_ui
+  - node
+  - options
+  - taxonomy
+  - toolbar
+  - views
+  - views_ui
+  # Contrib modules - Content & Fields
+  - field_config_cardinality
+  - field_group
+  - layout_paragraphs
+  - paragraphs
+  # Contrib modules - SEO & Discovery
+  - google_tag
+  - metatag
+  - pathauto
+  - redirect
+  - simple_sitemap
+  - token
+  # Contrib modules - Search
+  - search_api
+  - search_api_exclude
+  # Contrib modules - Content behavior
+  - linkit
+  - markerio
+  - rabbit_hole
+  # Contrib modules - Admin & UX
+  - better_exposed_filters
+  - config_ignore
+  - editoria11y
+  - environment_indicator
+  - multiple_selects
+  - role_delegation
+  # Contrib modules - Development tools
+  - twig_field_value
+  - twig_tweak
+  - webp
+  # Themes
+  - claro
+  - gin
+  - DK_THEME_NAME
+
+config:
+  strict: false

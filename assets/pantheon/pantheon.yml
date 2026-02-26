@@ -1,9 +1,11 @@
 api_version: 1
 web_docroot: true
-php_version: 8.3
+php_version: DK_PHP_VERSION
 build_step: false
 database:
-  version: 10.4
+  version: 10.6
+search:
+  version: 8
 # See https://pantheon.io/docs/pantheon-yml/#enforce-https--hsts for valid values.
 enforce_https: transitional
 protected_web_paths:
@@ -11,3 +13,18 @@ protected_web_paths:
   - /sites/default/files/private/
   - /sites/default/files/config/
 php_runtime_generation: 2
+workflows:
+  deploy:
+    before:
+      - type: webphp
+        description: 'Invoke the processes before code has been deployed.'
+        script: private/scripts/quicksilver/pantheon-drupal-quicksilver/standard-refresh.php
+    after:
+      - type: webphp
+        description: 'Invoke the processes after code has been deployed.'
+        script: private/scripts/quicksilver/pantheon-drupal-quicksilver/standard-refresh.php
+  sync_code:
+    after:
+      - type: webphp
+        description: 'Invoke the processes after code has been pushed.'
+        script: private/scripts/quicksilver/pantheon-drupal-quicksilver/standard-refresh.php

@@ -1,0 +1,10 @@
+name: '🚀 Formula: Pantheon'
+description: 'Recipe for Pantheon platform integration and optimization.'
+type: 'Site'
+
+install:
+  # Pantheon integration modules
+  - pantheon_advanced_page_cache
+  - redis
+  - search_api_pantheon
+  - pantheon_secrets

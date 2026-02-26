@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: teaser
+label: 'Teaser 4:3'
+effects:
+  9caea024-919e-4305-9f5b-e7fbc8e681df:
+    uuid: 9caea024-919e-4305-9f5b-e7fbc8e681df
+    id: focal_point_scale_and_crop
+    weight: 2
+    data:
+      width: 960
+      height: 720
+      crop_type: focal_point

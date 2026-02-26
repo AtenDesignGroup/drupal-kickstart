@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: us_medium
+label: 'US medium'
+locked: false
+pattern: 'F j, Y'
