@@ -1,0 +1,9 @@
+name: 'Formula: Webform'
+description: 'Recipe to install Webform module for Drupal (Beta release).'
+type: 'Site'
+
+install:
+  - webform
+
+config:
+  strict: false

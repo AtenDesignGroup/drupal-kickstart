@@ -1,0 +1,9 @@
+name: 'Formula: SVG Image'
+description: 'Recipe to install SVG Image module for Drupal.'
+type: 'Site'
+
+install:
+  - svg_image
+
+config:
+  strict: false

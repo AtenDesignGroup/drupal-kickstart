@@ -1,0 +1,9 @@
+name: 'Formula: Custom Field'
+description: 'Recipe to install Custom Field module for Drupal.'
+type: 'Site'
+
+install:
+  - custom_field
+
+config:
+  strict: false

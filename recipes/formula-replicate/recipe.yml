@@ -1,0 +1,9 @@
+name: 'Formula: Replicate'
+description: 'Recipe to install Replicate module for Drupal.'
+type: 'Site'
+
+install:
+  - replicate
+
+config:
+  strict: false

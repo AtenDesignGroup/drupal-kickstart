@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-smart-date",
+  "description": "Recipe for Smart Date module - provides a smart date field with intelligent date range handling.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/smart_date": "^4.2"
+  }
+}

@@ -1,0 +1,13 @@
+name: 'Formula: Mercury Editor'
+description: 'Recipe to install Mercury Editor and related modules for Drupal.'
+type: 'Site'
+
+install:
+  - mercury_editor
+  - style_options
+  - config_pages
+  - me_config_pages
+  - layout_paragraphs_restrictions
+
+config:
+  strict: false

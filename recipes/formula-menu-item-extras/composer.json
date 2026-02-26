@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-menu-item-extras",
+  "description": "Recipe for Menu Item Extras module - adds custom fields to menu items.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/menu_item_extras": "^3.1"
+  }
+}

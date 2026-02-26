@@ -1,0 +1,9 @@
+name: 'Formula: Flood Control'
+description: 'Recipe to install Flood Control module for Drupal.'
+type: 'Site'
+
+install:
+  - flood_control
+
+config:
+  strict: false

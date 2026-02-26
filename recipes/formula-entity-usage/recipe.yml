@@ -1,0 +1,9 @@
+name: 'Formula: Entity Usage'
+description: 'Recipe to install Entity Usage module for Drupal (Beta release).'
+type: 'Site'
+
+install:
+  - entity_usage
+
+config:
+  strict: false

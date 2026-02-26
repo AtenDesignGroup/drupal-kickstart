@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-block-field",
+  "description": "Recipe for Block Field module - provides a field type that displays blocks.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/block_field": "^1.0@RC"
+  }
+}

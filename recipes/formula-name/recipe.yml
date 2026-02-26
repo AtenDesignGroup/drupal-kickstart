@@ -1,0 +1,9 @@
+name: 'Formula: Name'
+description: 'Recipe to install Name Field module for Drupal.'
+type: 'Site'
+
+install:
+  - name
+
+config:
+  strict: false

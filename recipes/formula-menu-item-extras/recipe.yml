@@ -1,0 +1,9 @@
+name: 'Formula: Menu Item Extras'
+description: 'Recipe to install Menu Item Extras module for Drupal.'
+type: 'Site'
+
+install:
+  - menu_item_extras
+
+config:
+  strict: false

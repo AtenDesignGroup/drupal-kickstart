@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-media-entity-download",
+  "description": "Recipe for Media Entity Download module - adds a download button for media entities.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/media_entity_download": "^2.4"
+  }
+}

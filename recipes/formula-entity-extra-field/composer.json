@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-entity-extra-field",
+  "description": "Recipe for Entity Extra Field module - allows extra fields to be created and attached to entity bundles.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/entity_extra_field": "^2.1"
+  }
+}

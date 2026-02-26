@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-entity-usage",
+  "description": "Recipe for Entity Usage module - tracks where entities are used across the site.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/entity_usage": "^2.0@beta"
+  }
+}

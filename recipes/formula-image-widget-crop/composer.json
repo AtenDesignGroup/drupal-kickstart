@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-image-widget-crop",
+  "description": "Recipe for Image Widget Crop module - provides an interface for cropping images.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/image_widget_crop": "^3.0"
+  }
+}

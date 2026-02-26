@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-svg-image",
+  "description": "Recipe for SVG Image module - provides support for using SVG images in Image fields.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/svg_image": "^3.2"
+  }
+}

@@ -1,0 +1,9 @@
+name: 'Formula: Admin Toolbar'
+description: 'Recipe to install Admin Toolbar module for Drupal.'
+type: 'Site'
+
+install:
+  - admin_toolbar
+
+config:
+  strict: false

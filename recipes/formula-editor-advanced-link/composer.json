@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-editor-advanced-link",
+  "description": "Recipe for Editor Advanced Link module - enhances the link dialog in CKEditor.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/editor_advanced_link": "^2.3"
+  }
+}

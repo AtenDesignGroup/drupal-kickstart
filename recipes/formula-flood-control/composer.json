@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-flood-control",
+  "description": "Recipe for Flood Control module - provides an interface to manage flood entries.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/flood_control": "^3.0"
+  }
+}

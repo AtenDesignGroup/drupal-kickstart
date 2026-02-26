@@ -1,0 +1,9 @@
+name: 'Formula: Entity Extra Field'
+description: 'Recipe to install Entity Extra Field module for Drupal.'
+type: 'Site'
+
+install:
+  - entity_extra_field
+
+config:
+  strict: false

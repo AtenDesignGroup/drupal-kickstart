@@ -1,0 +1,9 @@
+name: 'Formula: Smart Date'
+description: 'Recipe to install Smart Date module for Drupal.'
+type: 'Site'
+
+install:
+  - smart_date
+
+config:
+  strict: false

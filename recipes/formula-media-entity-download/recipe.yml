@@ -1,0 +1,9 @@
+name: 'Formula: Media Entity Download'
+description: 'Recipe to install Media Entity Download module for Drupal.'
+type: 'Site'
+
+install:
+  - media_entity_download
+
+config:
+  strict: false

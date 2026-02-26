@@ -1,0 +1,19 @@
+{
+  "name": "aten/formula-mercury-editor",
+  "description": "Recipe for Mercury Editor and related modules - provides enhanced content editing experience.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/mercury_editor": "^2.2",
+    "drupal/style_options": "^1.1",
+    "drupal/config_pages": "^2.19",
+    "drupal/me_config_pages": "1.0.x-dev",
+    "drupal/layout_paragraphs_restrictions": "^2.1@alpha"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-admin-toolbar",
+  "description": "Recipe for Admin Toolbar module - improves the default Drupal Toolbar to transform it into a drop-down menu.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/admin_toolbar": "^3.6"
+  }
+}

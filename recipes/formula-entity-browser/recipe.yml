@@ -1,0 +1,9 @@
+name: 'Formula: Entity Browser'
+description: 'Recipe to install Entity Browser module for Drupal.'
+type: 'Site'
+
+install:
+  - entity_browser
+
+config:
+  strict: false

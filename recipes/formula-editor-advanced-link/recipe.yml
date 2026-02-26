@@ -1,0 +1,9 @@
+name: 'Formula: Editor Advanced Link'
+description: 'Recipe to install Editor Advanced Link module for Drupal.'
+type: 'Site'
+
+install:
+  - editor_advanced_link
+
+config:
+  strict: false

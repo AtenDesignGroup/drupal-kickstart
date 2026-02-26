@@ -1,0 +1,9 @@
+name: 'Formula: Menu Attributes'
+description: 'Recipe to install Menu Attributes module for Drupal.'
+type: 'Site'
+
+install:
+  - menu_attributes
+
+config:
+  strict: false

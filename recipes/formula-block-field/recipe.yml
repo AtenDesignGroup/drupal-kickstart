@@ -1,0 +1,9 @@
+name: 'Formula: Block Field'
+description: 'Recipe to install Block Field module for Drupal (Release Candidate).'
+type: 'Site'
+
+install:
+  - block_field
+
+config:
+  strict: false

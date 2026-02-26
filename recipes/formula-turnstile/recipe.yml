@@ -1,0 +1,9 @@
+name: 'Formula: Cloudflare Turnstile'
+description: 'Recipe to install Cloudflare Turnstile module for Drupal.'
+type: 'Site'
+
+install:
+  - turnstile
+
+config:
+  strict: false

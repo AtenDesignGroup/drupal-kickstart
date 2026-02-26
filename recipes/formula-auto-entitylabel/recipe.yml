@@ -1,0 +1,9 @@
+name: 'Formula: Automatic Entity Label'
+description: 'Recipe to install Automatic Entity Label module for Drupal.'
+type: 'Site'
+
+install:
+  - auto_entitylabel
+
+config:
+  strict: false

@@ -1,0 +1,9 @@
+name: 'Formula: Ultimate Cron'
+description: 'Recipe to install Ultimate Cron module for Drupal (Beta release).'
+type: 'Site'
+
+install:
+  - ultimate_cron
+
+config:
+  strict: false

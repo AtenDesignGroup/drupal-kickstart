@@ -1,0 +1,9 @@
+name: 'Formula: Image Widget Crop'
+description: 'Recipe to install Image Widget Crop module for Drupal.'
+type: 'Site'
+
+install:
+  - image_widget_crop
+
+config:
+  strict: false

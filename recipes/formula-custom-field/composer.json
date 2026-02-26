@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-custom-field",
+  "description": "Recipe for Custom Field module - allows creating custom fields with multiple components.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/custom_field": "^4.0"
+  }
+}

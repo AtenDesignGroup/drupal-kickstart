@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-entity-browser",
+  "description": "Recipe for Entity Browser module - provides a generic entity browser/picker/selector.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/entity_browser": "^2.15"
+  }
+}

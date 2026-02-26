@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-name",
+  "description": "Recipe for Name Field module - provides a Field API field type for name components.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/name": "^1.1"
+  }
+}

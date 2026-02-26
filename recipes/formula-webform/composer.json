@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-webform",
+  "description": "Recipe for Webform module - provides form building and submission handling.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/webform": "^6.3@beta"
+  }
+}
