@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+## Description: Apply a recipe to the current Drupal site
+## Usage: recipe [recipe-name]
+## Example: "ddev recipe" or "ddev recipe formula-paragraphs"
+# =============================================================================
+# Drupal Recipe Runner — DDEV web container command
+# Runs inside the container: bash 5+, drush and composer available natively.
+# =============================================================================
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Colors / styling
+# -----------------------------------------------------------------------------
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+# -----------------------------------------------------------------------------
+# Error trap
+# -----------------------------------------------------------------------------
+trap 'echo -e "\n${RED}${BOLD}Recipe application failed.${RESET} Fix the issue and re-run." >&2' ERR
+
+# -----------------------------------------------------------------------------
+# Helpers
+# -----------------------------------------------------------------------------
+header() {
+  echo -e "\n${BOLD}${CYAN}==> $1${RESET}"
+}
+
+info() {
+  echo -e "    ${GREEN}✔${RESET} $1"
+}
+
+warn() {
+  echo -e "    ${YELLOW}⚠${RESET}  $1"
+}
+
+# =============================================================================
+# 0. PREFLIGHT
+# =============================================================================
+SITE_ROOT="/var/www/html"
+
+header "Preflight Checks"
+
+if [[ ! -d "${SITE_ROOT}/recipes" ]]; then
+  echo -e "  ${RED}${BOLD}Error:${RESET} No recipes/ directory found at ${SITE_ROOT}/recipes."
+  exit 1
+fi
+
+if ! drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
+  echo -e "  ${RED}${BOLD}Error:${RESET} Drupal is not bootstrapped. Ensure the site is installed."
+  exit 1
+fi
+
+info "Site root   : ${SITE_ROOT}"
+info "Drupal      : bootstrapped"
+
+# =============================================================================
+# 1. DISCOVER RECIPES
+# =============================================================================
+header "Available Recipes"
+
+RECIPES=()
+while IFS= read -r line; do
+  RECIPES+=("$line")
+done < <(find "${SITE_ROOT}/recipes" -maxdepth 2 -name "recipe.yml" \
+  | sed "s|${SITE_ROOT}/recipes/||" \
+  | sed 's|/recipe.yml||' \
+  | sort)
+
+if [[ ${#RECIPES[@]} -eq 0 ]]; then
+  echo -e "  ${RED}${BOLD}Error:${RESET} No recipe.yml files found under ${SITE_ROOT}/recipes/."
+  exit 1
+fi
+
+# =============================================================================
+# 2. SELECT RECIPE
+# =============================================================================
+
+if [[ $# -ge 1 ]]; then
+  SELECTED_RECIPE="$1"
+  if [[ ! -f "${SITE_ROOT}/recipes/${SELECTED_RECIPE}/recipe.yml" ]]; then
+    echo -e "  ${RED}${BOLD}Error:${RESET} Recipe '${SELECTED_RECIPE}' not found."
+    exit 1
+  fi
+  info "Using recipe: ${SELECTED_RECIPE}"
+else
+  echo
+  for i in "${!RECIPES[@]}"; do
+    printf "    ${CYAN}%2d)${RESET} %s\n" "$((i + 1))" "${RECIPES[$i]}"
+  done
+  echo
+
+  while true; do
+    read -r -p "$(echo -e "  ${BOLD}Select a recipe (1-${#RECIPES[@]})${RESET}: ")" _selection
+    if [[ "$_selection" =~ ^[0-9]+$ ]] && (( _selection >= 1 && _selection <= ${#RECIPES[@]} )); then
+      SELECTED_RECIPE="${RECIPES[$(( _selection - 1 ))]}"
+      break
+    else
+      warn "Invalid selection — enter a number between 1 and ${#RECIPES[@]}."
+    fi
+  done
+fi
+
+RECIPE_PATH="${SITE_ROOT}/recipes/${SELECTED_RECIPE}"
+
+# =============================================================================
+# 3. SHOW RECIPE DETAILS + CONFIRM
+# =============================================================================
+header "Recipe Details"
+echo
+echo -e "    ${BOLD}Recipe      :${RESET} ${SELECTED_RECIPE}"
+echo -e "    ${BOLD}Path        :${RESET} ${RECIPE_PATH}"
+
+# Parse name/description from recipe.yml using grep (no yq dependency)
+RECIPE_LABEL=$(grep -m1 "^name:" "${RECIPE_PATH}/recipe.yml" | sed "s/^name: *//" | tr -d "'" || true)
+RECIPE_DESC=$(grep -m1 "^description:" "${RECIPE_PATH}/recipe.yml" | sed "s/^description: *//" | tr -d "'" || true)
+[[ -n "$RECIPE_LABEL" ]] && echo -e "    ${BOLD}Name        :${RESET} ${RECIPE_LABEL}"
+[[ -n "$RECIPE_DESC" ]]  && echo -e "    ${BOLD}Description :${RESET} ${RECIPE_DESC}"
+
+# Show composer deps if recipe has a composer.json
+RECIPE_COMPOSER="${RECIPE_PATH}/composer.json"
+if [[ -f "$RECIPE_COMPOSER" ]]; then
+  DEPS=$(php -r "
+    \$j = json_decode(file_get_contents('${RECIPE_COMPOSER}'), true);
+    \$require = \$j['require'] ?? [];
+    foreach (\$require as \$pkg => \$ver) {
+      if (strpos(\$pkg, 'drupal/') === 0) echo \$pkg . ':' . \$ver . ' ';
+    }
+  " 2>/dev/null || true)
+  [[ -n "$DEPS" ]] && echo -e "    ${BOLD}Packages    :${RESET} ${DEPS}"
+fi
+
+echo
+
+read -r -p "$(echo -e "  ${BOLD}Apply this recipe?${RESET} [${CYAN}Y/n${RESET}]: ")" _proceed
+_proceed="${_proceed:-Y}"
+if [[ ! "$_proceed" =~ ^[Yy] ]]; then
+  echo -e "\n${YELLOW}Cancelled.${RESET}"
+  exit 0
+fi
+
+# =============================================================================
+# 4. COMPOSER REQUIRE (from recipe's composer.json)
+# =============================================================================
+if [[ -f "$RECIPE_COMPOSER" ]]; then
+  header "Installing Composer Dependencies"
+
+  # Build the package list from require, skipping php and ext-* entries
+  PACKAGES=$(php -r "
+    \$j = json_decode(file_get_contents('${RECIPE_COMPOSER}'), true);
+    \$require = \$j['require'] ?? [];
+    \$out = [];
+    foreach (\$require as \$pkg => \$ver) {
+      if (strpos(\$pkg, 'php') === 0 || strpos(\$pkg, 'ext-') === 0) continue;
+      \$out[] = \$pkg . ':' . \$ver;
+    }
+    echo implode(' ', \$out);
+  " 2>/dev/null || true)
+
+  if [[ -n "$PACKAGES" ]]; then
+    echo -e "    Requiring: ${CYAN}${PACKAGES}${RESET}"
+    # shellcheck disable=SC2086
+    composer require --working-dir="${SITE_ROOT}" $PACKAGES
+    info "Composer packages installed"
+  else
+    info "No Composer packages to install"
+  fi
+fi
+
+# =============================================================================
+# 5. APPLY RECIPE
+# =============================================================================
+header "Applying Recipe: ${SELECTED_RECIPE}"
+
+drush recipe "${RECIPE_PATH}"
+info "Recipe '${SELECTED_RECIPE}' applied successfully"
+
+# =============================================================================
+# 6. EXPORT CONFIG
+# =============================================================================
+header "Exporting Configuration"
+
+read -r -p "$(echo -e "  ${BOLD}Export config now? (drush cex)${RESET} [${CYAN}Y/n${RESET}]: ")" _export
+_export="${_export:-Y}"
+if [[ "$_export" =~ ^[Yy] ]]; then
+  drush cex -y
+  info "Config exported"
+else
+  warn "Skipped — run 'ddev drush cex -y' manually."
+fi
+
+# =============================================================================
+# 7. CLEAR CACHE
+# =============================================================================
+drush cr
+info "Cache cleared"
+
+# =============================================================================
+# DONE
+# =============================================================================
+echo
+echo -e "${GREEN}${BOLD}============================================================${RESET}"
+echo -e "${GREEN}${BOLD}  Recipe Applied Successfully!${RESET}"
+echo -e "${GREEN}${BOLD}============================================================${RESET}"
+echo
+echo -e "  ${BOLD}Recipe :${RESET} ${SELECTED_RECIPE}"
+echo

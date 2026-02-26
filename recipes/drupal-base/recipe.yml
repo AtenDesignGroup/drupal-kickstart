@@ -1,0 +1,86 @@
+name: 'Drupal Base'
+description: 'A recipe tailored to best practices for kickstarting a new Drupal 11 project.'
+type: 'Site'
+
+install:
+  - config
+  - node
+  - user
+  - text
+  - link
+  - filter
+  - block
+  - block_content
+  - ckeditor5
+  - contextual
+  - menu_link_content
+  - datetime
+  - block_content
+  - editor
+  - image
+  - menu_ui
+  - options
+  - path
+  - dynamic_page_cache
+  - big_pipe
+  - taxonomy
+  - dblog
+  - toolbar
+  - field_ui
+  - media
+  - media_library
+  - views
+  - views_ui
+  - automated_cron
+  - claro
+  - gin
+  - gin_login
+  - gin_toolbar
+  - config_ignore
+  - pathauto
+  - redirect
+  - robotstxt
+  - menu_block
+  - csp
+  - metatag
+  - metatag_open_graph
+  - metatag_verification
+
+config:
+  import:
+    dblog: '*'
+    image: '*'
+    media: '*'
+    media_library: '*'
+    pathauto: '*'
+    redirect:
+      - redirect.settings
+      - system.action.redirect_delete_action
+      - views.view.redirect
+    node:
+      - views.view.content
+    user:
+      - views.view.user_admin_people
+    gin:
+      - gin.settings
+      - block.block.gin_breadcrumbs
+      - block.block.gin_content
+      - block.block.gin_local_actions
+      - block.block.gin_messages
+      - block.block.gin_page_title
+      - block.block.gin_primary_local_tasks
+      - block.block.gin_secondary_local_tasks
+  actions:
+    node.settings:
+      simple_config_update:
+        use_admin_theme: true
+    user.settings:
+      simple_config_update:
+        register: admin_only
+    automated_cron.settings:
+      simple_config_update:
+        interval: 0
+    system.theme:
+      simple_config_update:
+        admin: 'gin'
+        default: 'stark'

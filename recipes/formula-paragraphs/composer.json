@@ -11,6 +11,7 @@
     ],
     "require": {
         "drupal/paragraphs": "^1.18",
+        "drupal/layout_paragraphs": "^2.0",
         "drupal/nomarkup": "^1.0"
     }
 }

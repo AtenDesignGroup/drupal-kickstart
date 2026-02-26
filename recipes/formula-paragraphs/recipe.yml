@@ -4,4 +4,5 @@ type: 'Paragraphs'
 
 install:
   - paragraphs
+  - layout_paragraphs
   - nomarkup
