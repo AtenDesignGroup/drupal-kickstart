@@ -135,51 +135,47 @@ fi
 # =============================================================================
 if [[ "$RESUME" == "yes" ]]; then
   # Derive theme path from loaded values — no prompts needed
-  THEME_PATH="${WEB_PATH}/themes/custom/${THEME_NAME}"
-  # Provide default for THEME_DESC if missing from an older .kickstart.env
-  THEME_DESC="${THEME_DESC:-${PROJECT_NAME} Theme}"
+  DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
+  # Provide default for DK_THEME_DESC if missing from an older .kickstart.env
+  DK_THEME_DESC="${DK_THEME_DESC:-${DK_DDEV_NAME} Theme}"
   header "Resuming with saved configuration"
 else
   header "Project Configuration"
 
   # Project name — default to current directory basename
-  DEFAULT_NAME="${PROJECT_NAME:-$(basename "$PWD")}"
-  prompt PROJECT_NAME "Project name" "$DEFAULT_NAME"
+  DEFAULT_NAME="${DK_DDEV_NAME:-$(basename "$PWD")}"
+  prompt DK_DDEV_NAME "Project name" "$DEFAULT_NAME"
 
   # Theme name
-  DEFAULT_THEME="${THEME_NAME:-${PROJECT_NAME}_theme}"
-  prompt THEME_NAME "Theme name" "$DEFAULT_THEME"
+  DEFAULT_THEME="${DK_THEME_NAME:-${DK_DDEV_NAME}_theme}"
+  prompt DK_THEME_NAME "Theme name" "$DEFAULT_THEME"
 
   # Theme description (used by the prototype theme generator)
-  DEFAULT_THEME_DESC="${THEME_DESC:-${PROJECT_NAME} Theme}"
-  prompt THEME_DESC "Theme description" "$DEFAULT_THEME_DESC"
-
-  # Web path (docroot)
-  DEFAULT_WEB="${WEB_PATH:-web}"
-  prompt WEB_PATH "Web path (docroot)" "$DEFAULT_WEB"
+  DEFAULT_THEME_DESC="${DK_THEME_DESC:-${DK_DDEV_NAME} Theme}"
+  prompt DK_THEME_DESC "Theme description" "$DEFAULT_THEME_DESC"
 
   # Derived theme path (not prompted)
-  THEME_PATH="${WEB_PATH}/themes/custom/${THEME_NAME}"
+  DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
 
   # Pantheon
-  DEFAULT_PANTHEON="${PANTHEON:-no}"
-  prompt_yn PANTHEON "Install Pantheon modules?" "$DEFAULT_PANTHEON"
+  DEFAULT_PANTHEON="${DK_USES_PANTHEON:-no}"
+  prompt_yn DK_USES_PANTHEON "Install Pantheon modules?" "$DEFAULT_PANTHEON"
 
   # SOLR
-  DEFAULT_SOLR="${SOLR:-no}"
-  prompt_yn SOLR "Enable SOLR?" "$DEFAULT_SOLR"
+  DEFAULT_SOLR="${DK_USES_SOLR:-no}"
+  prompt_yn DK_USES_SOLR "Enable SOLR?" "$DEFAULT_SOLR"
 
-  # JIRA shortname
-  DEFAULT_JIRA="${JIRA_SHORT:-}"
-  prompt JIRA_SHORT "JIRA project shortname (e.g. GRE for GRE-123:)" "$DEFAULT_JIRA"
+  # Commit prefix
+  DEFAULT_COMMIT="${DK_COMMIT_PREFIX:-}"
+  prompt DK_COMMIT_PREFIX "Commit prefix (e.g. GRE for GRE-123:)" "$DEFAULT_COMMIT"
 
   # PHP version
-  DEFAULT_PHP="${PHP_VERSION:-8.3}"
-  prompt PHP_VERSION "PHP version" "$DEFAULT_PHP"
+  DEFAULT_PHP="${DK_PHP_VERSION:-8.3}"
+  prompt DK_PHP_VERSION "PHP version" "$DEFAULT_PHP"
 
   # Node version
-  DEFAULT_NODE="${NODE_VERSION:-22}"
-  prompt NODE_VERSION "Node version" "$DEFAULT_NODE"
+  DEFAULT_NODE="${DK_NODE_VERSION:-22}"
+  prompt DK_NODE_VERSION "Node version" "$DEFAULT_NODE"
 fi
 
 # =============================================================================
@@ -189,19 +185,35 @@ if [[ "$RESUME" != "yes" ]]; then
   cat > "$ENV_FILE" <<EOF
 # Drupal Kickstart — saved configuration
 # Generated: $(date)
-PROJECT_NAME="${PROJECT_NAME}"
-THEME_NAME="${THEME_NAME}"
-THEME_DESC="${THEME_DESC}"
-WEB_PATH="${WEB_PATH}"
-PANTHEON="${PANTHEON}"
-SOLR="${SOLR}"
-JIRA_SHORT="${JIRA_SHORT}"
-PHP_VERSION="${PHP_VERSION}"
-NODE_VERSION="${NODE_VERSION}"
+DK_DDEV_NAME="${DK_DDEV_NAME}"
+DK_THEME_NAME="${DK_THEME_NAME}"
+DK_THEME_DESC="${DK_THEME_DESC}"
+DK_USES_PANTHEON="${DK_USES_PANTHEON}"
+DK_USES_SOLR="${DK_USES_SOLR}"
+DK_COMMIT_PREFIX="${DK_COMMIT_PREFIX}"
+DK_PHP_VERSION="${DK_PHP_VERSION}"
+DK_NODE_VERSION="${DK_NODE_VERSION}"
 EOF
 
   add_to_gitignore ".kickstart.env"
   info "Values saved to ${ENV_FILE} (added to .gitignore)"
+
+  # Generate secure secrets and write to .env
+  DK_DRUPAL_HASH_SALT=$(openssl rand -base64 48 | tr -d '=+/' | head -c 64)
+  DK_DRUPAL_ADMIN_USERNAME="administrator"
+  DK_DRUPAL_ADMIN_PASSWORD=$(openssl rand -base64 24 | tr -d '=+/')
+
+  cat > ".env" <<EOF
+# Drupal Kickstart — secrets
+# Generated: $(date)
+# ⚠ Do NOT commit this file.
+DK_DRUPAL_HASH_SALT="${DK_DRUPAL_HASH_SALT}"
+DK_DRUPAL_ADMIN_USERNAME="${DK_DRUPAL_ADMIN_USERNAME}"
+DK_DRUPAL_ADMIN_PASSWORD="${DK_DRUPAL_ADMIN_PASSWORD}"
+EOF
+
+  add_to_gitignore ".env"
+  info "Secrets written to .env (added to .gitignore)"
 fi
 
 # =============================================================================
@@ -209,21 +221,20 @@ fi
 # =============================================================================
 header "Review — Please Confirm Your Settings"
 echo
-echo -e "    ${BOLD}Project name    :${RESET} ${PROJECT_NAME}"
-echo -e "    ${BOLD}Web path        :${RESET} ${WEB_PATH}"
-echo -e "    ${BOLD}Theme name      :${RESET} ${THEME_NAME}"
-echo -e "    ${BOLD}Theme desc      :${RESET} ${THEME_DESC}"
-echo -e "    ${BOLD}Theme path      :${RESET} ${THEME_PATH}"
-echo -e "    ${BOLD}PHP version     :${RESET} ${PHP_VERSION}"
-echo -e "    ${BOLD}Node version    :${RESET} ${NODE_VERSION}"
-echo -e "    ${BOLD}Pantheon        :${RESET} ${PANTHEON}"
-echo -e "    ${BOLD}SOLR            :${RESET} ${SOLR}"
-if [[ -n "$JIRA_SHORT" ]]; then
-  echo -e "    ${BOLD}Commit prefix   :${RESET} ${JIRA_SHORT}-123: (example)"
+echo -e "    ${BOLD}Project name    :${RESET} ${DK_DDEV_NAME}"
+echo -e "    ${BOLD}Theme name      :${RESET} ${DK_THEME_NAME}"
+echo -e "    ${BOLD}Theme desc      :${RESET} ${DK_THEME_DESC}"
+echo -e "    ${BOLD}Theme path      :${RESET} ${DK_THEME_PATH}"
+echo -e "    ${BOLD}PHP version     :${RESET} ${DK_PHP_VERSION}"
+echo -e "    ${BOLD}Node version    :${RESET} ${DK_NODE_VERSION}"
+echo -e "    ${BOLD}Pantheon        :${RESET} ${DK_USES_PANTHEON}"
+echo -e "    ${BOLD}SOLR            :${RESET} ${DK_USES_SOLR}"
+if [[ -n "$DK_COMMIT_PREFIX" ]]; then
+  echo -e "    ${BOLD}Commit prefix   :${RESET} ${DK_COMMIT_PREFIX}-123: (example)"
 else
   echo -e "    ${BOLD}Commit prefix   :${RESET} ${YELLOW}(none entered — grumphp.yml will not be updated)${RESET}"
 fi
-echo -e "    ${BOLD}Site URL        :${RESET} https://${PROJECT_NAME}.test"
+echo -e "    ${BOLD}Site URL        :${RESET} https://${DK_DDEV_NAME}.ddev.site"
 echo
 
 read -r -p "$(echo -e "  ${BOLD}Proceed?${RESET} [${CYAN}Y/n${RESET}]: ")" _proceed
@@ -238,14 +249,13 @@ fi
 # =============================================================================
 header "Initializing DDEV"
 ddev config \
-  --project-name="${PROJECT_NAME}" \
+  --project-name="${DK_DDEV_NAME}" \
   --project-type=drupal11 \
-  --docroot="${WEB_PATH}" \
-  --php-version="${PHP_VERSION}" \
-  --create-docroot \
-  --project-tld=test
+  --docroot=web \
+  --php-version="${DK_PHP_VERSION}" \
+  --create-docroot
 
-info "DDEV configured (docroot: ${WEB_PATH}, PHP: ${PHP_VERSION})"
+info "DDEV configured (docroot: web, PHP: ${DK_PHP_VERSION})"
 
 # =============================================================================
 # 6. PATCH .ddev/config.yml
@@ -256,8 +266,8 @@ DDEV_CONFIG=".ddev/config.yml"
 
 # Append nodejs_version if not already present
 if ! grep -q "^nodejs_version:" "$DDEV_CONFIG"; then
-  echo "nodejs_version: \"${NODE_VERSION}\"" >> "$DDEV_CONFIG"
-  info "Added nodejs_version: ${NODE_VERSION}"
+  echo "nodejs_version: \"${DK_NODE_VERSION}\"" >> "$DDEV_CONFIG"
+  info "Added nodejs_version: ${DK_NODE_VERSION}"
 fi
 
 # Append web_environment block if not already present
@@ -266,8 +276,8 @@ if ! grep -q "^web_environment:" "$DDEV_CONFIG"; then
 
 web_environment:
   - APP_ENVIRONMENT=local
-  - DRUSH_OPTIONS_URI=https://${PROJECT_NAME}.test
-  - THEME_PATH=${THEME_PATH}
+  - DRUSH_OPTIONS_URI=https://${DK_DDEV_NAME}.ddev.site
+  - THEME_PATH=${DK_THEME_PATH}
 EOF
   info "Added web_environment block"
 fi
@@ -286,7 +296,7 @@ fi
 # =============================================================================
 # 8. SOLR (optional)
 # =============================================================================
-if [[ "$SOLR" == "yes" ]]; then
+if [[ "$DK_USES_SOLR" == "yes" ]]; then
   header "Installing SOLR DDEV Addon"
   ddev add-on get ddev/ddev-solr
   info "SOLR DDEV addon installed"
@@ -294,31 +304,46 @@ if [[ "$SOLR" == "yes" ]]; then
 fi
 
 # =============================================================================
-# 9. UPDATE grumphp.yml COMMIT MATCHER
+# 9. TOKEN SUBSTITUTION
+# Replace DK_* placeholders in grumphp.yml and all recipe/asset YAML files.
+# Uses | as sed delimiter to safely handle DK_THEME_PATH containing slashes.
 # =============================================================================
-if [[ -n "$JIRA_SHORT" ]] && [[ -f "grumphp.yml" ]]; then
-  header "Updating grumphp.yml Commit Matcher"
-  sed -i.bak "s/JIRA-\\\\d+/${JIRA_SHORT}-\\\\d+/g" grumphp.yml && rm -f grumphp.yml.bak
-  info "grumphp.yml matcher updated to ${JIRA_SHORT}-\\d+"
-fi
+header "Applying token substitution"
+
+# Build the list of YAML files to process (recipes/, assets/, grumphp.yml)
+TOKEN_FILES=()
+while IFS= read -r f; do
+  TOKEN_FILES+=("$f")
+done < <(find recipes assets grumphp.yml -type f -name "*.yml" 2>/dev/null)
+
+for f in "${TOKEN_FILES[@]}"; do
+  sed -i.bak \
+    -e "s|DK_DDEV_NAME|${DK_DDEV_NAME}|g" \
+    -e "s|DK_THEME_NAME|${DK_THEME_NAME}|g" \
+    -e "s|DK_THEME_DESC|${DK_THEME_DESC}|g" \
+    -e "s|DK_THEME_PATH|${DK_THEME_PATH}|g" \
+    -e "s|DK_PHP_VERSION|${DK_PHP_VERSION}|g" \
+    -e "s|DK_COMMIT_PREFIX|${DK_COMMIT_PREFIX:-PROJ}|g" \
+    "$f" && rm -f "${f}.bak"
+done
+
+info "Tokens replaced in ${#TOKEN_FILES[@]} files"
 
 # =============================================================================
 # 10. DDEV START
 # =============================================================================
 header "Starting DDEV"
 ddev start
-info "DDEV started — ${PROJECT_NAME}.test"
+info "DDEV started — ${DK_DDEV_NAME}.ddev.site"
 
 # =============================================================================
 # 11. SCAFFOLD DRUPAL PROJECT
 # =============================================================================
 header "Scaffolding Drupal 11 Project"
 
-if [[ ! -f "${WEB_PATH}/index.php" ]]; then
+if [[ ! -f "web/index.php" ]]; then
   info "Running composer create-project in container..."
-  # --no-install: create composer.json + composer.lock scaffold without vendor/
-  # We rsync everything — no exclusions needed since there's no repo composer.json
-  ddev exec bash -c "composer create-project 'drupal/recommended-project:^11' /tmp/dp --no-install --no-interaction"
+  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:^11' /tmp/dp --no-interaction"
   ddev exec bash -c "rsync -a /tmp/dp/ /var/www/html/"
   info "Drupal scaffold created"
 else
@@ -330,30 +355,22 @@ fi
 # =============================================================================
 header "Installing Composer Dependencies"
 
-# Drush
+# Apply project composer standards (platform, plugins, scaffold, patches, scripts)
+ddev setup-composer
+
+# Set minimum-stability to dev so the local path repo (formula-foundational) is resolvable.
+# prefer-stable ensures all other packages still resolve to stable releases.
+ddev composer config minimum-stability dev
+ddev composer config prefer-stable true
+info "Composer stability configured (dev + prefer-stable)"
+
+# Drush — a tooling dep, not part of the recipe
 ddev composer require \
   "drush/drush:^13" \
   --no-interaction
 info "drush/drush installed"
 
-# Contrib packages
-ddev composer require \
-  "drupal/gin:^3.0" \
-  "drupal/gin_login:^2.0" \
-  "drupal/config_ignore:^3.0" \
-  "drupal/pathauto:^1.0" \
-  "drupal/redirect:^1.0" \
-  "drupal/robotstxt:^1.0" \
-  "drupal/menu_block:^1.0" \
-  "drupal/csp:^1.0" \
-  "drupal/metatag:^2.0" \
-  "drupal/redis:^2.0@alpha" \
-  --no-interaction
-info "Contrib packages installed"
-
-# Dev dependencies — use -W to allow transitive dependency upgrades
-# drupal/core-dev requires phpunit which needs a newer sebastian/diff than
-# what the contrib packages locked above; -W lets Composer resolve it cleanly.
+# Dev dependencies — -W allows transitive upgrades (phpunit needs newer sebastian/diff)
 ddev composer require --dev \
   "drupal/core-dev:^11" \
   --with-all-dependencies \
@@ -365,7 +382,7 @@ info "Dev dependencies installed"
 # =============================================================================
 header "Configuring Redis Cache Settings"
 
-SITES_DEFAULT="${WEB_PATH}/sites/default"
+SITES_DEFAULT="web/sites/default"
 mkdir -p "$SITES_DEFAULT"
 
 SETTINGS_LOCAL="${SITES_DEFAULT}/settings.local.php"
@@ -384,15 +401,15 @@ SETTINGS_HEADER
 fi
 
 if ! grep -q "redis.connection" "$SETTINGS_LOCAL"; then
-  cat >> "$SETTINGS_LOCAL" <<'REDIS_BLOCK'
+  cat >> "$SETTINGS_LOCAL" <<REDIS_BLOCK
 
 // Redis caching — provided by ddev/ddev-redis addon.
-// Run `ddev drush en redis -y && ddev drush cr` after Drupal install to activate.
+// Run \`ddev drush en redis -y && ddev drush cr\` after Drupal install to activate.
 if (!defined('MAINTENANCE_MODE')) {
-  $settings['redis.connection']['interface'] = 'PhpRedis';
-  $settings['redis.connection']['host'] = 'redis';
-  $settings['cache']['default'] = 'cache.backend.redis';
-  $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
+  \$settings['redis.connection']['interface'] = 'PhpRedis';
+  \$settings['redis.connection']['host'] = 'redis';
+  \$settings['cache']['default'] = 'cache.backend.redis';
+  \$settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
 }
 REDIS_BLOCK
   info "Redis config written to ${SETTINGS_LOCAL}"
@@ -400,10 +417,26 @@ else
   warn "Redis config already present in ${SETTINGS_LOCAL} — skipped"
 fi
 
+# Hash salt — injected directly since settings.local.php is gitignored
+if ! grep -q "hash_salt" "$SETTINGS_LOCAL"; then
+  [[ -f ".env" ]] && source ".env"
+  cat >> "$SETTINGS_LOCAL" <<SALT_BLOCK
+
+// Hash salt — generated by Drupal Kickstart.
+\$settings['hash_salt'] = '${DK_DRUPAL_HASH_SALT}';
+SALT_BLOCK
+  info "Hash salt written to ${SETTINGS_LOCAL}"
+fi
+
 # =============================================================================
 # 14. SITE INSTALL
 # =============================================================================
 header "Installing Drupal"
+
+# Source .env to get admin credentials
+[[ -f ".env" ]] && source ".env"
+ADMIN_USER="${DK_DRUPAL_ADMIN_USERNAME:-administrator}"
+ADMIN_PASS="${DK_DRUPAL_ADMIN_PASSWORD:-admin}"
 
 STARTERKIT_CMD=".ddev/commands/web/aten-starterkit"
 SITE_INSTALL_CMD=".ddev/commands/web/site-install"
@@ -411,123 +444,60 @@ if [[ -f "$STARTERKIT_CMD" ]]; then
   ddev aten-starterkit
   info "aten-starterkit complete"
 elif [[ -f "$SITE_INSTALL_CMD" ]]; then
-  SITE_NAME="${PROJECT_NAME}" ddev site-install
-  info "Drupal installed via ddev site-install (admin/admin)"
+  SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install
+  info "Drupal installed via ddev site-install"
 else
   ddev drush site:install --yes \
-    --site-name="${PROJECT_NAME}" \
-    --account-name=admin \
-    --account-pass=admin
-  info "Drupal installed (admin/admin)"
+    --site-name="${DK_DDEV_NAME}" \
+    --account-name="${ADMIN_USER}" \
+    --account-pass="${ADMIN_PASS}"
+  info "Drupal installed"
 fi
 
 # =============================================================================
-# 15. DRUPAL BASE RECIPE
-# =============================================================================
-header "Applying Drupal Base Recipe"
-
-if ! ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
-  warn "Drupal is not bootstrapped — skipping recipe."
-  warn "Run 'ddev drush recipe /var/www/html/recipes/drupal-base' manually."
-elif [[ ! -d "recipes/drupal-base" ]]; then
-  warn "recipes/drupal-base not found — skipping."
-else
-  ddev drush recipe /var/www/html/recipes/drupal-base
-  info "Drupal Base recipe applied"
-  ddev drush cex -y
-  info "Configuration exported"
-fi
-
-# =============================================================================
-# 16. PROTOTYPE THEME
+# 15. PROTOTYPE THEME
 # =============================================================================
 header "Generating Custom Theme"
 
-GENERATOR="vendor/drupal/prototype/generator.php"
 ddev composer require 'drupal/prototype:^5.3' --no-interaction
 info "drupal/prototype installed"
 
-if ddev exec test -f "/var/www/html/${GENERATOR}"; then
-  ddev exec php "/var/www/html/${GENERATOR}" \
-    -n "${THEME_NAME}" \
-    -d "${THEME_DESC}" \
-    -p "${WEB_PATH}/themes/custom" \
-    -a short
-  info "Theme '${THEME_NAME}' generated at ${THEME_PATH}"
-  ddev drush pm:enable "${THEME_NAME}" -y
-  info "Theme '${THEME_NAME}' enabled"
-else
-  warn "generator.php not found at ${GENERATOR} — theme generation skipped."
-  warn "Run manually: ddev exec php /var/www/html/${GENERATOR} -n ${THEME_NAME} -d '${THEME_DESC}' -p ${WEB_PATH}/themes/custom -a short"
+# Use Drupal 11's native starterkit generator directly — bypasses generator.php
+# (which internally calls this same command but has path resolution issues).
+# prototype registers itself as a starterkit in its .info.yml.
+ddev exec bash -c "cd /var/www/html/web && php core/scripts/drupal generate-theme '${DK_THEME_NAME}' \
+  --name='${DK_THEME_DESC}' \
+  --path=themes/custom \
+  --starterkit=prototype"
+
+# Verify the theme was actually created before trying to enable it
+# Check inside the container — host-side mutagen sync may lag behind
+if ! ddev exec test -d "/var/www/html/${DK_THEME_PATH}" 2>/dev/null; then
+  echo -e "\n${RED}${BOLD}Error:${RESET} Theme generation ran but ${DK_THEME_PATH} was not created." >&2
+  exit 1
 fi
+
+info "Theme '${DK_THEME_NAME}' generated at ${DK_THEME_PATH}"
+ddev drush theme:install "${DK_THEME_NAME}" -y
+ddev drush cr
+info "Theme '${DK_THEME_NAME}' enabled"
 
 ddev composer remove drupal/prototype --no-interaction
 info "drupal/prototype removed from require"
 
 # =============================================================================
+# 16. DRUPAL BASE RECIPE
+# =============================================================================
+header "Applying Drupal Base Recipe"
+ddev recipe formula-foundational
+# Allow installation of optional recipes
+ddev recipe
+
+# =============================================================================
 # 17. PANTHEON (optional)
 # =============================================================================
-if [[ "$PANTHEON" == "yes" ]]; then
-  header "Installing Pantheon"
-
-  # -- Composer packages -------------------------------------------------------
-  ddev composer require \
-    'drupal/pantheon_advanced_page_cache:^2.3' \
-    'pantheon-systems/drupal-integrations:^11' \
-    'drupal/search_api_pantheon:^8.4' \
-    'drupal/pantheon_secrets:^1.0' \
-    --no-interaction
-  info "Pantheon Composer packages installed"
-
-  # drupal-integrations is a non-standard package — must be explicitly allowed
-  ddev composer config extra.allowed-packages.pantheon-systems/drupal-integrations true
-  info "pantheon-systems/drupal-integrations added to extra.allowed-packages"
-
-  # -- Pantheon recipe ---------------------------------------------------------
-  if [[ -d "recipes/drupal-pantheon" ]]; then
-    if ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
-      ddev drush recipe /var/www/html/recipes/drupal-pantheon
-      info "Drupal Pantheon recipe applied"
-      ddev drush cex -y
-      info "Configuration exported"
-    else
-      warn "Drupal not bootstrapped — run 'ddev drush recipe /var/www/html/recipes/drupal-pantheon' manually."
-    fi
-  else
-    warn "recipes/drupal-pantheon not found — skipping recipe."
-  fi
-
-  # -- pantheon.yml ------------------------------------------------------------
-  if [[ ! -f "pantheon.yml" ]]; then
-    cp assets/pantheon/pantheon.yml pantheon.yml
-    sed -i.bak "s/^php_version:.*/php_version: ${PHP_VERSION}/" pantheon.yml \
-      && rm -f pantheon.yml.bak
-    info "pantheon.yml copied (PHP ${PHP_VERSION})"
-  else
-    warn "pantheon.yml already exists — skipped (verify php_version: ${PHP_VERSION})"
-  fi
-
-  # -- settings.platform.php --------------------------------------------------
-  PLATFORM_SETTINGS="${WEB_PATH}/sites/default/settings.platform.php"
-  if [[ ! -f "$PLATFORM_SETTINGS" ]]; then
-    cp assets/pantheon/settings.platform.php "$PLATFORM_SETTINGS"
-    info "settings.platform.php copied to ${WEB_PATH}/sites/default/"
-  else
-    warn "settings.platform.php already exists — skipped."
-  fi
-
-  # -- Quicksilver scripts ----------------------------------------------------
-  QS_SRC="assets/pantheon/quicksilver/pantheon-drupal-quicksilver"
-  QS_DEST="${WEB_PATH}/private/scripts/quicksilver"
-  if [[ -d "$QS_SRC" ]]; then
-    mkdir -p "$QS_DEST"
-    cp -r "${QS_SRC}/." "$QS_DEST/"
-    info "Quicksilver scripts copied to ${QS_DEST}"
-  else
-    warn "Quicksilver source not found at ${QS_SRC} — skipped."
-  fi
-
-  warn "Complete Pantheon environment linking must be done manually."
+if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
+  ddev setup-pantheon --php-version="${DK_PHP_VERSION}"
 fi
 
 # =============================================================================
@@ -538,18 +508,18 @@ echo -e "${GREEN}${BOLD}========================================================
 echo -e "${GREEN}${BOLD}  Drupal Kickstart Complete!${RESET}"
 echo -e "${GREEN}${BOLD}============================================================${RESET}"
 echo
-echo -e "  ${BOLD}Site URL        :${RESET} https://${PROJECT_NAME}.test"
-echo -e "  ${BOLD}Theme path      :${RESET} ${THEME_PATH}"
-if [[ -n "$JIRA_SHORT" ]]; then
-  echo -e "  ${BOLD}Commit format   :${RESET} ${JIRA_SHORT}-123: My commit message"
+echo -e "  ${BOLD}Site URL        :${RESET} https://${DK_DDEV_NAME}.ddev.site"
+echo -e "  ${BOLD}Theme path      :${RESET} ${DK_THEME_PATH}"
+if [[ -n "$DK_COMMIT_PREFIX" ]]; then
+  echo -e "  ${BOLD}Commit format   :${RESET} ${DK_COMMIT_PREFIX}-123: My commit message"
 fi
 echo
 echo -e "  ${YELLOW}${BOLD}Next steps:${RESET}"
 echo -e "  1. Run ${BOLD}ddev drush en redis -y && ddev drush cr${RESET} to activate Redis caching"
-if [[ "$PANTHEON" == "yes" ]]; then
+if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
   echo -e "  2. Complete Pantheon environment linking manually"
 fi
-if [[ "$SOLR" == "yes" ]]; then
+if [[ "$DK_USES_SOLR" == "yes" ]]; then
   echo -e "  3. Add SOLR core config to ${BOLD}.ddev/solr/${RESET}"
 fi
 echo
