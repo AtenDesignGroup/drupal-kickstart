@@ -1,0 +1,15 @@
+{
+    "scripts": {
+        "grumphp": "vendor/bin/grumphp run",
+        "grumphp:pre-commit": "vendor/bin/grumphp git:pre-commit",
+        "phpcs": "vendor/bin/phpcs --extensions=php,module,inc,install,test,profile,theme,info --standard=web/core --standard=web/modules/contrib --standard=web/profiles/contrib --standard=web/themes/contrib --standard=web/modules/custom --standard=web/profiles/custom --standard=web/themes/custom --ignore=node_modules,bower_components,vendor,dist,styleguide --ignore-annotations",
+        "phpcbf-staged": "vendor/bin/phpcbf --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,bower_components,vendor,dist,styleguide --ignore-annotations $(git diff --name-only --staged)",
+        "phpcbf": "vendor/bin/phpcbf --extensions=php,module,inc,install,test,profile,theme,info --ignore=node_modules,bower_components,vendor,dist,styleguide --ignore-annotations",
+        "phpcsfixer": "vendor/bin/php-cs-fixer fix",
+        "phpcsfixer:dry-run": "vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "eslint": "node_modules/.bin/eslint",
+        "eslint:fix": "node_modules/.bin/eslint --fix",
+        "stylelint": "node_modules/.bin/stylelint",
+        "stylelint:fix": "node_modules/.bin/stylelint --fix"
+    }
+}
