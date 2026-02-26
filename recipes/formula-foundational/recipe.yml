@@ -53,6 +53,7 @@ install:
   # Themes
   - claro
   - gin
+  - DK_THEME_NAME
 
 config:
   strict: false

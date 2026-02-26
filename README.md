@@ -1,7 +1,14 @@
-# PROJECT NAME - Drupal 9
+# PROJECT NAME
 
 - Production URL: https://atendesigngroup.com/
 - Aten Shortname: PROJECTCODE
+
+## Project Setup
+
+See `docs` for details on project setup, including:
+
+- Drupal Kickstart
+- Grumphp
 
 ## Overview
 
