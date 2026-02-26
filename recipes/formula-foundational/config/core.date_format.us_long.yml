@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: us_long
+label: 'US long'
+locked: false
+pattern: 'F j, Y - g:i A'

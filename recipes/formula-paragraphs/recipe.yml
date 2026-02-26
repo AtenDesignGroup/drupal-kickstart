@@ -1,0 +1,7 @@
+name: '🦄 🌈  Formula: Paragraphs'
+description: 'Provides a set of standard Paragraph types and related configuration.'
+type: 'Paragraphs'
+
+install:
+  - paragraphs
+  - nomarkup

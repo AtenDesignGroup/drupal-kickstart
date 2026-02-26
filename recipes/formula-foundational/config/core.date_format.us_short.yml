@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: us_short
+label: 'US short'
+locked: false
+pattern: n/j/y

@@ -1,0 +1,18 @@
+{
+    "name": "aten/formula-news",
+    "description": "Recipe for news.",
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Seth Hill",
+            "email": "seth@atendesigngroup.com"
+        }
+    ],
+    "require": {
+        "drupal/layout_paragraphs": "^2.1",
+        "drupal/metatag": "*",
+        "drupal/paragraphs": "^1.18",
+        "drupal/pathauto": "*"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "aten/formula-paragraphs",
+    "description": "Recipe for foundational Paragraph types.",
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Seth Hill",
+            "email": "seth@atendesigngroup.com"
+        }
+    ],
+    "require": {
+        "drupal/paragraphs": "^1.18",
+        "drupal/nomarkup": "^1.0"
+    }
+}

@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: full_size
+label: 'Full size 16:9'
+effects:
+  a927056a-4c60-458c-a56f-37dcb919020d:
+    uuid: a927056a-4c60-458c-a56f-37dcb919020d
+    id: focal_point_scale_and_crop
+    weight: 2
+    data:
+      width: 1920
+      height: 1080
+      crop_type: focal_point
