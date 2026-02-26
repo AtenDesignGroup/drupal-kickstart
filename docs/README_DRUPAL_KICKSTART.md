@@ -12,19 +12,14 @@
 
 1. Create and navigate to your project directory:
    ```bash
-   mkdir my-drupal-site && cd my-drupal-site
+   mkdir ~/Sites/my-drupal-site && cd ~/Sites/my-drupal-site
    ```
 
-2. Download the latest release:
+2. Download the latest release and run the setup script:
    ```bash
-   curl -L https://github.com/AtenDesignGroup/drupal-kickstart/archive/refs/tags/11.0.1.tar.gz | tar xz --strip-components=1
+   curl -L https://github.com/AtenDesignGroup/drupal-kickstart/archive/refs/tags/11.0.0.tar.gz | tar xz --strip-components=1 && bash drupal-kickstart.sh
    ```
    Or visit [Releases](https://github.com/AtenDesignGroup/drupal-kickstart/releases) to download manually.
-
-3. Run the setup script:
-   ```bash
-   # Script coming soon
-   ```
 
 ## Contributing
 
