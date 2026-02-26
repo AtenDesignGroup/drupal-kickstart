@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+## Description: Configure composer.json with project standards (platform, plugins, scaffold, patches, scripts).
+## Usage: setup-composer
+## Example: "ddev setup-composer"
+
+set -euo pipefail
+
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+CYAN="\033[0;36m"
+RESET="\033[0m"
+
+trap 'echo -e "\n\033[0;31m${BOLD}setup-composer failed.${RESET} Check messages above." >&2' ERR
+
+header() { echo -e "\n${BOLD}${CYAN}==> $1${RESET}"; }
+info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
+
+# =============================================================================
+# CONFIG
+# =============================================================================
+header "Composer config"
+
+ddev composer config preferred-install dist
+ddev composer config platform.php 8.3
+info "preferred-install: dist, platform.php: 8.3"
+
+# =============================================================================
+# ALLOW-PLUGINS
+# =============================================================================
+header "allow-plugins"
+
+ddev composer config allow-plugins.phpro/grumphp-shim true
+ddev composer config allow-plugins.phpro/grumphp true
+ddev composer config allow-plugins.cweagans/composer-patches true
+ddev composer config allow-plugins.tbachert/spi true
+info "grumphp, composer-patches, spi"
+
+# =============================================================================
+# EXTRA: PATCHES
+# =============================================================================
+header "Patches config"
+
+ddev composer config extra.patches-file ./composer.patches.json
+ddev composer config --json extra.composer-exit-on-patch-failure true
+ddev composer config --json extra.enable-patching true
+ddev composer config --json extra.patchLevel '{"drupal/core": "-p2"}'
+info "patches-file, enable-patching, patchLevel"
+
+# =============================================================================
+# EXTRA: DRUPAL-SCAFFOLD
+# Merged so create-project's locations/installer-paths are preserved.
+# =============================================================================
+header "Drupal scaffold additions"
+
+ddev composer config --json --merge extra.drupal-scaffold '{
+  "file-mapping": {
+    "[project-root]/.editorconfig": false
+  },
+  "phpstan": {
+    "includes": ["extension.neon"]
+  },
+  "phpstan/extension-installer": {
+    "ignore": ["phpstan/phpstan-phpunit"]
+  }
+}'
+info "file-mapping, phpstan config merged into drupal-scaffold"
+
+# =============================================================================
+# SCRIPTS (from composer.custom.json)
+# =============================================================================
+header "Composer scripts"
+
+if [[ -f "${DDEV_APPROOT}/composer.custom.json" ]]; then
+  SCRIPTS=$(ddev exec php -r "
+    \$data = json_decode(file_get_contents('/var/www/html/composer.custom.json'), true);
+    echo json_encode(\$data['scripts'] ?? new stdClass(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+  ")
+  ddev composer config --json --merge scripts "$SCRIPTS"
+  info "Scripts merged from composer.custom.json"
+else
+  info "No composer.custom.json found — skipping scripts"
+fi
+
+# =============================================================================
+# DONE
+# =============================================================================
+echo
+echo -e "${GREEN}${BOLD}composer.json configured.${RESET}"
+echo

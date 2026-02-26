@@ -80,6 +80,10 @@ config:
     automated_cron.settings:
       simple_config_update:
         interval: 0
+    system.site:
+      simple_config_update:
+        name: 'DK_DDEV_NAME'
+        mail: 'admin@DK_DDEV_NAME.ddev.site'
     system.theme:
       simple_config_update:
         admin: 'gin'

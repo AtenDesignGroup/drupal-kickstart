@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+## Description: Set up Pantheon integration: copy assets, apply recipe, configure DDEV & Composer.
+## Usage: setup-pantheon [--php-version=VERSION]
+## Example: "ddev setup-pantheon" or "ddev setup-pantheon --php-version=8.3"
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Colors / styling
+# -----------------------------------------------------------------------------
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+trap 'echo -e "\n${RED}${BOLD}setup-pantheon failed.${RESET} Check messages above." >&2' ERR
+
+header() { echo -e "\n${BOLD}${CYAN}==> $1${RESET}"; }
+info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
+warn()   { echo -e "    ${YELLOW}⚠${RESET}  $1"; }
+
+# -----------------------------------------------------------------------------
+# Arguments
+# -----------------------------------------------------------------------------
+PHP_VERSION="8.3"
+for arg in "$@"; do
+  case "$arg" in
+    --php-version=*) PHP_VERSION="${arg#*=}" ;;
+  esac
+done
+
+# -----------------------------------------------------------------------------
+# Paths
+# -----------------------------------------------------------------------------
+PROJECT_ROOT="${DDEV_APPROOT}"
+DDEV_CONFIG="${PROJECT_ROOT}/.ddev/config.yml"
+ASSETS="${PROJECT_ROOT}/assets/pantheon"
+
+if [[ ! -d "$ASSETS" ]]; then
+  echo -e "${RED}${BOLD}Error:${RESET} assets/pantheon/ not found at ${ASSETS}."
+  exit 1
+fi
+
+# =============================================================================
+# 1. COMPOSER PACKAGES (via formula-pantheon recipe)
+# =============================================================================
+header "Installing Pantheon Composer packages"
+
+# Allow drupal-integrations scaffold files before requiring it
+ddev composer config --json extra.allowed-packages '["pantheon-systems/drupal-integrations"]'
+info "extra.allowed-packages set for pantheon-systems/drupal-integrations"
+
+# Register the local recipe as a path repository so Composer resolves its
+# require block (pantheon_advanced_page_cache, drupal-integrations, etc.)
+ddev composer config \
+  repositories.formula-pantheon \
+  '{"type":"path","url":"recipes/formula-pantheon","options":{"symlink":false}}'
+info "Path repository registered for recipes/formula-pantheon"
+
+ddev composer require 'aten/formula-pantheon:@dev' --no-interaction
+info "formula-pantheon recipe and Pantheon packages installed"
+
+# =============================================================================
+# 2. COPY FILES
+# =============================================================================
+header "Copying Pantheon asset files"
+
+# pantheon.yml → project root
+if [[ ! -f "${PROJECT_ROOT}/pantheon.yml" ]]; then
+  cp "${ASSETS}/pantheon.yml" "${PROJECT_ROOT}/pantheon.yml"
+  sed -i.bak "s/^php_version:.*/php_version: ${PHP_VERSION}/" "${PROJECT_ROOT}/pantheon.yml" \
+    && rm -f "${PROJECT_ROOT}/pantheon.yml.bak"
+  info "pantheon.yml → / (PHP ${PHP_VERSION})"
+else
+  warn "pantheon.yml already exists — skipped"
+fi
+
+# quicksilver → web/private/pantheon/quicksilver
+QS_SRC="${ASSETS}/quicksilver"
+QS_DEST="${PROJECT_ROOT}/web/private/pantheon/quicksilver"
+if [[ ! -d "$QS_DEST" ]]; then
+  mkdir -p "$QS_DEST"
+  cp -r "${QS_SRC}/." "$QS_DEST/"
+  info "quicksilver → web/private/pantheon/quicksilver"
+else
+  warn "web/private/pantheon/quicksilver already exists — skipped"
+fi
+
+# pantheon_secrets → private/pantheon_secrets
+SECRETS_SRC="${ASSETS}/pantheon_secrets"
+SECRETS_DEST="${PROJECT_ROOT}/private/pantheon_secrets"
+if [[ ! -d "$SECRETS_DEST" ]]; then
+  mkdir -p "$SECRETS_DEST"
+  cp -r "${SECRETS_SRC}/." "$SECRETS_DEST/"
+  info "pantheon_secrets → private/pantheon_secrets"
+else
+  warn "private/pantheon_secrets already exists — skipped"
+fi
+
+# settings.platform.php → web/sites/default/settings.platform.php
+PLATFORM_SETTINGS="${PROJECT_ROOT}/web/sites/default/settings.platform.php"
+if [[ ! -f "$PLATFORM_SETTINGS" ]]; then
+  cp "${ASSETS}/settings.platform.php" "$PLATFORM_SETTINGS"
+  info "settings.platform.php → web/sites/default/"
+else
+  warn "settings.platform.php already exists — skipped"
+fi
+
+# =============================================================================
+# 3. APPLY RECIPE
+# =============================================================================
+header "Applying formula-pantheon recipe"
+
+ddev recipe formula-pantheon
+
+# =============================================================================
+# 4. UPDATE DDEV CONFIG (web_environment)
+# =============================================================================
+header "Updating .ddev/config.yml"
+
+SECRETS_ENV_VALUE="CUSTOMER_SECRETS_FAKE_FILE=/var/www/html/private/pantheon_secrets/secrets.json"
+
+if ! grep -q "CUSTOMER_SECRETS_FAKE_FILE" "$DDEV_CONFIG"; then
+  python3 - "$DDEV_CONFIG" "$SECRETS_ENV_VALUE" <<'PYEOF'
+import sys, re
+
+config_file = sys.argv[1]
+entry = "  - " + sys.argv[2]
+text = open(config_file).read()
+
+if re.search(r'^web_environment:', text, re.MULTILINE):
+    # Insert the new entry after the web_environment: line
+    text = re.sub(
+        r'(^web_environment:)',
+        r'\1\n' + entry,
+        text,
+        flags=re.MULTILINE
+    )
+else:
+    text += f'\nweb_environment:\n{entry}\n'
+
+open(config_file, 'w').write(text)
+PYEOF
+  info "CUSTOMER_SECRETS_FAKE_FILE added to web_environment"
+else
+  warn "CUSTOMER_SECRETS_FAKE_FILE already in web_environment — skipped"
+fi
+
+# =============================================================================
+# 5. RESTART to pick up new web_environment
+# =============================================================================
+header "Restarting DDEV"
+
+ddev restart
+
+# =============================================================================
+# DONE
+# =============================================================================
+echo
+echo -e "${GREEN}${BOLD}Pantheon setup complete!${RESET}"
+echo
+echo -e "  ${BOLD}Next steps:${RESET}"
+echo -e "  • Connect site on https://dashboard.pantheon.io"
+echo -e "  • Add real secrets to ${BOLD}private/pantheon_secrets/secrets.json${RESET}"
+echo -e "  • Commit pantheon.yml, settings.platform.php, and quicksilver scripts"
+echo
