@@ -364,18 +364,6 @@ ddev composer config minimum-stability dev
 ddev composer config prefer-stable true
 info "Composer stability configured (dev + prefer-stable)"
 
-# Register the local formula-foundational recipe as a path repository so Composer can
-# resolve its composer.json dependencies (gin, metatag, redis, pathauto, etc.)
-ddev composer config repositories.formula-foundational \
-  '{"type":"path","url":"recipes/formula-foundational","options":{"symlink":false}}'
-
-# Requiring the recipe pulls in all packages declared in recipes/formula-foundational/composer.json
-ddev composer require \
-  "aten/formula-foundational:@dev" \
-  --no-interaction \
-  --with-all-dependencies
-info "Drupal Base recipe packages installed"
-
 # Drush — a tooling dep, not part of the recipe
 ddev composer require \
   "drush/drush:^13" \
@@ -501,18 +489,9 @@ info "drupal/prototype removed from require"
 # 16. DRUPAL BASE RECIPE
 # =============================================================================
 header "Applying Drupal Base Recipe"
-
-if ! ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
-  warn "Drupal is not bootstrapped — skipping recipe."
-  warn "Run 'ddev drush recipe /var/www/html/recipes/formula-foundational' manually."
-elif [[ ! -d "recipes/formula-foundational" ]]; then
-  warn "recipes/formula-foundational not found — skipping."
-else
-  ddev drush recipe /var/www/html/recipes/formula-foundational
-  info "Drupal Base recipe applied"
-  ddev drush cex -y
-  info "Configuration exported"
-fi
+ddev recipe formula-foundational
+# Allow installation of optional recipes
+ddev recipe
 
 # =============================================================================
 # 17. PANTHEON (optional)
