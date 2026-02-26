@@ -358,21 +358,22 @@ header "Installing Composer Dependencies"
 # Apply project composer standards (platform, plugins, scaffold, patches, scripts)
 ddev setup-composer
 
-# Set minimum-stability to dev so the local path repo (drupal-base) is resolvable.
+# Set minimum-stability to dev so the local path repo (formula-foundational) is resolvable.
 # prefer-stable ensures all other packages still resolve to stable releases.
 ddev composer config minimum-stability dev
 ddev composer config prefer-stable true
 info "Composer stability configured (dev + prefer-stable)"
 
-# Register the local drupal-base recipe as a path repository so Composer can
+# Register the local formula-foundational recipe as a path repository so Composer can
 # resolve its composer.json dependencies (gin, metatag, redis, pathauto, etc.)
-ddev composer config repositories.drupal-base \
-  '{"type":"path","url":"recipes/drupal-base","options":{"symlink":false}}'
+ddev composer config repositories.formula-foundational \
+  '{"type":"path","url":"recipes/formula-foundational","options":{"symlink":false}}'
 
-# Requiring the recipe pulls in all packages declared in recipes/drupal-base/composer.json
+# Requiring the recipe pulls in all packages declared in recipes/formula-foundational/composer.json
 ddev composer require \
-  "atendesigngroup/drupal-base:@dev" \
-  --no-interaction
+  "aten/formula-foundational:@dev" \
+  --no-interaction \
+  --with-all-dependencies
 info "Drupal Base recipe packages installed"
 
 # Drush — a tooling dep, not part of the recipe
@@ -470,23 +471,28 @@ fi
 # =============================================================================
 header "Generating Custom Theme"
 
-GENERATOR="vendor/drupal/prototype/generator.php"
 ddev composer require 'drupal/prototype:^5.3' --no-interaction
 info "drupal/prototype installed"
 
-if ddev exec test -f "/var/www/html/${GENERATOR}"; then
-  ddev exec php "/var/www/html/${GENERATOR}" \
-    -n "${DK_THEME_NAME}" \
-    -d "${DK_THEME_DESC}" \
-    -p "web/themes/custom" \
-    -a short
-  info "Theme '${DK_THEME_NAME}' generated at ${DK_THEME_PATH}"
-  ddev drush pm:enable "${DK_THEME_NAME}" -y
-  info "Theme '${DK_THEME_NAME}' enabled"
-else
-  warn "generator.php not found at ${GENERATOR} — theme generation skipped."
-  warn "Run manually: ddev exec php /var/www/html/${GENERATOR} -n ${DK_THEME_NAME} -d '${DK_THEME_DESC}' -p web/themes/custom -a short"
+# Use Drupal 11's native starterkit generator directly — bypasses generator.php
+# (which internally calls this same command but has path resolution issues).
+# prototype registers itself as a starterkit in its .info.yml.
+ddev exec bash -c "cd /var/www/html/web && php core/scripts/drupal generate-theme '${DK_THEME_NAME}' \
+  --name='${DK_THEME_DESC}' \
+  --path=themes/custom \
+  --starterkit=prototype"
+
+# Verify the theme was actually created before trying to enable it
+# Check inside the container — host-side mutagen sync may lag behind
+if ! ddev exec test -d "/var/www/html/${DK_THEME_PATH}" 2>/dev/null; then
+  echo -e "\n${RED}${BOLD}Error:${RESET} Theme generation ran but ${DK_THEME_PATH} was not created." >&2
+  exit 1
 fi
+
+info "Theme '${DK_THEME_NAME}' generated at ${DK_THEME_PATH}"
+ddev drush theme:install "${DK_THEME_NAME}" -y
+ddev drush cr
+info "Theme '${DK_THEME_NAME}' enabled"
 
 ddev composer remove drupal/prototype --no-interaction
 info "drupal/prototype removed from require"
@@ -498,11 +504,11 @@ header "Applying Drupal Base Recipe"
 
 if ! ddev drush status --field=bootstrap 2>/dev/null | grep -qi "successful"; then
   warn "Drupal is not bootstrapped — skipping recipe."
-  warn "Run 'ddev drush recipe /var/www/html/recipes/drupal-base' manually."
-elif [[ ! -d "recipes/drupal-base" ]]; then
-  warn "recipes/drupal-base not found — skipping."
+  warn "Run 'ddev drush recipe /var/www/html/recipes/formula-foundational' manually."
+elif [[ ! -d "recipes/formula-foundational" ]]; then
+  warn "recipes/formula-foundational not found — skipping."
 else
-  ddev drush recipe /var/www/html/recipes/drupal-base
+  ddev drush recipe /var/www/html/recipes/formula-foundational
   info "Drupal Base recipe applied"
   ddev drush cex -y
   info "Configuration exported"

@@ -70,13 +70,31 @@ info "file-mapping, phpstan config merged into drupal-scaffold"
 # =============================================================================
 header "Composer scripts"
 
-if [[ -f "${DDEV_APPROOT}/composer.custom.json" ]]; then
-  SCRIPTS=$(ddev exec php -r "
-    \$data = json_decode(file_get_contents('/var/www/html/composer.custom.json'), true);
-    echo json_encode(\$data['scripts'] ?? new stdClass(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-  ")
-  ddev composer config --json --merge scripts "$SCRIPTS"
-  info "Scripts merged from composer.custom.json"
+if [[ -f "$(pwd)/composer.custom.json" ]]; then
+  # Pipe PHP directly into the container via stdin — no temp files, no escaping issues.
+  # composer config does not support the 'scripts' key, so we merge directly
+  # into composer.json via PHP.
+  ddev exec php -- - << 'PHPEOF'
+<?php
+$root  = '/var/www/html';
+$dest  = $root . '/composer.json';
+$src   = $root . '/composer.custom.json';
+
+$composer = json_decode(file_get_contents($dest), true);
+$custom   = json_decode(file_get_contents($src),  true);
+
+$composer['scripts'] = array_replace(
+  $composer['scripts'] ?? [],
+  $custom['scripts']   ?? []
+);
+
+file_put_contents(
+  $dest,
+  json_encode($composer, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n"
+);
+echo "Scripts merged.\n";
+PHPEOF
+  info "Scripts merged from composer.custom.json into composer.json"
 else
   info "No composer.custom.json found — skipping scripts"
 fi
