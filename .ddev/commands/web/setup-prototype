@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## Description: Generate a custom Drupal theme with the prototype starterkit, then enable it as the site default.
-## Usage: setup-theme --theme-name=NAME [--theme-desc=DESCRIPTION] [--generate-only]
-## Example: "ddev setup-theme --theme-name=my_theme" or "ddev setup-theme --theme-name=my_theme --generate-only"
+## Usage: setup-prototype --theme-name=NAME [--theme-desc=DESCRIPTION] [--generate-only]
+## Example: "ddev setup-prototype --theme-name=my_theme" or "ddev setup-prototype --theme-name=my_theme --generate-only"
 
 set -euo pipefail
 
@@ -15,7 +15,7 @@ CYAN="\033[0;36m"
 RED="\033[0;31m"
 RESET="\033[0m"
 
-trap 'echo -e "\n${RED}${BOLD}setup-theme failed.${RESET}" >&2' ERR
+trap 'echo -e "\n${RED}${BOLD}setup-prototype failed.${RESET}" >&2' ERR
 
 header() { echo -e "\n${BOLD}${CYAN}==> $1${RESET}"; }
 info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
@@ -37,7 +37,7 @@ done
 
 if [[ -z "$THEME_NAME" ]]; then
   echo -e "${RED}${BOLD}Error:${RESET} --theme-name is required."
-  echo -e "  Usage: ddev setup-theme --theme-name=my_theme [--theme-desc='My Theme']"
+  echo -e "  Usage: ddev setup-prototype --theme-name=my_theme [--theme-desc='My Theme']"
   exit 1
 fi
 
