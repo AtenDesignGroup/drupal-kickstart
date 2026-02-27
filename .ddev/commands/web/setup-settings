@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+## Description: Configure Drupal settings files: settings.ddev.php (with hash salt), settings.php include, settings.local.php.
+## Usage: setup-settings [--hash-salt=HASH_SALT]
+## Example: "ddev setup-settings" or "ddev setup-settings --hash-salt=mysecretsalt"
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Colors / styling
+# -----------------------------------------------------------------------------
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+trap 'echo -e "\n${RED}${BOLD}setup-settings failed.${RESET}" >&2' ERR
+
+header() { echo -e "\n${BOLD}${CYAN}==> $1${RESET}"; }
+info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
+warn()   { echo -e "    ${YELLOW}⚠${RESET}  $1"; }
+
+# -----------------------------------------------------------------------------
+# Parse args
+# -----------------------------------------------------------------------------
+HASH_SALT=""
+for arg in "$@"; do
+  case "$arg" in
+    --hash-salt=*) HASH_SALT="${arg#*=}" ;;
+  esac
+done
+
+# -----------------------------------------------------------------------------
+# Paths
+# -----------------------------------------------------------------------------
+ROOT="${DDEV_COMPOSER_ROOT:-/var/www/html}"
+SITES_DEFAULT="${ROOT}/web/sites/default"
+
+# -----------------------------------------------------------------------------
+# Resolve hash salt: arg → .env → generate
+# -----------------------------------------------------------------------------
+if [[ -z "$HASH_SALT" ]] && [[ -f "${ROOT}/.env" ]]; then
+  # shellcheck source=/dev/null
+  source "${ROOT}/.env"
+  HASH_SALT="${DK_DRUPAL_HASH_SALT:-}"
+fi
+
+if [[ -z "$HASH_SALT" ]]; then
+  HASH_SALT=$(openssl rand -base64 48 | tr -d '=+/' | head -c 64)
+  warn "No hash salt found — generated a new one (consider saving it to .env as DK_DRUPAL_HASH_SALT)"
+fi
+
+mkdir -p "$SITES_DEFAULT"
+
+# =============================================================================
+# 1. settings.ddev.php — copy from assets and inject hash salt
+# =============================================================================
+header "Configuring settings.ddev.php"
+
+SETTINGS_DDEV="${SITES_DEFAULT}/settings.ddev.php"
+if [[ -f "${ROOT}/assets/settings.ddev.php" ]]; then
+  cp "${ROOT}/assets/settings.ddev.php" "$SETTINGS_DDEV"
+  sed -i.bak "s|\\\$settings\['hash_salt'\] = '[^']*';|\$settings['hash_salt'] = '${HASH_SALT}';|" \
+    "$SETTINGS_DDEV" && rm -f "${SETTINGS_DDEV}.bak"
+  info "assets/settings.ddev.php → sites/default/settings.ddev.php (hash salt set)"
+else
+  warn "assets/settings.ddev.php not found — skipping"
+fi
+
+# =============================================================================
+# 2. settings.php — add settings.ddev.php include
+# =============================================================================
+header "Patching settings.php"
+
+SETTINGS_PHP="${SITES_DEFAULT}/settings.php"
+if [[ -f "$SETTINGS_PHP" ]] && ! grep -q "settings.ddev.php" "$SETTINGS_PHP"; then
+  cat >> "$SETTINGS_PHP" <<'DDEV_INCLUDE'
+
+// Included by Drupal Kickstart — replaces DDEV-managed include.
+if (file_exists($app_root . '/' . $site_path . '/settings.ddev.php') && getenv('IS_DDEV_PROJECT') == 'true') {
+  include $app_root . '/' . $site_path . '/settings.ddev.php';
+}
+DDEV_INCLUDE
+  info "Added settings.ddev.php include to settings.php"
+else
+  warn "settings.php not found or include already present — skipped"
+fi
+
+# =============================================================================
+# 3. settings.local.php — create minimal stub
+# =============================================================================
+header "Creating settings.local.php"
+
+SETTINGS_LOCAL="${SITES_DEFAULT}/settings.local.php"
+if [[ ! -f "$SETTINGS_LOCAL" ]]; then
+  cat > "$SETTINGS_LOCAL" <<'SETTINGS_HEADER'
+<?php
+
+/**
+ * @file
+ * Local development settings.
+ */
+
+SETTINGS_HEADER
+  info "Created settings.local.php"
+else
+  warn "settings.local.php already exists — skipped"
+fi

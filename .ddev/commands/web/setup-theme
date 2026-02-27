@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+## Description: Generate a custom Drupal theme with the prototype starterkit, then enable it as the site default.
+## Usage: setup-theme --theme-name=NAME [--theme-desc=DESCRIPTION] [--generate-only]
+## Example: "ddev setup-theme --theme-name=my_theme" or "ddev setup-theme --theme-name=my_theme --generate-only"
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Colors / styling
+# -----------------------------------------------------------------------------
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+trap 'echo -e "\n${RED}${BOLD}setup-theme failed.${RESET}" >&2' ERR
+
+header() { echo -e "\n${BOLD}${CYAN}==> $1${RESET}"; }
+info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
+warn()   { echo -e "    ${YELLOW}⚠${RESET}  $1"; }
+
+# -----------------------------------------------------------------------------
+# Parse args
+# -----------------------------------------------------------------------------
+THEME_NAME=""
+THEME_DESC=""
+GENERATE_ONLY="no"
+for arg in "$@"; do
+  case "$arg" in
+    --theme-name=*) THEME_NAME="${arg#*=}" ;;
+    --theme-desc=*) THEME_DESC="${arg#*=}" ;;
+    --generate-only) GENERATE_ONLY="yes" ;;
+  esac
+done
+
+if [[ -z "$THEME_NAME" ]]; then
+  echo -e "${RED}${BOLD}Error:${RESET} --theme-name is required."
+  echo -e "  Usage: ddev setup-theme --theme-name=my_theme [--theme-desc='My Theme']"
+  exit 1
+fi
+
+THEME_DESC="${THEME_DESC:-Custom theme: ${THEME_NAME}}"
+THEME_PATH="web/themes/custom/${THEME_NAME}"
+ROOT="${DDEV_COMPOSER_ROOT:-/var/www/html}"
+
+# =============================================================================
+# 1. GENERATE THEME (prototype starterkit)
+# =============================================================================
+header "Generating theme '${THEME_NAME}'"
+
+if [[ -d "${ROOT}/${THEME_PATH}" ]]; then
+  info "Theme '${THEME_NAME}' already exists at ${THEME_PATH} — skipping generation"
+else
+  # Install prototype temporarily — it registers itself as a starterkit.
+  composer require 'drupal/prototype:^5.3' --no-interaction
+  info "drupal/prototype installed"
+
+  # Use Drupal 11's native starterkit generator directly.
+  cd "${ROOT}/web" && php core/scripts/drupal generate-theme "${THEME_NAME}" \
+    --name="${THEME_DESC}" \
+    --path=themes/custom \
+    --starterkit=prototype
+
+  if [[ ! -d "${ROOT}/${THEME_PATH}" ]]; then
+    echo -e "\n${RED}${BOLD}Error:${RESET} Theme generation ran but ${THEME_PATH} was not created." >&2
+    exit 1
+  fi
+
+  info "Theme '${THEME_NAME}' generated at ${THEME_PATH}"
+
+  # Remove prototype — it's only needed for generation.
+  cd "${ROOT}" && composer remove drupal/prototype --no-interaction
+  info "drupal/prototype removed from require"
+fi
+
+# =============================================================================
+# 2. ENABLE + SET AS DEFAULT
+# =============================================================================
+if [[ "$GENERATE_ONLY" == "yes" ]]; then
+  info "--generate-only set — skipping theme activation (run 'ddev drush theme:install ${THEME_NAME} -y' after dependencies are installed)"
+  exit 0
+fi
+
+header "Enabling theme '${THEME_NAME}'"
+
+drush theme:install "${THEME_NAME}" -y
+drush config:set system.theme default "${THEME_NAME}" -y
+drush cr
+info "Theme '${THEME_NAME}' installed and set as site default"

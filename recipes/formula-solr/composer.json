@@ -1,0 +1,15 @@
+{
+  "name": "aten/formula-solr",
+  "description": "Recipe for Search API Solr server configuration.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/search_api_solr": "^4.3"
+  }
+}

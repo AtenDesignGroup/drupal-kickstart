@@ -136,8 +136,7 @@ fi
 if [[ "$RESUME" == "yes" ]]; then
   # Derive theme path from loaded values — no prompts needed
   DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
-  # Provide default for DK_THEME_DESC if missing from an older .kickstart.env
-  DK_THEME_DESC="${DK_THEME_DESC:-${DK_DDEV_NAME} Theme}"
+  DK_THEME_DESC="${DK_THEME_DESC:-Custom theme for ${DK_DDEV_NAME}}"
   header "Resuming with saved configuration"
 else
   header "Project Configuration"
@@ -150,9 +149,8 @@ else
   DEFAULT_THEME="${DK_THEME_NAME:-${DK_DDEV_NAME}_theme}"
   prompt DK_THEME_NAME "Theme name" "$DEFAULT_THEME"
 
-  # Theme description (used by the prototype theme generator)
-  DEFAULT_THEME_DESC="${DK_THEME_DESC:-${DK_DDEV_NAME} Theme}"
-  prompt DK_THEME_DESC "Theme description" "$DEFAULT_THEME_DESC"
+  # Theme description — auto-derived, not prompted
+  DK_THEME_DESC="Custom theme for ${DK_DDEV_NAME}"
 
   # Derived theme path (not prompted)
   DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
@@ -200,7 +198,7 @@ EOF
 
   # Generate secure secrets and write to .env
   DK_DRUPAL_HASH_SALT=$(openssl rand -base64 48 | tr -d '=+/' | head -c 64)
-  DK_DRUPAL_ADMIN_USERNAME="administrator"
+  DK_DRUPAL_ADMIN_USERNAME="admin"
   DK_DRUPAL_ADMIN_PASSWORD=$(openssl rand -base64 24 | tr -d '=+/')
 
   cat > ".env" <<EOF
@@ -223,7 +221,6 @@ header "Review — Please Confirm Your Settings"
 echo
 echo -e "    ${BOLD}Project name    :${RESET} ${DK_DDEV_NAME}"
 echo -e "    ${BOLD}Theme name      :${RESET} ${DK_THEME_NAME}"
-echo -e "    ${BOLD}Theme desc      :${RESET} ${DK_THEME_DESC}"
 echo -e "    ${BOLD}Theme path      :${RESET} ${DK_THEME_PATH}"
 echo -e "    ${BOLD}PHP version     :${RESET} ${DK_PHP_VERSION}"
 echo -e "    ${BOLD}Node version    :${RESET} ${DK_NODE_VERSION}"
@@ -282,29 +279,23 @@ EOF
   info "Added web_environment block"
 fi
 
-# =============================================================================
-# 7. REDIS DDEV ADDON
-# =============================================================================
-header "Installing Redis DDEV Addon"
-if version_gte "${DDEV_VERSION}" "${DDEV_MIN}"; then
-  ddev add-on get ddev/ddev-redis
-  info "Redis DDEV addon installed"
-else
-  warn "Skipping Redis addon — DDEV ${DDEV_VERSION} < ${DDEV_MIN}. Upgrade DDEV and run 'ddev add-on get ddev/ddev-redis' manually."
+# Prevent DDEV from auto-generating settings.ddev.php — we provide our own copy.
+if ! grep -q "^disable_settings_management:" "$DDEV_CONFIG"; then
+  echo 'disable_settings_management: true' >> "$DDEV_CONFIG"
+  info "Disabled DDEV settings management (using custom settings.ddev.php)"
 fi
 
 # =============================================================================
-# 8. SOLR (optional)
+# 7. SOLR (optional)
 # =============================================================================
 if [[ "$DK_USES_SOLR" == "yes" ]]; then
   header "Installing SOLR DDEV Addon"
   ddev add-on get ddev/ddev-solr
   info "SOLR DDEV addon installed"
-  warn "TODO: Place your SOLR core config in .ddev/solr/ — see https://github.com/ddev/ddev-solr"
 fi
 
 # =============================================================================
-# 9. TOKEN SUBSTITUTION
+# 8. TOKEN SUBSTITUTION
 # Replace DK_* placeholders in grumphp.yml and all recipe/asset YAML files.
 # Uses | as sed delimiter to safely handle DK_THEME_PATH containing slashes.
 # =============================================================================
@@ -330,32 +321,36 @@ done
 info "Tokens replaced in ${#TOKEN_FILES[@]} files"
 
 # =============================================================================
-# 10. DDEV START
+# 9. DDEV START
 # =============================================================================
 header "Starting DDEV"
 ddev start
 info "DDEV started — ${DK_DDEV_NAME}.ddev.site"
 
 # =============================================================================
-# 11. SCAFFOLD DRUPAL PROJECT
+# 10. SCAFFOLD DRUPAL PROJECT
 # =============================================================================
 header "Scaffolding Drupal 11 Project"
 
 if [[ ! -f "web/index.php" ]]; then
   info "Running composer create-project in container..."
-  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:^11' /tmp/dp --no-interaction"
+  # Set platform.php before create-project so Composer resolves against PHP 8.3
+  # from the start rather than using the container's detected version.
+  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:^11.2' /tmp/dp --no-interaction"
   ddev exec bash -c "rsync -a /tmp/dp/ /var/www/html/"
-  info "Drupal scaffold created"
+  ddev composer config platform.php 8.3
+  info "Drupal scaffold created (11.2.x, platform.php 8.3)"
 else
   info "Drupal scaffold already present — skipping create-project"
 fi
 
 # =============================================================================
-# 12. COMPOSER DEPENDENCIES
+# 11. COMPOSER DEPENDENCIES
 # =============================================================================
 header "Installing Composer Dependencies"
 
-# Apply project composer standards (platform, plugins, scaffold, patches, scripts)
+# Apply project composer standards (platform, plugins, scaffold, patches, scripts).
+# Also installs drush/drush and drupal/core-dev as standard tooling deps.
 ddev setup-composer
 
 # Set minimum-stability to dev so the local path repo (formula-foundational) is resolvable.
@@ -364,72 +359,24 @@ ddev composer config minimum-stability dev
 ddev composer config prefer-stable true
 info "Composer stability configured (dev + prefer-stable)"
 
-# Drush — a tooling dep, not part of the recipe
-ddev composer require \
-  "drush/drush:^13" \
-  --no-interaction
-info "drush/drush installed"
+# =============================================================================
+# 12. SETTINGS FILES
+# =============================================================================
+header "Configuring Settings Files"
 
-# Dev dependencies — -W allows transitive upgrades (phpunit needs newer sebastian/diff)
-ddev composer require --dev \
-  "drupal/core-dev:^11" \
-  --with-all-dependencies \
-  --no-interaction
-info "Dev dependencies installed"
+# Ensure hash salt is available (sourced from .env on resume runs)
+[[ -z "${DK_DRUPAL_HASH_SALT:-}" ]] && [[ -f ".env" ]] && source ".env"
+
+# Copy assets/settings.ddev.php (with hash salt), patch settings.php include,
+# and create a minimal settings.local.php stub.
+ddev exec bash /var/www/html/.ddev/commands/web/setup-settings \
+  --hash-salt="${DK_DRUPAL_HASH_SALT}"
+
+# Expose settings.local.php path for later Solr/Redis additions.
+SETTINGS_LOCAL="web/sites/default/settings.local.php"
 
 # =============================================================================
-# 13. REDIS SETTINGS
-# =============================================================================
-header "Configuring Redis Cache Settings"
-
-SITES_DEFAULT="web/sites/default"
-mkdir -p "$SITES_DEFAULT"
-
-SETTINGS_LOCAL="${SITES_DEFAULT}/settings.local.php"
-
-if [[ ! -f "$SETTINGS_LOCAL" ]]; then
-  cat > "$SETTINGS_LOCAL" <<'SETTINGS_HEADER'
-<?php
-
-/**
- * @file
- * Local development settings.
- */
-
-SETTINGS_HEADER
-  info "Created ${SETTINGS_LOCAL}"
-fi
-
-if ! grep -q "redis.connection" "$SETTINGS_LOCAL"; then
-  cat >> "$SETTINGS_LOCAL" <<REDIS_BLOCK
-
-// Redis caching — provided by ddev/ddev-redis addon.
-// Run \`ddev drush en redis -y && ddev drush cr\` after Drupal install to activate.
-if (!defined('MAINTENANCE_MODE')) {
-  \$settings['redis.connection']['interface'] = 'PhpRedis';
-  \$settings['redis.connection']['host'] = 'redis';
-  \$settings['cache']['default'] = 'cache.backend.redis';
-  \$settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
-}
-REDIS_BLOCK
-  info "Redis config written to ${SETTINGS_LOCAL}"
-else
-  warn "Redis config already present in ${SETTINGS_LOCAL} — skipped"
-fi
-
-# Hash salt — injected directly since settings.local.php is gitignored
-if ! grep -q "hash_salt" "$SETTINGS_LOCAL"; then
-  [[ -f ".env" ]] && source ".env"
-  cat >> "$SETTINGS_LOCAL" <<SALT_BLOCK
-
-// Hash salt — generated by Drupal Kickstart.
-\$settings['hash_salt'] = '${DK_DRUPAL_HASH_SALT}';
-SALT_BLOCK
-  info "Hash salt written to ${SETTINGS_LOCAL}"
-fi
-
-# =============================================================================
-# 14. SITE INSTALL
+# 13. SITE INSTALL
 # =============================================================================
 header "Installing Drupal"
 
@@ -455,49 +402,76 @@ else
 fi
 
 # =============================================================================
-# 15. PROTOTYPE THEME
+# 14. PROTOTYPE THEME
 # =============================================================================
 header "Generating Custom Theme"
 
-ddev composer require 'drupal/prototype:^5.3' --no-interaction
-info "drupal/prototype installed"
-
-# Use Drupal 11's native starterkit generator directly — bypasses generator.php
-# (which internally calls this same command but has path resolution issues).
-# prototype registers itself as a starterkit in its .info.yml.
-ddev exec bash -c "cd /var/www/html/web && php core/scripts/drupal generate-theme '${DK_THEME_NAME}' \
-  --name='${DK_THEME_DESC}' \
-  --path=themes/custom \
-  --starterkit=prototype"
-
-# Verify the theme was actually created before trying to enable it
-# Check inside the container — host-side mutagen sync may lag behind
-if ! ddev exec test -d "/var/www/html/${DK_THEME_PATH}" 2>/dev/null; then
-  echo -e "\n${RED}${BOLD}Error:${RESET} Theme generation ran but ${DK_THEME_PATH} was not created." >&2
-  exit 1
-fi
-
-info "Theme '${DK_THEME_NAME}' generated at ${DK_THEME_PATH}"
-ddev drush theme:install "${DK_THEME_NAME}" -y
-ddev drush cr
-info "Theme '${DK_THEME_NAME}' enabled"
-
-ddev composer remove drupal/prototype --no-interaction
-info "drupal/prototype removed from require"
+# Only generate the theme files here — activation is deferred to §15 so that
+# the theme's module dependencies (twig_field_value, twig_tweak) are installed
+# by the foundational recipe before drush theme:install runs.
+ddev setup-theme \
+  --theme-name="${DK_THEME_NAME}" \
+  --theme-desc="${DK_THEME_DESC}" \
+  --generate-only
 
 # =============================================================================
-# 16. DRUPAL BASE RECIPE
+# 15. DRUPAL BASE RECIPE
 # =============================================================================
 header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
 # Allow installation of optional recipes
 ddev recipe
 
+# Activate the theme now that its module dependencies are installed by the
+# foundational recipe (twig_field_value, twig_tweak come via formula-foundational).
+header "Activating Custom Theme"
+ddev drush theme:install "${DK_THEME_NAME}" -y
+ddev drush config:set system.theme default "${DK_THEME_NAME}" -y
+ddev drush cr
+info "Theme '${DK_THEME_NAME}' set as site default"
+
+# =============================================================================
+# 16. SOLR POST-INSTALL (optional)
+# Must run after Drupal is installed and modules are available.
+# =============================================================================
+if [[ "$DK_USES_SOLR" == "yes" ]]; then
+  header "Configuring Solr"
+
+  # Installs Composer deps, applies formula-solr recipe, configures
+  # settings.local.php, generates and extracts the Solr configset, then
+  # restarts DDEV so the Solr container picks up the new schema.
+  ddev solr-init
+fi
+
 # =============================================================================
 # 17. PANTHEON (optional)
 # =============================================================================
 if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
+  header "Installing Redis DDEV Addon"
+  ddev add-on get ddev/ddev-redis
+  ddev restart
+  info "Redis DDEV addon installed"
+
+  # Write Redis PHP settings into settings.local.php now that the addon is present.
+  if ! grep -q "redis.connection" "$SETTINGS_LOCAL" 2>/dev/null; then
+    cat >> "$SETTINGS_LOCAL" <<'REDIS_BLOCK'
+
+// Redis caching — provided by ddev/ddev-redis addon.
+if (!defined('MAINTENANCE_MODE')) {
+  $settings['redis.connection']['interface'] = 'PhpRedis';
+  $settings['redis.connection']['host'] = 'redis';
+  $settings['cache']['default'] = 'cache.backend.redis';
+  $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
+}
+REDIS_BLOCK
+    info "Redis settings written to ${SETTINGS_LOCAL}"
+  fi
+
   ddev setup-pantheon --php-version="${DK_PHP_VERSION}"
+
+  ddev drush en redis -y
+  ddev drush cr
+  info "Redis module enabled and caches cleared"
 fi
 
 # =============================================================================
@@ -515,12 +489,8 @@ if [[ -n "$DK_COMMIT_PREFIX" ]]; then
 fi
 echo
 echo -e "  ${YELLOW}${BOLD}Next steps:${RESET}"
-echo -e "  1. Run ${BOLD}ddev drush en redis -y && ddev drush cr${RESET} to activate Redis caching"
 if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
-  echo -e "  2. Complete Pantheon environment linking manually"
-fi
-if [[ "$DK_USES_SOLR" == "yes" ]]; then
-  echo -e "  3. Add SOLR core config to ${BOLD}.ddev/solr/${RESET}"
+  echo -e "  1. Complete Pantheon environment linking manually"
 fi
 echo
 echo -e "  ${CYAN}Settings saved in ${BOLD}${ENV_FILE}${RESET}${CYAN} — delete when no longer needed.${RESET}"

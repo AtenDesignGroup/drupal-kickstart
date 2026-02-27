@@ -20,6 +20,8 @@ info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
 # =============================================================================
 header "Composer config"
 
+# platform.php is set in the scaffold step (§10) before create-project runs.
+# Re-assert here to ensure it survives any composer.json regeneration.
 ddev composer config preferred-install dist
 ddev composer config platform.php 8.3
 info "preferred-install: dist, platform.php: 8.3"
@@ -98,6 +100,27 @@ PHPEOF
 else
   info "No composer.custom.json found — skipping scripts"
 fi
+
+# =============================================================================
+# DRUPAL TOOLING DEPENDENCIES
+# =============================================================================
+header "Installing tooling dependencies"
+
+# Drush — required for all Drupal CLI operations.
+ddev composer require \
+  "drush/drush:^13" \
+  --no-interaction
+info "drush/drush installed"
+
+# Core dev — provides PHPUnit, test base classes, and coding standard tools.
+# Pinned to ^11.2 to match the core version installed by create-project.
+# -W (--with-all-dependencies) allows transitive upgrades (phpunit needs newer
+# sebastian/diff).
+ddev composer require --dev \
+  "drupal/core-dev:^11.2" \
+  --with-all-dependencies \
+  --no-interaction
+info "drupal/core-dev installed"
 
 # =============================================================================
 # DONE
