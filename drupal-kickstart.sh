@@ -409,7 +409,7 @@ header "Generating Custom Theme"
 # Only generate the theme files here — activation is deferred to §15 so that
 # the theme's module dependencies (twig_field_value, twig_tweak) are installed
 # by the foundational recipe before drush theme:install runs.
-ddev setup-theme \
+ddev setup-prototype \
   --theme-name="${DK_THEME_NAME}" \
   --theme-desc="${DK_THEME_DESC}" \
   --generate-only
