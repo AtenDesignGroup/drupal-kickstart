@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+## Description: Install Solr Composer deps, apply formula-solr recipe, generate and extract Solr configset.
+## Usage: solr-init
+## Example: "ddev solr-init"
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Colors / styling
+# -----------------------------------------------------------------------------
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+trap 'echo -e "\n${RED}${BOLD}solr-init failed.${RESET} Check messages above." >&2' ERR
+
+header() { echo -e "\n${BOLD}${CYAN}==> $1${RESET}"; }
+info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
+warn()   { echo -e "    ${YELLOW}⚠${RESET}  $1"; }
+
+# -----------------------------------------------------------------------------
+# Paths
+# -----------------------------------------------------------------------------
+PROJECT_ROOT="${DDEV_APPROOT}"
+SETTINGS_LOCAL="${PROJECT_ROOT}/web/sites/default/settings.local.php"
+
+add_to_gitignore() {
+  local entry="$1"
+  local file="${PROJECT_ROOT}/.gitignore"
+  if [[ ! -f "$file" ]]; then
+    echo "$entry" > "$file"
+  elif ! grep -qxF "$entry" "$file"; then
+    echo "$entry" >> "$file"
+  fi
+}
+
+# =============================================================================
+# 1. COMPOSER PACKAGES (via formula-solr recipe)
+# =============================================================================
+header "Installing Solr Composer packages"
+
+# Register the local recipe as a path repository so Composer resolves
+# drupal/search_api_solr and its dependencies.
+ddev composer config repositories.formula-solr \
+  '{"type":"path","url":"recipes/formula-solr","options":{"symlink":false}}'
+info "formula-solr path repository registered"
+
+ddev composer require \
+  'aten/formula-solr:@dev' \
+  --no-interaction \
+  --with-all-dependencies
+info "formula-solr Composer deps installed"
+
+# =============================================================================
+# 2. REBUILD CACHES + APPLY RECIPE
+# =============================================================================
+header "Applying formula-solr recipe"
+
+# Rebuild caches so Drupal discovers search_api_solr before recipe validation.
+ddev drush cr
+info "Caches rebuilt — search_api_solr now discoverable"
+
+# Applies: installs search_api + search_api_solr, creates local_solr_server
+# server config (scheme, host, port, core, auth, solr_version already set).
+ddev drush recipe /var/www/html/recipes/formula-solr
+info "formula-solr recipe applied"
+
+# =============================================================================
+# 3. SETTINGS.LOCAL.PHP — Solr overrides
+# =============================================================================
+header "Writing Solr settings to settings.local.php"
+
+if ! grep -q "local_solr_server" "$SETTINGS_LOCAL" 2>/dev/null; then
+  cat >> "$SETTINGS_LOCAL" <<'SOLR_BLOCK'
+
+// Solr — point indexes at the local DDEV Solr server.
+$config['search_api.index.default_index']['server'] = 'local_solr_server';
+$config['search_api.server.local_solr_server']['status'] = TRUE;
+SOLR_BLOCK
+  info "Solr settings written to ${SETTINGS_LOCAL}"
+else
+  warn "Solr settings already present in settings.local.php — skipped"
+fi
+
+# =============================================================================
+# 4. SUPPRESS MISSING LANGUAGE FIELD TYPES WARNING
+# =============================================================================
+header "Configuring Solr options"
+
+# Suppress the "missing language-specific field types" warning for English.
+# The language-undefined fallback works correctly for English content on a
+# dev site. This avoids a noisy but harmless admin UI warning.
+ddev drush config:set \
+  search_api.server.local_solr_server \
+  backend_config.suppress_missing_languages true -y
+info "suppress_missing_languages set"
+
+# =============================================================================
+# 5. FIELD TYPES + CONFIGSET GENERATION
+# =============================================================================
+header "Installing Solr field types and generating configset"
+
+ddev drush search-api-solr:install-missing-fieldtypes
+ddev drush cr
+info "Solr field types installed"
+
+ddev exec bash -c \
+  'rm -f /tmp/solr_config.zip && drush search-api-solr:get-server-config local_solr_server /tmp/solr_config.zip 2>&1'
+info "Solr core config archive generated"
+
+# =============================================================================
+# 6. EXTRACT CONFIGSET
+# =============================================================================
+header "Extracting Solr configset"
+
+# The addon startup script iterates configsets/*/ and creates a Solr core
+# named after each subdirectory — must match connector_config.core ('dev').
+mkdir -p "${PROJECT_ROOT}/.ddev/solr/configsets/dev"
+ddev exec bash -c \
+  'cd /tmp && unzip -o solr_config.zip -d /var/www/html/.ddev/solr/configsets/dev/'
+info "Solr configset extracted to .ddev/solr/configsets/dev/"
+
+# Track the generated configset in version control.
+add_to_gitignore '!.ddev/solr/configsets/dev'
+
+# =============================================================================
+# 7. RESTART DDEV
+# =============================================================================
+header "Restarting DDEV (Solr picks up new schema)"
+
+ddev restart
+info "DDEV restarted — Solr core config applied"
+
+ddev drush cr
+info "solr-init complete"
