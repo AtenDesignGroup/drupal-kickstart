@@ -409,6 +409,8 @@ ddev setup-prototype \
 # =============================================================================
 header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
+# Uninstall the Stark theme, which is enabled by default in the minimal profile.
+drush theme:uninstall stark
 # Allow installation of optional recipes
 ddev recipe
 

@@ -15,6 +15,3 @@ drush site:install minimal \
   --account-name="${ACCOUNT_NAME}" \
   --account-pass="${ACCOUNT_PASS}" \
   "$@"
-
-# Uninstall the Stark theme, which is enabled by default in the minimal profile.
-drush theme:uninstall stark
