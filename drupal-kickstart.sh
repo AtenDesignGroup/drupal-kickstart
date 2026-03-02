@@ -394,7 +394,7 @@ elif [[ -f "$SITE_INSTALL_CMD" ]]; then
   SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install
   info "Drupal installed via ddev site-install"
 else
-  ddev drush site:install --yes \
+  ddev drush site:install minimal --yes \
     --site-name="${DK_DDEV_NAME}" \
     --account-name="${ADMIN_USER}" \
     --account-pass="${ADMIN_PASS}"

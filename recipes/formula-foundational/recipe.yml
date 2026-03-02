@@ -3,24 +3,35 @@ description: 'Recipe to build foundational functionality in Drupal.'
 type: 'Site'
 
 install:
-  # Core modules
+  # Core
+  - breakpoint
+  - ckeditor5
   - config
+  - contextual
+  - menu_link_content
   - datetime
-  - entity_reference_revisions
-  - field_ui
+  - block_content
+  - editor
   - help
+  - image
   - link
+  - menu_ui
   - media
   - media_library
-  - menu_link_content
-  - menu_ui
-  - node
   - options
+  - path
+  - path_alias
+  - telephone
   - taxonomy
+  - shortcut
   - toolbar
+  - field_ui
+  - file
   - views
   - views_ui
+  - automated_cron
   # Contrib modules - Content & Fields
+  - entity_reference_revisions
   - field_config_cardinality
   - field_group
   - layout_paragraphs
