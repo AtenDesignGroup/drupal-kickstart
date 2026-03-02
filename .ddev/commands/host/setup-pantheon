@@ -52,16 +52,6 @@ header "Installing Pantheon Composer packages"
 ddev composer config --json extra.allowed-packages '["pantheon-systems/drupal-integrations"]'
 info "extra.allowed-packages set for pantheon-systems/drupal-integrations"
 
-# Register the local recipe as a path repository so Composer resolves its
-# require block (pantheon_advanced_page_cache, drupal-integrations, etc.)
-ddev composer config \
-  repositories.formula-pantheon \
-  '{"type":"path","url":"recipes/formula-pantheon","options":{"symlink":false}}'
-info "Path repository registered for recipes/formula-pantheon"
-
-ddev composer require 'aten/formula-pantheon:@dev' --no-interaction --with-all-dependencies
-info "formula-pantheon recipe and Pantheon packages installed"
-
 # =============================================================================
 # 2. COPY FILES
 # =============================================================================
@@ -111,8 +101,6 @@ fi
 # =============================================================================
 # 3. APPLY RECIPE
 # =============================================================================
-header "Applying formula-pantheon recipe"
-
 ddev recipe formula-pantheon
 
 # =============================================================================

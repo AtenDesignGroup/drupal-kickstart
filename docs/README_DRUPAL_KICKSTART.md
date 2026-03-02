@@ -1,13 +1,5 @@
 # Drupal Kickstart
 
-- Limited for use on spinning up new projects
-- Branch based on Drupal version and tag releases
-    - 11.0.x
-        - Tag: 11.0.1 etc.
-    - 12.0.x
-- Download a release to start the process
-- Track issues in Github Issues
-
 ## Starting a New Project
 
 1. Create and navigate to your project directory:
@@ -24,3 +16,13 @@
 ## Contributing
 
 We welcome contributions! Please submit issues and pull requests on [GitHub](https://github.com/AtenDesignGroup/drupal-kickstart).
+
+### General Development Guidelines
+- Limited for use on spinning up new projects
+- Branch based on Drupal version and tag releases
+    - 11.0.x
+        - Tag: 11.0.1 etc.
+    - 12.0.x
+- Download a release to start the process
+- Track issues in Github Issues
+- Use recipes heavily to add functionality and features
