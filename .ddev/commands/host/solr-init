@@ -25,7 +25,7 @@ warn()   { echo -e "    ${YELLOW}⚠${RESET}  $1"; }
 # Paths
 # -----------------------------------------------------------------------------
 PROJECT_ROOT="${DDEV_APPROOT}"
-SETTINGS_LOCAL="${PROJECT_ROOT}/web/sites/default/settings.local.php"
+SETTINGS_DDEV="${PROJECT_ROOT}/web/sites/default/settings.ddev.php"
 
 add_to_gitignore() {
   local entry="$1"
@@ -48,12 +48,6 @@ ddev composer config repositories.formula-solr \
   '{"type":"path","url":"recipes/formula-solr","options":{"symlink":false}}'
 info "formula-solr path repository registered"
 
-ddev composer require \
-  'aten/formula-solr:@dev' \
-  --no-interaction \
-  --with-all-dependencies
-info "formula-solr Composer deps installed"
-
 # =============================================================================
 # 2. REBUILD CACHES + APPLY RECIPE
 # =============================================================================
@@ -65,24 +59,23 @@ info "Caches rebuilt — search_api_solr now discoverable"
 
 # Applies: installs search_api + search_api_solr, creates local_solr_server
 # server config (scheme, host, port, core, auth, solr_version already set).
-ddev drush recipe /var/www/html/recipes/formula-solr
-info "formula-solr recipe applied"
+ddev recipe formula-solr
 
 # =============================================================================
-# 3. SETTINGS.LOCAL.PHP — Solr overrides
+# 3. SETTINGS.DDEV.PHP — Solr overrides
 # =============================================================================
-header "Writing Solr settings to settings.local.php"
+header "Writing Solr settings to settings.ddev.php"
 
-if ! grep -q "local_solr_server" "$SETTINGS_LOCAL" 2>/dev/null; then
-  cat >> "$SETTINGS_LOCAL" <<'SOLR_BLOCK'
+if ! grep -q "local_solr_server" "$SETTINGS_DDEV" 2>/dev/null; then
+  cat >> "$SETTINGS_DDEV" <<'SOLR_BLOCK'
 
 // Solr — point indexes at the local DDEV Solr server.
 $config['search_api.index.default_index']['server'] = 'local_solr_server';
 $config['search_api.server.local_solr_server']['status'] = TRUE;
 SOLR_BLOCK
-  info "Solr settings written to ${SETTINGS_LOCAL}"
+  info "Solr settings written to ${SETTINGS_DDEV}"
 else
-  warn "Solr settings already present in settings.local.php — skipped"
+  warn "Solr settings already present in settings.ddev.php — skipped"
 fi
 
 # =============================================================================

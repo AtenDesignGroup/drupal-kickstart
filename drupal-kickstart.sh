@@ -334,12 +334,12 @@ header "Scaffolding Drupal 11 Project"
 
 if [[ ! -f "web/index.php" ]]; then
   info "Running composer create-project in container..."
-  # Set platform.php before create-project so Composer resolves against PHP 8.3
+  # Set platform.php before create-project so Composer resolves against the configured PHP version
   # from the start rather than using the container's detected version.
   ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:^11.2' /tmp/dp --no-interaction"
   ddev exec bash -c "rsync -a /tmp/dp/ /var/www/html/"
-  ddev composer config platform.php 8.3
-  info "Drupal scaffold created (11.2.x, platform.php 8.3)"
+  ddev composer config platform.php ${DK_PHP_VERSION}
+  info "Drupal scaffold created (11.2.x, platform.php ${DK_PHP_VERSION})"
 else
   info "Drupal scaffold already present — skipping create-project"
 fi
@@ -368,12 +368,12 @@ header "Configuring Settings Files"
 [[ -z "${DK_DRUPAL_HASH_SALT:-}" ]] && [[ -f ".env" ]] && source ".env"
 
 # Copy assets/settings.ddev.php (with hash salt), patch settings.php include,
-# and create a minimal settings.local.php stub.
+# and create a minimal settings.ddev.php stub.
 ddev exec bash /var/www/html/.ddev/commands/web/setup-settings \
   --hash-salt="${DK_DRUPAL_HASH_SALT}"
 
-# Expose settings.local.php path for later Solr/Redis additions.
-SETTINGS_LOCAL="web/sites/default/settings.local.php"
+# Expose settings.ddev.php path for later Solr/Redis additions.
+SETTINGS_DDEV="web/sites/default/settings.ddev.php"
 
 # =============================================================================
 # 13. SITE INSTALL
@@ -438,13 +438,13 @@ if [[ "$DK_USES_SOLR" == "yes" ]]; then
   header "Configuring Solr"
 
   # Installs Composer deps, applies formula-solr recipe, configures
-  # settings.local.php, generates and extracts the Solr configset, then
+  # settings.ddev.php, generates and extracts the Solr configset, then
   # restarts DDEV so the Solr container picks up the new schema.
   ddev solr-init
 fi
 
 # =============================================================================
-# 17. PANTHEON (optional)
+# 17. PANTHEON (optional) -- Eventually abstract Redis.
 # =============================================================================
 if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
   header "Installing Redis DDEV Addon"
@@ -452,9 +452,9 @@ if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
   ddev restart
   info "Redis DDEV addon installed"
 
-  # Write Redis PHP settings into settings.local.php now that the addon is present.
-  if ! grep -q "redis.connection" "$SETTINGS_LOCAL" 2>/dev/null; then
-    cat >> "$SETTINGS_LOCAL" <<'REDIS_BLOCK'
+  # Write Redis PHP settings into settings.ddev.php now that the addon is present.
+  if ! grep -q "redis.connection" "$SETTINGS_DDEV" 2>/dev/null; then
+    cat >> "$SETTINGS_DDEV" <<'REDIS_BLOCK'
 
 // Redis caching — provided by ddev/ddev-redis addon.
 if (!defined('MAINTENANCE_MODE')) {
@@ -464,14 +464,10 @@ if (!defined('MAINTENANCE_MODE')) {
   $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
 }
 REDIS_BLOCK
-    info "Redis settings written to ${SETTINGS_LOCAL}"
+    info "Redis settings written to ${SETTINGS_DDEV}"
   fi
 
   ddev setup-pantheon --php-version="${DK_PHP_VERSION}"
-
-  ddev drush en redis -y
-  ddev drush cr
-  info "Redis module enabled and caches cleared"
 fi
 
 # =============================================================================
