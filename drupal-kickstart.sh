@@ -385,20 +385,10 @@ header "Installing Drupal"
 ADMIN_USER="${DK_DRUPAL_ADMIN_USERNAME:-administrator}"
 ADMIN_PASS="${DK_DRUPAL_ADMIN_PASSWORD:-admin}"
 
-STARTERKIT_CMD=".ddev/commands/web/aten-starterkit"
 SITE_INSTALL_CMD=".ddev/commands/web/site-install"
-if [[ -f "$STARTERKIT_CMD" ]]; then
-  ddev aten-starterkit
-  info "aten-starterkit complete"
-elif [[ -f "$SITE_INSTALL_CMD" ]]; then
+if [[ -f "$SITE_INSTALL_CMD" ]]; then
   SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install
   info "Drupal installed via ddev site-install"
-else
-  ddev drush site:install minimal --yes \
-    --site-name="${DK_DDEV_NAME}" \
-    --account-name="${ADMIN_USER}" \
-    --account-pass="${ADMIN_PASS}"
-  info "Drupal installed"
 fi
 
 # =============================================================================
@@ -421,14 +411,6 @@ header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
 # Allow installation of optional recipes
 ddev recipe
-
-# Activate the theme now that its module dependencies are installed by the
-# foundational recipe (twig_field_value, twig_tweak come via formula-foundational).
-header "Activating Custom Theme"
-ddev drush theme:install "${DK_THEME_NAME}" -y
-ddev drush config:set system.theme default "${DK_THEME_NAME}" -y
-ddev drush cr
-info "Theme '${DK_THEME_NAME}' set as site default"
 
 # =============================================================================
 # 16. SOLR POST-INSTALL (optional)

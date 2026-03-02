@@ -59,11 +59,52 @@ get_recipe_display_name() {
     fi
 }
 
+# Function to substitute DK_* tokens in recipe.yml if .kickstart.env exists
+substitute_recipe_tokens() {
+    local recipe_yml=$1
+    local env_file="/var/www/html/.kickstart.env"
+
+    # Check if recipe.yml exists
+    if [ ! -f "$recipe_yml" ]; then
+        return 0
+    fi
+
+    # Check if recipe.yml contains any DK_* tokens
+    if ! grep -q "DK_" "$recipe_yml" 2>/dev/null; then
+        return 0
+    fi
+
+    # Check if .kickstart.env exists
+    if [ ! -f "$env_file" ]; then
+        return 0
+    fi
+
+    # Source environment variables from .kickstart.env
+    # shellcheck source=/dev/null
+    source "$env_file"
+
+    # Perform token substitution using sed (matching drupal-kickstart.sh §8 pattern)
+    print_info "Applying token substitution from .kickstart.env"
+    sed -i.bak \
+        -e "s|DK_DDEV_NAME|${DK_DDEV_NAME}|g" \
+        -e "s|DK_THEME_NAME|${DK_THEME_NAME}|g" \
+        -e "s|DK_THEME_DESC|${DK_THEME_DESC}|g" \
+        -e "s|DK_THEME_PATH|${DK_THEME_PATH}|g" \
+        -e "s|DK_PHP_VERSION|${DK_PHP_VERSION}|g" \
+        -e "s|DK_COMMIT_PREFIX|${DK_COMMIT_PREFIX:-PROJ}|g" \
+        "$recipe_yml" && rm -f "${recipe_yml}.bak"
+
+    return 0
+}
+
 # Function to apply a single recipe
 apply_recipe() {
     local RECIPE_NAME=$1
     local RECIPE_PATH="/var/www/html/recipes/$RECIPE_NAME"
     local ROOT_COMPOSER="/var/www/html/composer.json"
+
+    # Substitute tokens before validation if .kickstart.env exists and tokens are present
+    substitute_recipe_tokens "$RECIPE_PATH/recipe.yml"
 
     print_info "Starting recipe application: $RECIPE_NAME"
     echo ""
