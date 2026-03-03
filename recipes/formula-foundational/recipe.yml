@@ -68,3 +68,8 @@ install:
 
 config:
   strict: false
+  actions:
+    system.theme:
+      simple_config_update:
+        admin: 'gin'
+        default: 'DK_THEME_NAME'

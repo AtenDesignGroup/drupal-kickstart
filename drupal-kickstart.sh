@@ -426,16 +426,10 @@ ddev setup-prototype \
 # =============================================================================
 header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
+# Uninstall the Stark theme, which is enabled by default in the minimal profile.
+ddev drush theme:uninstall stark
 # Allow installation of optional recipes
 ddev recipe
-
-# Activate the theme now that its module dependencies are installed by the
-# foundational recipe (twig_field_value, twig_tweak come via formula-foundational).
-header "Activating Custom Theme"
-ddev drush theme:install "${DK_THEME_NAME}" -y
-ddev drush config:set system.theme default "${DK_THEME_NAME}" -y
-ddev drush cr
-info "Theme '${DK_THEME_NAME}' set as site default"
 
 # =============================================================================
 # 16. SOLR POST-INSTALL (optional)
