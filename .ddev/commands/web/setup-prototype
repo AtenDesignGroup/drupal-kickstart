@@ -70,6 +70,18 @@ else
 
   info "Theme '${THEME_NAME}' generated at ${THEME_PATH}"
 
+  # Patch the generated .info.yml — the starterkit template may default to
+  # 'Custom' as the name and include a version. Overwrite both explicitly.
+  THEME_INFO="${ROOT}/${THEME_PATH}/${THEME_NAME}.info.yml"
+  if [[ -f "$THEME_INFO" ]]; then
+    sed -i.bak "s/^name:.*/name: '${THEME_DESC}'/" "$THEME_INFO"
+    # Remove the version line — contrib-style versioning doesn't belong in
+    # custom themes and causes Drupal to show a misleading version badge.
+    sed -i.bak "/^version:/d" "$THEME_INFO"
+    rm -f "${THEME_INFO}.bak"
+    info "Patched ${THEME_NAME}.info.yml (name + version)"
+  fi
+
   # Remove prototype — it's only needed for generation.
   cd "${ROOT}" && composer remove drupal/prototype --no-interaction
   info "drupal/prototype removed from require"

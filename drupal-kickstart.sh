@@ -144,10 +144,19 @@ else
   # Project name — default to current directory basename
   DEFAULT_NAME="${DK_DDEV_NAME:-$(basename "$PWD")}"
   prompt DK_DDEV_NAME "Project name" "$DEFAULT_NAME"
-
-  # Theme name
-  DEFAULT_THEME="${DK_THEME_NAME:-${DK_DDEV_NAME}_theme}"
+  # Theme name — sanitize helper: lowercase, spaces/hyphens→underscore, strip
+  # non-alphanumeric, strip leading digits/underscores (Drupal machine name rules).
+  sanitize_machine_name() {
+    echo "$1" \
+      | tr '[:upper:]' '[:lower:]' \
+      | tr -s '[:space:]-' '_' \
+      | tr -cd '[:alnum:]_' \
+      | sed 's/^[0-9_]*//; s/_*$//'
+  }
+  DEFAULT_THEME="$(sanitize_machine_name "${DK_THEME_NAME:-${DK_DDEV_NAME}_theme}")"
   prompt DK_THEME_NAME "Theme name" "$DEFAULT_THEME"
+  # Sanitize whatever the user typed as well
+  DK_THEME_NAME="$(sanitize_machine_name "$DK_THEME_NAME")"
 
   # Theme description — auto-derived, not prompted
   DK_THEME_DESC="Custom theme for ${DK_DDEV_NAME}"
@@ -385,11 +394,19 @@ header "Installing Drupal"
 ADMIN_USER="${DK_DRUPAL_ADMIN_USERNAME:-administrator}"
 ADMIN_PASS="${DK_DRUPAL_ADMIN_PASSWORD:-admin}"
 
-SITE_INSTALL_CMD=".ddev/commands/web/site-install"
-if [[ -f "$SITE_INSTALL_CMD" ]]; then
-  SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install
-  info "Drupal installed via ddev site-install"
-fi
+# Ensure config/sync exists before install so Drupal uses it rather than
+# generating a random hash-suffixed directory.
+mkdir -p config/sync
+info "Config sync directory ensured (config/sync)"
+
+SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install minimal
+info "Drupal installed via ddev site-install (minimal profile)"
+
+# drush site:install rewrites settings.php, removing the settings.ddev.php
+# include. Re-run setup-settings to restore it.
+ddev exec bash /var/www/html/.ddev/commands/web/setup-settings \
+  --hash-salt="${DK_DRUPAL_HASH_SALT}"
+info "settings.php include restored after site install"
 
 # =============================================================================
 # 14. PROTOTYPE THEME

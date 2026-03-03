@@ -32,6 +32,8 @@ $databases['migrate']['default'] = [
 
 $settings['hash_salt'] = '5690f07b27f8def452809fd420c4eb2c7fb058feaeb604b3123dee7c89e14d6c';
 
+$settings['config_sync_directory'] = '../config/sync';
+
 // This will prevent Drupal from setting read-only permissions on sites/default.
 $settings['skip_permissions_hardening'] = TRUE;
 

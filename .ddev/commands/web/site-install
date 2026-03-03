@@ -4,6 +4,10 @@
 ## Example: "site-install"
 ## Example: "site-install --site-name=mysite --account-pass=secret"
 
+
+## Setup config export directory for settings.php.
+CONFIG_EXPORT_DIR="../config/sync"
+mkdir -p "${CONFIG_EXPORT_DIR}"
 # Defaults — can be overridden by passing flags
 SITE_NAME="${SITE_NAME:-${PROJECT_NAME:-Drupal}}"
 ACCOUNT_NAME="${ACCOUNT_NAME:-admin}"
