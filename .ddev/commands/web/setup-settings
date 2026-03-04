@@ -87,6 +87,13 @@ else
   warn "settings.php not found or include already present — skipped"
 fi
 
+# drush site:install injects `$settings['rebuild_access'] = TRUE;` which
+# triggers a Drupal security warning. Remove it unconditionally if present.
+if [[ -f "$SETTINGS_PHP" ]] && grep -q 'rebuild_access' "$SETTINGS_PHP"; then
+  sed -i '' '/rebuild_access/d' "$SETTINGS_PHP"
+  info "Removed rebuild_access from settings.php"
+fi
+
 # =============================================================================
 # 3. settings.local.php — create minimal stub
 # =============================================================================
