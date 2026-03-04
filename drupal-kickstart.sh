@@ -264,11 +264,11 @@ ddev config \
 info "DDEV configured (docroot: web, PHP: ${DK_PHP_VERSION})"
 
 # =============================================================================
-# 6. PATCH .ddev/config.yml
+# 6. PATCH .ddev/config.yaml
 # =============================================================================
-header "Patching .ddev/config.yml"
+header "Patching .ddev/config.yaml"
 
-DDEV_CONFIG=".ddev/config.yml"
+DDEV_CONFIG=".ddev/config.yaml"
 
 # Append nodejs_version if not already present
 if ! grep -q "^nodejs_version:" "$DDEV_CONFIG"; then
