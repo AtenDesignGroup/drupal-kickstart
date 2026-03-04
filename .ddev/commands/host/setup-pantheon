@@ -35,7 +35,7 @@ done
 # Paths
 # -----------------------------------------------------------------------------
 PROJECT_ROOT="${DDEV_APPROOT}"
-DDEV_CONFIG="${PROJECT_ROOT}/.ddev/config.yml"
+DDEV_CONFIG="${PROJECT_ROOT}/.ddev/config.yaml"
 ASSETS="${PROJECT_ROOT}/assets/pantheon"
 
 if [[ ! -d "$ASSETS" ]]; then
@@ -105,6 +105,10 @@ ddev recipe formula-pantheon
 
 # =============================================================================
 # 4. UPDATE DDEV CONFIG (web_environment)
+# Adds REDIS_ENABLED=true and CUSTOMER_SECRETS_FAKE_FILE.
+# REDIS_ENABLED must be set AFTER the recipe installs the redis module —
+# settings.ddev.php gates cache.backend.redis on this variable so that
+# Drupal does not try to load the service before the module is installed.
 # =============================================================================
 header "Updating .ddev/config.yml"
 
@@ -134,6 +138,33 @@ PYEOF
   info "CUSTOMER_SECRETS_FAKE_FILE added to web_environment"
 else
   warn "CUSTOMER_SECRETS_FAKE_FILE already in web_environment — skipped"
+fi
+
+REDIS_ENV_VALUE="REDIS_ENABLED=true"
+
+if ! grep -q "REDIS_ENABLED" "$DDEV_CONFIG"; then
+  python3 - "$DDEV_CONFIG" "$REDIS_ENV_VALUE" <<'PYEOF'
+import sys, re
+
+config_file = sys.argv[1]
+entry = "  - " + sys.argv[2]
+text = open(config_file).read()
+
+if re.search(r'^web_environment:', text, re.MULTILINE):
+    text = re.sub(
+        r'(^web_environment:)',
+        r'\1\n' + entry,
+        text,
+        flags=re.MULTILINE
+    )
+else:
+    text += f'\nweb_environment:\n{entry}\n'
+
+open(config_file, 'w').write(text)
+PYEOF
+  info "REDIS_ENABLED=true added to web_environment"
+else
+  warn "REDIS_ENABLED already in web_environment — skipped"
 fi
 
 # =============================================================================

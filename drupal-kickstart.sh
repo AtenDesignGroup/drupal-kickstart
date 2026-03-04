@@ -258,8 +258,7 @@ ddev config \
   --project-name="${DK_DDEV_NAME}" \
   --project-type=drupal11 \
   --docroot=web \
-  --php-version="${DK_PHP_VERSION}" \
-  --create-docroot
+  --php-version="${DK_PHP_VERSION}"
 
 info "DDEV configured (docroot: web, PHP: ${DK_PHP_VERSION})"
 
@@ -270,14 +269,17 @@ header "Patching .ddev/config.yaml"
 
 DDEV_CONFIG=".ddev/config.yaml"
 
-# Append nodejs_version if not already present
+# Insert nodejs_version after corepack_enable if not already present
 if ! grep -q "^nodejs_version:" "$DDEV_CONFIG"; then
-  echo "nodejs_version: \"${DK_NODE_VERSION}\"" >> "$DDEV_CONFIG"
+  awk "/^corepack_enable:/{print; print \"nodejs_version: \\\"${DK_NODE_VERSION}\\\"\"; next}1" "$DDEV_CONFIG" > "${DDEV_CONFIG}.tmp" && mv "${DDEV_CONFIG}.tmp" "$DDEV_CONFIG"
   info "Added nodejs_version: ${DK_NODE_VERSION}"
 fi
 
-# Append web_environment block if not already present
-if ! grep -q "^web_environment:" "$DDEV_CONFIG"; then
+# Replace the empty web_environment: [] placeholder DDEV generates with our values
+if grep -q "^web_environment: \[\]" "$DDEV_CONFIG"; then
+  sed -i '' "s|^web_environment: \[\]|web_environment:\n  - APP_ENVIRONMENT=local\n  - DRUSH_OPTIONS_URI=https://${DK_DDEV_NAME}.ddev.site\n  - THEME_PATH=${DK_THEME_PATH}|" "$DDEV_CONFIG"
+  info "Populated web_environment block"
+elif ! grep -q "^web_environment:" "$DDEV_CONFIG"; then
   cat >> "$DDEV_CONFIG" <<EOF
 
 web_environment:
@@ -290,7 +292,7 @@ fi
 
 # Prevent DDEV from auto-generating settings.ddev.php — we provide our own copy.
 if ! grep -q "^disable_settings_management:" "$DDEV_CONFIG"; then
-  echo 'disable_settings_management: true' >> "$DDEV_CONFIG"
+  awk '/^nodejs_version:/{print; print "disable_settings_management: true"; next}1' "$DDEV_CONFIG" > "${DDEV_CONFIG}.tmp" && mv "${DDEV_CONFIG}.tmp" "$DDEV_CONFIG"
   info "Disabled DDEV settings management (using custom settings.ddev.php)"
 fi
 
@@ -381,9 +383,6 @@ header "Configuring Settings Files"
 ddev exec bash /var/www/html/.ddev/commands/web/setup-settings \
   --hash-salt="${DK_DRUPAL_HASH_SALT}"
 
-# Expose settings.ddev.php path for later Solr/Redis additions.
-SETTINGS_DDEV="web/sites/default/settings.ddev.php"
-
 # =============================================================================
 # 13. SITE INSTALL
 # =============================================================================
@@ -453,21 +452,10 @@ if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
   ddev restart
   info "Redis DDEV addon installed"
 
-  # Write Redis PHP settings into settings.ddev.php now that the addon is present.
-  if ! grep -q "redis.connection" "$SETTINGS_DDEV" 2>/dev/null; then
-    cat >> "$SETTINGS_DDEV" <<'REDIS_BLOCK'
-
-// Redis caching — provided by ddev/ddev-redis addon.
-if (!defined('MAINTENANCE_MODE')) {
-  $settings['redis.connection']['interface'] = 'PhpRedis';
-  $settings['redis.connection']['host'] = 'redis';
-  $settings['cache']['default'] = 'cache.backend.redis';
-  $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
-}
-REDIS_BLOCK
-    info "Redis settings written to ${SETTINGS_DDEV}"
-  fi
-
+  # Redis PHP settings are written inside setup-pantheon, AFTER the redis
+  # module is installed by the formula-pantheon recipe. Writing them here
+  # (before the recipe runs) causes Drush to fail with
+  # "non-existent service cache.backend.redis" on bootstrap.
   ddev setup-pantheon --php-version="${DK_PHP_VERSION}"
 fi
 

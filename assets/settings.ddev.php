@@ -87,8 +87,18 @@ $settings['config_exclude_modules'] = [
   'upgrade_status',
 ];
 
+// Redis caching — enabled via REDIS_ENABLED env var, set by setup-pantheon
+// after the redis module has been installed by the formula-pantheon recipe.
+if (!defined('MAINTENANCE_MODE') && getenv('REDIS_ENABLED') === 'true') {
+  $settings['redis.connection']['interface'] = 'PhpRedis';
+  $settings['redis.connection']['host'] = 'redis';
+  $settings['cache']['default'] = 'cache.backend.redis';
+  $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
+}
+
 // Override a key locally.
 // $config['key.key.YOUR_KEY']['key_provider_settings']['file_location'] = 'private://keys/somekey.key';
 
 // Override config example.
 // $config['your_module.settings']['some_key'] = 'value';
+
