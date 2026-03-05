@@ -60,10 +60,10 @@ else
   info "drupal/prototype installed"
 
   # Build the generator command; -a (abbreviated) is optional.
-  GENERATOR_CMD=(php themes/contrib/prototype/generator.php -n "${THEME_NAME}" -d "${THEME_DESC}" -p themes/custom)
+  GENERATOR_CMD=(php generator.php -n "${THEME_NAME}" -d "${THEME_DESC}" -p themes/custom)
   [[ -n "$THEME_ABBREVIATED" ]] && GENERATOR_CMD+=(-a "${THEME_ABBREVIATED}")
 
-  cd "${ROOT}/web" && "${GENERATOR_CMD[@]}"
+  cd "${ROOT}/web/themes/contrib/prototype" && "${GENERATOR_CMD[@]}"
 
   if [[ ! -d "${ROOT}/${THEME_PATH}" ]]; then
     echo -e "\n${RED}${BOLD}Error:${RESET} Theme generation ran but ${THEME_PATH} was not created." >&2
