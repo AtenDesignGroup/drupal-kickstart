@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## Description: Generate a custom Drupal theme with the prototype starterkit, then enable it as the site default.
-## Usage: setup-prototype --theme-name=NAME [--theme-desc=DESCRIPTION] [--generate-only]
-## Example: "ddev setup-prototype --theme-name=my_theme" or "ddev setup-prototype --theme-name=my_theme --generate-only"
+## Usage: setup-prototype --theme-name=NAME [--theme-desc=DESCRIPTION] [--theme-abbreviated=ABBR] [--generate-only]
+## Example: "ddev setup-prototype --theme-name=my_theme --theme-desc='My Theme' --theme-abbreviated=mt"
 
 set -euo pipefail
 
@@ -26,22 +26,24 @@ warn()   { echo -e "    ${YELLOW}⚠${RESET}  $1"; }
 # -----------------------------------------------------------------------------
 THEME_NAME=""
 THEME_DESC=""
+THEME_ABBREVIATED=""
 GENERATE_ONLY="no"
 for arg in "$@"; do
   case "$arg" in
-    --theme-name=*) THEME_NAME="${arg#*=}" ;;
-    --theme-desc=*) THEME_DESC="${arg#*=}" ;;
-    --generate-only) GENERATE_ONLY="yes" ;;
+    --theme-name=*)        THEME_NAME="${arg#*=}" ;;
+    --theme-desc=*)        THEME_DESC="${arg#*=}" ;;
+    --theme-abbreviated=*) THEME_ABBREVIATED="${arg#*=}" ;;
+    --generate-only)       GENERATE_ONLY="yes" ;;
   esac
 done
 
 if [[ -z "$THEME_NAME" ]]; then
   echo -e "${RED}${BOLD}Error:${RESET} --theme-name is required."
-  echo -e "  Usage: ddev setup-prototype --theme-name=my_theme [--theme-desc='My Theme']"
+  echo -e "  Usage: ddev setup-prototype --theme-name=my_theme [--theme-desc='My Theme'] [--theme-abbreviated=mt]"
   exit 1
 fi
 
-THEME_DESC="${THEME_DESC:-Custom theme: ${THEME_NAME}}"
+THEME_DESC="${THEME_DESC:-${THEME_NAME}}"
 THEME_PATH="web/themes/custom/${THEME_NAME}"
 ROOT="${DDEV_COMPOSER_ROOT:-/var/www/html}"
 
@@ -57,11 +59,11 @@ else
   composer require 'drupal/prototype:^5.3' --no-interaction
   info "drupal/prototype installed"
 
-  # Use Drupal 11's native starterkit generator directly.
-  cd "${ROOT}/web" && php core/scripts/drupal generate-theme "${THEME_NAME}" \
-    --name="${THEME_DESC}" \
-    --path=themes/custom \
-    --starterkit=prototype
+  # Build the generator command; -a (abbreviated) is optional.
+  GENERATOR_CMD=(php themes/contrib/prototype/generator.php -n "${THEME_NAME}" -d "${THEME_DESC}" -p themes/custom)
+  [[ -n "$THEME_ABBREVIATED" ]] && GENERATOR_CMD+=(-a "${THEME_ABBREVIATED}")
+
+  cd "${ROOT}/web" && "${GENERATOR_CMD[@]}"
 
   if [[ ! -d "${ROOT}/${THEME_PATH}" ]]; then
     echo -e "\n${RED}${BOLD}Error:${RESET} Theme generation ran but ${THEME_PATH} was not created." >&2
@@ -69,18 +71,6 @@ else
   fi
 
   info "Theme '${THEME_NAME}' generated at ${THEME_PATH}"
-
-  # Patch the generated .info.yml — the starterkit template may default to
-  # 'Custom' as the name and include a version. Overwrite both explicitly.
-  THEME_INFO="${ROOT}/${THEME_PATH}/${THEME_NAME}.info.yml"
-  if [[ -f "$THEME_INFO" ]]; then
-    sed -i.bak "s/^name:.*/name: '${THEME_DESC}'/" "$THEME_INFO"
-    # Remove the version line — contrib-style versioning doesn't belong in
-    # custom themes and causes Drupal to show a misleading version badge.
-    sed -i.bak "/^version:/d" "$THEME_INFO"
-    rm -f "${THEME_INFO}.bak"
-    info "Patched ${THEME_NAME}.info.yml (name + version)"
-  fi
 
   # Remove prototype — it's only needed for generation.
   cd "${ROOT}" && composer remove drupal/prototype --no-interaction

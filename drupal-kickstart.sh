@@ -143,7 +143,8 @@ fi
 if [[ "$RESUME" == "yes" ]]; then
   # Derive theme path from loaded values — no prompts needed
   DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
-  DK_THEME_DESC="${DK_THEME_DESC:-Custom theme for ${DK_DDEV_NAME}}"
+  DK_THEME_DESC="${DK_THEME_DESC:-${DK_THEME_NAME}}"
+  DK_THEME_ABBREVIATED="${DK_THEME_ABBREVIATED:-}"
   header "Resuming with saved configuration"
 else
   header "Project Configuration"
@@ -161,12 +162,17 @@ else
       | sed 's/^[0-9_]*//; s/_*$//'
   }
   DEFAULT_THEME="$(sanitize_machine_name "${DK_THEME_NAME:-${DK_DDEV_NAME}_theme}")"
-  prompt DK_THEME_NAME "Theme name" "$DEFAULT_THEME"
+  prompt DK_THEME_NAME "Theme name (machine name)" "$DEFAULT_THEME"
   # Sanitize whatever the user typed as well
   DK_THEME_NAME="$(sanitize_machine_name "$DK_THEME_NAME")"
 
-  # Theme description — auto-derived, not prompted
-  DK_THEME_DESC="Custom theme for ${DK_DDEV_NAME}"
+  # Theme display name
+  DEFAULT_THEME_DESC="${DK_THEME_DESC:-${DK_THEME_NAME}}"
+  prompt DK_THEME_DESC "Theme display name" "$DEFAULT_THEME_DESC"
+
+  # Theme abbreviated name (optional, used for CSS variable prefixes)
+  DEFAULT_THEME_ABBREVIATED="${DK_THEME_ABBREVIATED:-}"
+  prompt DK_THEME_ABBREVIATED "Theme abbreviated name for CSS variables (optional)" "$DEFAULT_THEME_ABBREVIATED"
 
   # Derived theme path (not prompted)
   DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
@@ -202,6 +208,7 @@ if [[ "$RESUME" != "yes" ]]; then
 DK_DDEV_NAME="${DK_DDEV_NAME}"
 DK_THEME_NAME="${DK_THEME_NAME}"
 DK_THEME_DESC="${DK_THEME_DESC}"
+DK_THEME_ABBREVIATED="${DK_THEME_ABBREVIATED}"
 DK_USES_PANTHEON="${DK_USES_PANTHEON}"
 DK_USES_SOLR="${DK_USES_SOLR}"
 DK_COMMIT_PREFIX="${DK_COMMIT_PREFIX}"
@@ -237,6 +244,10 @@ header "Review — Please Confirm Your Settings"
 echo
 echo -e "    ${BOLD}Project name    :${RESET} ${DK_DDEV_NAME}"
 echo -e "    ${BOLD}Theme name      :${RESET} ${DK_THEME_NAME}"
+echo -e "    ${BOLD}Theme display   :${RESET} ${DK_THEME_DESC}"
+if [[ -n "$DK_THEME_ABBREVIATED" ]]; then
+  echo -e "    ${BOLD}Theme abbrev.   :${RESET} ${DK_THEME_ABBREVIATED}"
+fi
 echo -e "    ${BOLD}Theme path      :${RESET} ${DK_THEME_PATH}"
 echo -e "    ${BOLD}PHP version     :${RESET} ${DK_PHP_VERSION}"
 echo -e "    ${BOLD}Node version    :${RESET} ${DK_NODE_VERSION}"
@@ -426,10 +437,10 @@ header "Generating Custom Theme"
 # Only generate the theme files here — activation is deferred to §15 so that
 # the theme's module dependencies (twig_field_value, twig_tweak) are installed
 # by the foundational recipe before drush theme:install runs.
-ddev setup-prototype \
-  --theme-name="${DK_THEME_NAME}" \
-  --theme-desc="${DK_THEME_DESC}" \
-  --generate-only
+PROTOTYPE_ARGS=(--theme-name="${DK_THEME_NAME}" --theme-desc="${DK_THEME_DESC}")
+[[ -n "${DK_THEME_ABBREVIATED}" ]] && PROTOTYPE_ARGS+=(--theme-abbreviated="${DK_THEME_ABBREVIATED}")
+PROTOTYPE_ARGS+=(--generate-only)
+ddev setup-prototype "${PROTOTYPE_ARGS[@]}"
 
 # =============================================================================
 # 15. DRUPAL BASE RECIPE

@@ -39,7 +39,8 @@ jobs:
           # Drupal Kickstart — CI configuration
           DK_DDEV_NAME="kickstart-ci"
           DK_THEME_NAME="kickstart_ci_theme"
-          DK_THEME_DESC="Custom theme for kickstart-ci"
+          DK_THEME_DESC="Kickstart CI Theme"
+          DK_THEME_ABBREVIATED=""
           DK_USES_PANTHEON="no"
           DK_USES_SOLR="no"
           DK_COMMIT_PREFIX="CI"
