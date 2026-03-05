@@ -117,16 +117,23 @@ ENV_FILE=".kickstart.env"
 RESUME="no"
 
 if [[ -f "$ENV_FILE" ]]; then
-  echo -e "\n${YELLOW}${BOLD}Found saved values from a previous run (${ENV_FILE}).${RESET}"
-  read -r -p "$(echo -e "  ${BOLD}Resume from those values?${RESET} [${CYAN}Y/n${RESET}]: ")" _resume_input
-  _resume_input="${_resume_input:-Y}"
-  if [[ "$_resume_input" =~ ^[Yy] ]]; then
+  if [[ "${CI:-}" == "true" ]]; then
     # shellcheck source=.kickstart.env
     source "$ENV_FILE"
     RESUME="yes"
-    info "Loaded saved values — skipping prompts."
+    info "CI mode — loaded saved values from ${ENV_FILE} automatically."
   else
-    info "Starting fresh — saved values will be overwritten after prompts."
+    echo -e "\n${YELLOW}${BOLD}Found saved values from a previous run (${ENV_FILE}).${RESET}"
+    read -r -p "$(echo -e "  ${BOLD}Resume from those values?${RESET} [${CYAN}Y/n${RESET}]: ")" _resume_input
+    _resume_input="${_resume_input:-Y}"
+    if [[ "$_resume_input" =~ ^[Yy] ]]; then
+      # shellcheck source=.kickstart.env
+      source "$ENV_FILE"
+      RESUME="yes"
+      info "Loaded saved values — skipping prompts."
+    else
+      info "Starting fresh — saved values will be overwritten after prompts."
+    fi
   fi
 fi
 
@@ -243,11 +250,15 @@ fi
 echo -e "    ${BOLD}Site URL        :${RESET} https://${DK_DDEV_NAME}.ddev.site"
 echo
 
-read -r -p "$(echo -e "  ${BOLD}Proceed?${RESET} [${CYAN}Y/n${RESET}]: ")" _proceed
-_proceed="${_proceed:-Y}"
-if [[ ! "$_proceed" =~ ^[Yy] ]]; then
-  echo -e "\n${YELLOW}Cancelled.${RESET} Your settings are preserved in ${ENV_FILE}."
-  exit 0
+if [[ "${CI:-}" == "true" ]]; then
+  info "CI mode — auto-confirming."
+else
+  read -r -p "$(echo -e "  ${BOLD}Proceed?${RESET} [${CYAN}Y/n${RESET}]: ")" _proceed
+  _proceed="${_proceed:-Y}"
+  if [[ ! "$_proceed" =~ ^[Yy] ]]; then
+    echo -e "\n${YELLOW}Cancelled.${RESET} Your settings are preserved in ${ENV_FILE}."
+    exit 0
+  fi
 fi
 
 # =============================================================================
@@ -277,7 +288,7 @@ fi
 
 # Replace the empty web_environment: [] placeholder DDEV generates with our values
 if grep -q "^web_environment: \[\]" "$DDEV_CONFIG"; then
-  sed -i '' "s|^web_environment: \[\]|web_environment:\n  - APP_ENVIRONMENT=local\n  - DRUSH_OPTIONS_URI=https://${DK_DDEV_NAME}.ddev.site\n  - THEME_PATH=${DK_THEME_PATH}|" "$DDEV_CONFIG"
+  sed -i.bak "s|^web_environment: \[\]|web_environment:\n  - APP_ENVIRONMENT=local\n  - DRUSH_OPTIONS_URI=https://${DK_DDEV_NAME}.ddev.site\n  - THEME_PATH=${DK_THEME_PATH}|" "$DDEV_CONFIG" && rm -f "${DDEV_CONFIG}.bak"
   info "Populated web_environment block"
 elif ! grep -q "^web_environment:" "$DDEV_CONFIG"; then
   cat >> "$DDEV_CONFIG" <<EOF
@@ -427,8 +438,10 @@ header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
 # Uninstall the Stark theme, which is enabled by default in the minimal profile.
 ddev drush theme:uninstall stark
-# Allow installation of optional recipes
-ddev recipe
+# Allow installation of optional recipes (skipped in CI)
+if [[ "${CI:-}" != "true" ]]; then
+  ddev recipe
+fi
 
 # =============================================================================
 # 16. SOLR POST-INSTALL (optional)

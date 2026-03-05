@@ -1,0 +1,130 @@
+name: Installer Test
+
+# Tests the full drupal-kickstart.sh installer end-to-end.
+# Pre-seeds .kickstart.env and .env so the script takes the non-interactive
+# "resume" path, then verifies the resulting Drupal site is healthy.
+
+on:
+  workflow_dispatch:
+    inputs:
+      php_version:
+        description: 'PHP version'
+        required: false
+        type: string
+        default: '8.3'
+      node_version:
+        description: 'Node version'
+        required: false
+        type: string
+        default: '22'
+
+jobs:
+  installer-test:
+    name: Run Kickstart Installer
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # Pre-seed .kickstart.env so the script takes the "resume" path and skips
+      # all interactive prompts. CI=true (set automatically by GitHub Actions)
+      # handles the two remaining confirm/menu prompts inside the script.
+      # -----------------------------------------------------------------------
+      - name: Pre-seed .kickstart.env
+        run: |
+          cat > .kickstart.env <<EOF
+          # Drupal Kickstart — CI configuration
+          DK_DDEV_NAME="kickstart-ci"
+          DK_THEME_NAME="kickstart_ci_theme"
+          DK_THEME_DESC="Custom theme for kickstart-ci"
+          DK_USES_PANTHEON="no"
+          DK_USES_SOLR="no"
+          DK_COMMIT_PREFIX="CI"
+          DK_PHP_VERSION="${{ inputs.php_version || '8.3' }}"
+          DK_NODE_VERSION="${{ inputs.node_version || '22' }}"
+          EOF
+
+      # Generate a stable hash salt and known admin credentials for CI.
+      - name: Pre-seed .env secrets
+        run: |
+          HASH_SALT=$(openssl rand -base64 48 | tr -d '=+/' | head -c 64)
+          cat > .env <<EOF
+          # Drupal Kickstart — CI secrets
+          DK_DRUPAL_HASH_SALT="${HASH_SALT}"
+          DK_DRUPAL_ADMIN_USERNAME="admin"
+          DK_DRUPAL_ADMIN_PASSWORD="admin"
+          EOF
+
+      # -----------------------------------------------------------------------
+      # Install DDEV. autostart: false because .ddev/config.yaml does not exist
+      # yet — the installer script runs `ddev config` + `ddev start` itself.
+      # -----------------------------------------------------------------------
+      - name: Setup DDEV
+        uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      # -----------------------------------------------------------------------
+      # Run the installer.
+      # CI=true is set automatically by GitHub Actions — the script uses it to
+      # skip the "Proceed?" confirm and the optional `ddev recipe` menu.
+      # -----------------------------------------------------------------------
+      - name: Run drupal-kickstart.sh
+        run: bash ./drupal-kickstart.sh
+
+      # -----------------------------------------------------------------------
+      # Verification steps
+      # -----------------------------------------------------------------------
+      - name: 'Verify: drush status exits cleanly'
+        run: ddev drush status
+
+      - name: 'Verify: Drupal 11 is installed'
+        run: |
+          VERSION=$(ddev drush status --field=drupal-version 2>/dev/null)
+          echo "Drupal version: ${VERSION}"
+          if [[ "${VERSION}" != 11* ]]; then
+            echo "ERROR: Expected Drupal 11.x, got '${VERSION}'"
+            exit 1
+          fi
+
+      - name: 'Verify: site responds with HTTP 200'
+        run: |
+          STATUS=$(curl --insecure --silent --output /dev/null \
+            --write-out "%{http_code}" https://kickstart-ci.ddev.site/)
+          echo "HTTP status: ${STATUS}"
+          if [[ "${STATUS}" != "200" ]]; then
+            echo "ERROR: Expected HTTP 200, got ${STATUS}"
+            exit 1
+          fi
+
+      - name: 'Verify: custom theme is active'
+        run: |
+          THEME=$(ddev drush config:get system.theme default --format=string 2>/dev/null)
+          echo "Default theme: ${THEME}"
+          if [[ "${THEME}" != "kickstart_ci_theme" ]]; then
+            echo "ERROR: Expected default theme 'kickstart_ci_theme', got '${THEME}'"
+            exit 1
+          fi
+
+      - name: 'Verify: cron runs without errors'
+        run: ddev drush cron
+
+      - name: 'Verify: no pending database updates'
+        run: |
+          UPDATES=$(ddev drush updatedb:status --format=string 2>/dev/null || true)
+          if [[ -n "${UPDATES}" ]]; then
+            echo "WARNING: Pending database updates detected:"
+            echo "${UPDATES}"
+          else
+            echo "No pending database updates."
+          fi
+
+      # -----------------------------------------------------------------------
+      # On failure: surface Drupal logs to help diagnose the problem.
+      # -----------------------------------------------------------------------
+      - name: 'Debug: show Drupal watchdog log on failure'
+        if: failure()
+        run: ddev drush watchdog:show --count=50 --severity=Warning || true
