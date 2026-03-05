@@ -1,0 +1,19 @@
+{
+  "name": "playwright-figma-vrt",
+  "version": "1.0.0",
+  "description": "Standalone Figma visual regression tests — compares live-site screenshots against Figma-exported baselines.",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "figma:baseline": "node scripts/figma-pull.js",
+    "test:report": "npx playwright show-report"
+  },
+  "author": "AtenDesignGroup",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.58.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}
