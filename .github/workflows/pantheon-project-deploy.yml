@@ -157,9 +157,25 @@ jobs:
         run: |
           SETTINGS="web/sites/default/settings.php"
 
+          # Drupal's scaffold .gitignore excludes settings.php by default.
+          # If the file is absent, create a minimal one so Pantheon can bootstrap.
+          if [[ ! -f "$SETTINGS" ]]; then
+            mkdir -p "$(dirname "$SETTINGS")"
+            cat > "$SETTINGS" <<'PHP'
+          <?php
+
+          /**
+           * @file
+           * Drupal site configuration.
+           */
+          PHP
+            echo "Created minimal settings.php (was absent from repo — likely gitignored)"
+          fi
+
           # 1. Remove the $databases block written by drush site:install.
+          # The block may be absent if settings.php was gitignored — sed is a no-op then.
           sed -i '/^\$databases\[/,/^\];$/d' "$SETTINGS"
-          echo "Stripped \$databases block from settings.php"
+          echo "Stripped \$databases block from settings.php (no-op if already absent)"
 
           # 2. Append settings.platform.php include (idempotent guard).
           if ! grep -q "settings.platform.php" "$SETTINGS"; then
@@ -181,6 +197,15 @@ jobs:
             echo "$DDEV_SETTINGS_ENTRY" >> .gitignore
             echo "Added $DDEV_SETTINGS_ENTRY to .gitignore"
           fi
+
+          # 4. Remove settings.php from .gitignore so it can be committed and
+          # pushed to Pantheon. Drupal's scaffold gitignore excludes it by
+          # default, but Pantheon needs it present in the repo to bootstrap.
+          # Use sed to remove any line that matches exactly "settings.php" or
+          # "web/sites/default/settings.php" (both forms appear in the wild).
+          sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
+          sed -i '/^sites\/default\/settings\.php$/d' .gitignore
+          echo "Ensured settings.php is not excluded by .gitignore"
 
       # -----------------------------------------------------------------------
       # Stage all changes and amend the merge commit so settings cleanup and
