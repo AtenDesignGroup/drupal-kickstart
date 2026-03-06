@@ -89,13 +89,28 @@ else
   warn "private/pantheon_secrets already exists — skipped"
 fi
 
-# settings.platform.php → web/sites/default/settings.platform.php
-PLATFORM_SETTINGS="${PROJECT_ROOT}/web/sites/default/settings.platform.php"
-if [[ ! -f "$PLATFORM_SETTINGS" ]]; then
-  cp "${ASSETS}/settings.platform.php" "$PLATFORM_SETTINGS"
-  info "settings.platform.php → web/sites/default/"
+# Inject settings.pantheon.php include into settings.php (idempotent).
+# The settings.pantheon.php file itself is provided by the
+# pantheon-systems/drupal-integrations Composer package scaffold — we only
+# need to ensure settings.php includes it.
+SITE_SETTINGS="${PROJECT_ROOT}/web/sites/default/settings.php"
+if ! grep -q "settings.pantheon.php" "$SITE_SETTINGS" 2>/dev/null; then
+  cat >> "$SITE_SETTINGS" <<'PHP'
+
+/**
+ * Include the Pantheon-specific settings file.
+ *
+ * n.b. The settings.pantheon.php file makes some changes
+ *      that affect all environments that this site
+ *      exists in.  Always include this file, even in
+ *      a local development environment, to ensure that
+ *      the site settings remain consistent.
+ */
+include __DIR__ . "/settings.pantheon.php";
+PHP
+  info "settings.pantheon.php include added to settings.php"
 else
-  warn "settings.platform.php already exists — skipped"
+  warn "settings.pantheon.php include already present — skipped"
 fi
 
 # =============================================================================
@@ -183,5 +198,5 @@ echo
 echo -e "  ${BOLD}Next steps:${RESET}"
 echo -e "  • Connect site on https://dashboard.pantheon.io"
 echo -e "  • Add real secrets to ${BOLD}private/pantheon_secrets/secrets.json${RESET}"
-echo -e "  • Commit pantheon.yml, settings.platform.php, and quicksilver scripts"
+echo -e "  • Commit pantheon.yml and quicksilver scripts"
 echo
