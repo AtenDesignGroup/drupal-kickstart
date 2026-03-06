@@ -69,20 +69,33 @@ jobs:
       # If theme_name input is blank, derive from site_name (hyphens → underscores).
       # Always ensures a valid Drupal machine name.
       # -----------------------------------------------------------------------
-      - name: Derive theme name
+      - name: Derive names
         run: |
+          # Sanitize site_name → valid DDEV/Pantheon machine name
+          # (lowercase, spaces → hyphens, strip non-alphanumeric except hyphens,
+          # strip leading/trailing hyphens)
+          DDEV_NAME=$(echo "${{ inputs.site_name }}" \
+            | tr '[:upper:]' '[:lower:]' \
+            | tr -s '[:space:]_' '-' \
+            | tr -cd '[:alnum:]-' \
+            | sed 's/^-*//; s/-*$//')
+          echo "DK_DDEV_NAME=$DDEV_NAME" >> "$GITHUB_ENV"
+
+          # Derive theme machine name
+          # (lowercase, spaces/hyphens → underscores, strip non-alphanumeric,
+          # strip leading digits/underscores, append _theme only if not already present)
           if [[ -n "${{ inputs.theme_name }}" ]]; then
             RAW="${{ inputs.theme_name }}"
           else
             RAW="${{ inputs.site_name }}"
           fi
-          # Lowercase, spaces/hyphens → underscores, strip non-alphanumeric,
-          # strip leading digits/underscores, append _theme
           THEME=$(echo "$RAW" \
             | tr '[:upper:]' '[:lower:]' \
             | tr -s '[:space:]-' '_' \
             | tr -cd '[:alnum:]_' \
-            | sed 's/^[0-9_]*//; s/_*$//')_theme
+            | sed 's/^[0-9_]*//; s/_*$//')
+          # Append _theme only if not already ending with _theme
+          [[ "$THEME" != *_theme ]] && THEME="${THEME}_theme"
           echo "DK_THEME_NAME=$THEME" >> "$GITHUB_ENV"
 
           # Derive theme display name
@@ -102,7 +115,7 @@ jobs:
         run: |
           cat > .kickstart.env <<EOF
           # Drupal Kickstart — Pantheon CI configuration
-          DK_DDEV_NAME="${{ inputs.site_name }}"
+          DK_DDEV_NAME="${{ env.DK_DDEV_NAME }}"
           DK_THEME_NAME="${{ env.DK_THEME_NAME }}"
           DK_THEME_DESC="${{ env.DK_THEME_DESC }}"
           DK_THEME_ABBREVIATED=""
