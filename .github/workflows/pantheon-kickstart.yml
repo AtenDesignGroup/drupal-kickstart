@@ -174,7 +174,7 @@ jobs:
           terminus site:create \
             "${{ inputs.site_name }}" \
             "${{ inputs.site_label }}" \
-            drupal-11 \
+            drupal11 \
             --org="${{ vars.PANTHEON_ORG }}"
 
       # -----------------------------------------------------------------------
