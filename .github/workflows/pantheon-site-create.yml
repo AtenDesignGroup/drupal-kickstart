@@ -1,0 +1,115 @@
+name: Pantheon Site Create
+
+# Provisions a new Pantheon site using the drupal-11 upstream via Terminus.
+# No code is pushed — this workflow handles infrastructure only.
+# Run this before pantheon-project-deploy.yml when starting a new project.
+#
+# Required secrets (pre-configured in repo settings, NOT workflow inputs):
+#   PANTHEON_MACHINE_TOKEN  — Terminus authentication token
+#
+# Required variable (pre-configured in repo settings):
+#   PANTHEON_ORG            — Pantheon organization ID (used as --org flag)
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_name:
+        description: 'Pantheon site machine name (lowercase, hyphens — e.g. my-client-site)'
+        required: true
+        type: string
+      site_label:
+        description: 'Pantheon site human-readable label (e.g. "My Client Site")'
+        required: true
+        type: string
+      php_version:
+        description: 'PHP version'
+        required: false
+        type: string
+        default: '8.3'
+
+jobs:
+  site-create:
+    name: Create Pantheon Site
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # -----------------------------------------------------------------------
+      # Install PHP, Terminus, and authenticate.
+      # -----------------------------------------------------------------------
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.php_version }}
+
+      - name: Install Terminus
+        run: |
+          curl -L https://github.com/pantheon-systems/terminus/releases/latest/download/terminus.phar \
+            -o /usr/local/bin/terminus
+          chmod +x /usr/local/bin/terminus
+          terminus --version
+
+      - name: Authenticate Terminus
+        run: terminus auth:login --machine-token="${{ secrets.PANTHEON_MACHINE_TOKEN }}"
+
+      # -----------------------------------------------------------------------
+      # Create the Pantheon site using the drupal-11 upstream.
+      # -----------------------------------------------------------------------
+      - name: Create Pantheon site
+        run: |
+          terminus site:create \
+            "${{ inputs.site_name }}" \
+            "${{ inputs.site_label }}" \
+            drupal-11-composer-mana \
+            --org="${{ vars.PANTHEON_ORG }}"
+
+      # -----------------------------------------------------------------------
+      # Poll until Pantheon's "Create Initial Site" provisioning workflow
+      # completes. The drupal-11 upstream initialization typically takes
+      # 30–90 seconds. Max ~15 retries × 15 sec = ~3.75 min timeout.
+      # -----------------------------------------------------------------------
+      - name: Wait for Pantheon site provisioning
+        run: |
+          echo "Waiting for Pantheon site provisioning to complete..."
+          MAX=15
+          for i in $(seq 1 $MAX); do
+            STATUS=$(terminus workflow:list "${{ inputs.site_name }}" \
+              --field=status 2>/dev/null | head -1 || true)
+            echo "  Attempt ${i}/${MAX} — workflow status: ${STATUS:-unknown}"
+            if [[ "$STATUS" == "succeeded" ]]; then
+              echo "Provisioning complete."
+              break
+            fi
+            if [[ $i -eq $MAX ]]; then
+              echo "ERROR: Timeout waiting for Pantheon provisioning after $((MAX * 15)) seconds."
+              exit 1
+            fi
+            sleep 15
+          done
+
+      # -----------------------------------------------------------------------
+      # Switch the dev environment from SFTP mode (Pantheon default) to Git.
+      # Must happen after provisioning completes.
+      # -----------------------------------------------------------------------
+      - name: Switch Pantheon dev to Git mode
+        run: terminus connection:set "${{ inputs.site_name }}.dev" git
+
+      # -----------------------------------------------------------------------
+      # Echo the Pantheon git URL to the run log so the developer has it
+      # available for pantheon-project-deploy.yml or local use.
+      # -----------------------------------------------------------------------
+      - name: Echo Pantheon git URL
+        run: |
+          GIT_URL=$(terminus connection:info "${{ inputs.site_name }}.dev" --field=git_url)
+          echo ""
+          echo "=========================================================="
+          echo "  Pantheon site created and switched to Git mode."
+          echo "  Site name : ${{ inputs.site_name }}"
+          echo "  Dev URL   : https://dev-${{ inputs.site_name }}.pantheonsite.io"
+          echo "  Git URL   : ${GIT_URL}"
+          echo "=========================================================="
+          echo ""
+          echo "Next step: run pantheon-project-deploy.yml with site_name=${{ inputs.site_name }}"
+
+      - name: 'Verify: terminus site info'
+        run: terminus site:info "${{ inputs.site_name }}"
