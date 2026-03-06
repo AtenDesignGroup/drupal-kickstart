@@ -23,6 +23,11 @@ on:
         description: 'Pantheon site human-readable label (e.g. "My Client Site")'
         required: true
         type: string
+      upstream_id:
+        description: 'Pantheon upstream ID. Use "empty" (default) since drupal-kickstart pushes its own fully-built project.'
+        required: false
+        type: string
+        default: 'empty'
       theme_name:
         description: 'Drupal theme machine name (optional — auto-derived from site_name if omitted)'
         required: false
@@ -180,14 +185,24 @@ jobs:
         run: terminus auth:login --machine-token="${{ secrets.PANTHEON_MACHINE_TOKEN }}"
 
       # -----------------------------------------------------------------------
-      # Create the Pantheon site using the drupal-11 upstream.
+      # List available upstreams for the org so the ID is visible in the log.
+      # Useful for debugging if site:create fails with "upstream not found".
+      # -----------------------------------------------------------------------
+      - name: List available Drupal upstreams
+        run: terminus upstream:list --org="${{ vars.PANTHEON_ORG }}" --framework=drupal || true
+
+      # -----------------------------------------------------------------------
+      # Create the Pantheon site.
+      # Uses the "empty" upstream by default — we push a fully-built Drupal 11
+      # project from drupal-kickstart.sh, so we don't need Pantheon to scaffold
+      # any framework files. An empty repo is cleaner for a full overwrite.
       # -----------------------------------------------------------------------
       - name: Create Pantheon site
         run: |
           terminus site:create \
             "${{ inputs.site_name }}" \
             "${{ inputs.site_label }}" \
-            drupal11 \
+            "${{ inputs.upstream_id }}" \
             --org="${{ vars.PANTHEON_ORG }}"
 
       # -----------------------------------------------------------------------
