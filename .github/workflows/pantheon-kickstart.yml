@@ -195,11 +195,11 @@ jobs:
           sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
           sed -i '/^sites\/default\/settings\.php$/d' .gitignore
 
-          # Force-add Composer build artifacts. These directories are excluded
-          # by .gitignore for local development but Pantheon requires them to
-          # be committed — it does not run composer install at deploy time.
-          git add -f vendor/ web/core/ web/modules/contrib/ web/themes/contrib/ \
-            web/libraries/ web/profiles/contrib/ drush/Commands/contrib/ || true
+          # Remove .gitignore so git add -A picks up all Composer build
+          # artifacts (vendor/, web/core/, web/modules/contrib/, etc.).
+          # Pantheon does not run composer install at deploy time and does
+          # not need a development .gitignore in its repository.
+          rm -f .gitignore
           git add -A
           git commit -m "${{ env.GIT_COMMIT_MESSAGE }}" --no-verify
 
@@ -410,11 +410,11 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Stage and amend merge commit
         run: |
-          # Force-add Composer build artifacts. These directories are excluded
-          # by .gitignore for local development but Pantheon requires them to
-          # be committed — it does not run composer install at deploy time.
-          git add -f vendor/ web/core/ web/modules/contrib/ web/themes/contrib/ \
-            web/libraries/ web/profiles/contrib/ drush/Commands/contrib/ || true
+          # Remove .gitignore so git add -A picks up all Composer build
+          # artifacts (vendor/, web/core/, web/modules/contrib/, etc.).
+          # Pantheon does not run composer install at deploy time and does
+          # not need a development .gitignore in its repository.
+          rm -f .gitignore
           git add -A
           git commit --amend --no-edit --no-verify
 
