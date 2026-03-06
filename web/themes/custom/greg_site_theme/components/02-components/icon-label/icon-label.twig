@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Elements - Icon Label
+ *
+ * Available Props:
+ * - attributes: [Drupal\Core\Template\Attribute] Any custom attributes needed for this component.
+ * - hide_text: [boolean]
+ * - text: [string]
+ * - icon_before: [string]
+ * - icon_after: [string]
+ */
+#}
+
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'e-icon-label',
+] %}
+
+{% set text_classes = [
+  'text',
+  hide_text ? 'visually-hidden',
+] %}
+
+<span {{ attributes.addClass(classes) }}>
+  {% if icon_before %}
+    <span class="icon" aria-hidden="true">
+      {{ icon_before }}
+    </span>
+  {% endif %}
+
+  <span class="{{ text_classes|join(' ') }}">{{ text }}</span>
+
+  {% if icon_after %}
+    <span class="icon" aria-hidden="true">
+      {{ icon_after }}
+    </span>
+  {% endif %}
+</span>

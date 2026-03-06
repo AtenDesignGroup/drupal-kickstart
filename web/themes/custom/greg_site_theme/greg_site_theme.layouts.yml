@@ -1,0 +1,7 @@
+default:
+  label: Default
+  category: greg_site_theme
+  template: templates/layouts/default
+  regions:
+    content:
+      label: Content

@@ -1,0 +1,27 @@
+//
+// Elements - Media
+//
+// - 01 - General
+//
+
+
+//------------------------------------
+//  01 - General
+//------------------------------------
+
+figure {
+  margin: 0;
+
+  img {
+    display: block;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+figcaption {
+  margin: 16px 0;
+}

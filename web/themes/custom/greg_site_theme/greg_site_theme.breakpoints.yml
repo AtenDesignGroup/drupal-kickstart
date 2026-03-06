@@ -1,0 +1,38 @@
+greg_site_theme.small:
+  label: 'Small'
+  mediaQuery: 'all and (min-width: 480px)'
+  weight: 1
+  multipliers:
+    - 1x
+    - 2x
+
+greg_site_theme.medium:
+  label: 'Medium'
+  mediaQuery: 'all and (min-width: 768px)'
+  weight: 2
+  multipliers:
+    - 1x
+    - 2x
+
+greg_site_theme.large:
+  label: 'Large'
+  mediaQuery: 'all and (min-width: 992px)'
+  weight: 3
+  multipliers:
+    - 1x
+    - 2x
+
+greg_site_theme.x_large:
+  label: 'X Large'
+  mediaQuery: 'all and (min-width: 1200px)'
+  weight: 4
+  multipliers:
+    - 1x
+    - 2x
+
+greg_site_theme.2x_large:
+  label: '2X Large'
+  mediaQuery: 'all and (min-width: 1920px)'
+  weight: 4
+  multipliers:
+    - 1x

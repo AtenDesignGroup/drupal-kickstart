@@ -1,0 +1,9 @@
+parameters:
+  level: 5
+  paths:
+    - .
+  excludePaths:
+    - vendor/ (?)
+    - web/ (?)
+    - node_modules/ (?)
+    - tests/ (?)

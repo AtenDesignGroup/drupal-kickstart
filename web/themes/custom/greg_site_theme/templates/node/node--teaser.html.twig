@@ -1,0 +1,6 @@
+{{ include('greg_site_theme:teaser', {
+  title: label|default(''),
+  body: content.body|default(''),
+  link:{ url: url, text: label|render},
+  attr: attributes
+}) }}

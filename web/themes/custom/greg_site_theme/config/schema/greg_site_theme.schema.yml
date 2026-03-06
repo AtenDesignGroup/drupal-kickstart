@@ -1,0 +1,8 @@
+# Schema for the configuration files of the greg_site_theme theme.
+greg_site_theme.settings:
+  type: theme_settings
+  label: 'greg_site_theme settings'
+  mapping:
+    display_back_to_top:
+      type: boolean
+      label: 'Display a back to top button on the site'

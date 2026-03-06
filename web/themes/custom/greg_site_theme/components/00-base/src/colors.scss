@@ -1,0 +1,60 @@
+//
+// Base - Color
+//
+// - 01 - Theme Colors
+// - 02 - Grayscale
+// - 03 - Semantic Colors
+//
+
+
+//------------------------------------
+//  01 - Theme Colors
+//------------------------------------
+
+:root {
+  --gregsite-color-blue: #0d6efd;
+  --gregsite-color-indigo: #6610f2;
+  --gregsite-color-purple: #6f42c1;
+  --gregsite-color-pink: #d63384;
+  --gregsite-color-red: #dc3545;
+  --gregsite-color-orange: #fd7e14;
+  --gregsite-color-yellow: #ffc107;
+  --gregsite-color-green: #198754;
+  --gregsite-color-teal: #20c997;
+  --gregsite-color-cyan: #0dcaf0;
+}
+
+
+//------------------------------------
+//  02 - Grayscale
+//------------------------------------
+
+:root {
+  --gregsite-color-white: #ffffff;
+  --gregsite-color-gray-100: #f8f9fa;
+  --gregsite-color-gray-200: #e9ecef;
+  --gregsite-color-gray-300: #dee2e6;
+  --gregsite-color-gray-400: #ced4da;
+  --gregsite-color-gray-500: #adb5bd;
+  --gregsite-color-gray-600: #6c757d;
+  --gregsite-color-gray-700: #495057;
+  --gregsite-color-gray-800: #343a40;
+  --gregsite-color-gray-900: #212529;
+  --gregsite-color-black: #000000;
+}
+
+
+//------------------------------------
+//  03 - Semantic Colors
+//------------------------------------
+
+:root {
+  --gregsite-color-primary: var(--gregsite-color-blue);
+  --gregsite-color-secondary: var(--gregsite-color-gray-900);
+  --gregsite-color-success: var(--gregsite-color-green);
+  --gregsite-color-info: var(--gregsite-color-cyan);
+  --gregsite-color-warning: var(--gregsite-color-yellow);
+  --gregsite-color-danger: var(--gregsite-color-red);
+  --gregsite-color-light: var(--gregsite-color-gray-100);
+  --gregsite-color-dark: var(--gregsite-color-gray-900);
+}

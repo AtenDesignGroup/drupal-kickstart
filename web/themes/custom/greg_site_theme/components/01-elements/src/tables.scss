@@ -1,0 +1,67 @@
+//
+// Elements - Tables
+//
+// - 01 - General
+// - 02 - Elements
+//
+@use 'partials' as *;
+
+//------------------------------------
+//  01 - General
+//------------------------------------
+
+table {
+  @include type-scale(label, 16);
+  width: 100%;
+  max-width: 100%;
+  border-spacing: 0;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+
+//------------------------------------
+//  02 - Elements
+//------------------------------------
+
+thead {
+  & th {
+    vertical-align: bottom;
+  }
+
+  & th,
+  & td {
+    border-bottom: 1px solid var(--gregsite-color-dark);
+  }
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--gregsite-color-dark);
+  font-weight: var(--gregsite-fw-bold);
+}
+
+// Remove top border from thead by default
+caption + thead tr:first-child th,
+caption + thead tr:first-child td,
+colgroup + thead tr:first-child th,
+colgroup + thead tr:first-child td,
+thead:first-child tr:first-child th,
+thead:first-child tr:first-child td {
+  border-top: 0;
+}
+
+// Account for multiple tbody instances
+tbody + tbody {
+  border-top: 2px solid var(--gregsite-color-dark);
+}
+
+tr.even {
+  background-color: var(--gregsite-color-gray-200);
+}

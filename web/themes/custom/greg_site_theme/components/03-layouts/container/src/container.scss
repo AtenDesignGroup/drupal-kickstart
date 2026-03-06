@@ -1,0 +1,114 @@
+//
+// Layouts - Container
+//
+// The container layout component is used to constrain the width of
+// the content within a layout.
+//
+// - 01 - Imports
+// - 02 - Container
+// - 03 - Gutters
+// - 04 - Widths
+// - 05 - Bleed
+//
+
+
+//------------------------------------
+//  01 - Imports
+//------------------------------------
+
+@use 'partials' as *;
+
+
+//------------------------------------
+//  02 - Container
+//------------------------------------
+
+[class*="l-container"] {
+  --container-gutter: var(--gregsite-space-36);
+  --container-width: var(--gregsite-width-xlarge);
+  padding-inline: var(--container-gutter);
+  margin-inline: auto;
+  max-width: var(--container-width);
+  width: 100%;
+}
+
+
+//------------------------------------
+//  03 - Gutters
+//
+//  Gutters define the space between the
+//  container's edge and its contents.
+//
+//  Values are responsive and based on
+//  the space scale set in
+//  /components/00-base/src/spacing.scss.
+//
+//------------------------------------
+
+.l-container--gutter-none {
+  --container-gutter: 0;
+}
+
+.l-container--gutter-large {
+  --container-gutter: var(--gregsite-space-20);
+}
+
+.l-container--gutter-medium {
+  --container-gutter: var(--gregsite-space-36);
+}
+
+.l-container--gutter-small {
+  --container-gutter: var(--gregsite-space-60);
+}
+
+
+//------------------------------------
+//  04 - Widths
+//
+//  Widths define the maximum width of the container.
+//
+//  Values are based on the size scale set in
+//  /components/00-base/src/sizes.scss.
+//
+//------------------------------------
+
+.l-container--width-xxlarge {
+  --container-width: var(--gregsite-width-xxlarge);
+}
+
+.l-container--width-xlarge {
+  --container-width: var(--gregsite-width-xlarge);
+}
+
+.l-container--width-large {
+  --container-width: var(--gregsite-width-large);
+}
+
+.l-container--width-medium {
+  --container-width: var(--gregsite-width-medium);
+}
+
+.l-container--width-small {
+  --container-width: var(--gregsite-width-small);
+}
+
+.l-container--width-xsmall {
+  --container-width: var(--gregsite-width-xsmall);
+}
+
+.l-container--width-xxsmall {
+  --container-width: var(--gregsite-width-xxsmall);
+}
+
+
+//------------------------------------
+//  05 - Bleed
+//
+//  Bleed stretches the container horizontally to align its
+//  inner contents and removes the padding from the
+//  container.
+//------------------------------------
+
+.l-container--bleed {
+  margin-inline: calc(-1 * var(--container-gutter));
+}

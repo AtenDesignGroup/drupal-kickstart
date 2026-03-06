@@ -64,7 +64,7 @@ install:
   # Themes
   - claro
   - gin
-  - DK_THEME_NAME
+  - greg_site_theme
 
 config:
   strict: false
@@ -72,4 +72,4 @@ config:
     system.theme:
       simple_config_update:
         admin: 'gin'
-        default: 'DK_THEME_NAME'
+        default: 'greg_site_theme'

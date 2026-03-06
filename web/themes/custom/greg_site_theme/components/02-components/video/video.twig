@@ -1,0 +1,23 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-video'
+] %}
+
+<figure {{ attributes.addClass(classes) }}>
+  {% block media_block %}
+    {% if media %}
+      <div class="c-video__wrapper">
+        <iframe src="{{ media }}" frameborder="0" allowtransparency="" width="426" height="240" title="{{ title }}"></iframe>
+      </div>
+    {% endif %}
+  {% endblock %}
+
+  {% block caption_block %}
+    {% if caption %}
+      <figcaption class="c-video__caption">
+        {{caption}}
+      </figcaption>
+    {% endif %}
+  {% endblock %}
+</figure>

@@ -1,0 +1,125 @@
+{% set url = 'https://www.google.com' %}
+{% set content_demo %}
+<p>Item content</p>
+{% endset %}
+
+
+<a id='accordion'></a>
+<h2 class='styleguide'>Accordion
+</h2>
+<div class='styleguide'>
+  {% embed 'greg_site_theme:accordion' with {
+      heading: 'Example Single Accordion',
+      content: content_demo,
+      id: 'example-accordion',
+    } only %}
+    {% block content %}
+      {{content}}
+    {% endblock %}
+  {% endembed %}
+</div>
+
+<a id='button'></a>
+<h2 class='styleguide'>Button</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:button', {
+  link: {url: url, title: 'Example button'},
+  attributes: attributes
+}, with_context = false) }}
+</div>
+
+<a id='button_icon'></a>
+<h2 class='styleguide'>
+  Button with Icon</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:button', {
+  link: {url: url, title: 'Example button with icon'},
+  icon_suffix: 'arrow-right',
+  attributes: attributes,
+}, with_context = false) }}
+</div>
+
+<a id='cta'></a>
+<h2 class='styleguide'>CTA</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:cta', {
+  title: 'Example CTA',
+  link: {url: url, title: 'Example link'},
+  text: 'Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed. Purus ut eu fermentum non. Arcu lectus sed in quisque vitae posuere. Adipiscing nullam mauris iaculis leo turpis leo, congue.',
+  icon: 'arrow-right',
+  attributes: attributes,
+}, with_context = false) }}
+</div>
+
+<a id='figure'></a>
+<h2 class='styleguide'>Figure</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:figure', {
+  caption: 'Example caption',
+  media: content.40['#content'],
+  attributes: attributes,
+}, with_context = false) }}
+</div>
+
+<a id='link'></a>
+<h2 class='styleguide'>Link</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:link', {
+  link: {url: url, title: 'Example link'},
+  attributes: attributes
+}, with_context = false) }}
+</div>
+
+<a id='link_icon'></a>
+<h2 class='styleguide'>Link with icon</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:link', {
+  link: {url: url, title: 'Example link'},
+  icon: 'arrow-right',
+  attributes: attributes
+}, with_context = false) }}
+</div>
+
+<a id='page_title'></a>
+<h2 class='styleguide'>Page Title</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:page-title', {
+  title: 'Page Title',
+  attributes: attributes
+}, with_context = false) }}
+</div>
+
+
+<a id='pullquote'></a>
+<h2 class='styleguide'>Pullquote</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:pullquote', {
+  text: 'Example quote paragraph. Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed.',
+  credit: 'Example Quote Credit',
+  attributes: attributes
+}, with_context = false) }}
+</div>
+
+<a id='teaser'></a>
+<h2 class='styleguide'>Teaser</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:teaser', {
+  title: 'Example teaser title',
+  body: 'Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed. Purus ut eu fermentum non. Arcu lectus sed in quisque vitae posuere. Adipiscing nullam mauris iaculis leo turpis leo, congue.',
+  link: {url: url, text: 'Example link'},
+  media: content.40['#content'],
+  attributes: attributes
+}, with_context = false) }}
+</div>
+
+<a id='video'></a>
+<h2 class='styleguide'>Video</h2>
+<div class='styleguide'>
+  {{ include('greg_site_theme:video', {
+  caption: 'Example caption',
+  media: 'https://www.youtube.com/embed/TGBTesjW93M?si=AeZq6ZOqrj85tVtM',
+  attributes: attributes
+}, with_context = false) }}
+</div>
+
+<div class='l-container'>{{ content }}</div>

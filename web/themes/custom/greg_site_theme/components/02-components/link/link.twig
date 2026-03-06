@@ -1,0 +1,16 @@
+{% import "greg_site_theme:icons" as icons %}
+
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-link'
+] %}
+
+<a href="{{link.url}}" {{ attributes.addClass(classes)|without('href') }}>
+  {{ link.title }}
+  {% if icon %}
+    <span class='c-link__icon'>
+      {{ icons.inline(icon) }}
+    </span>
+  {% endif %}
+</a>

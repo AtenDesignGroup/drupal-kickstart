@@ -1,0 +1,21 @@
+uuid: 10e4d585-b3b4-462b-9a51-bf173d489644
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.limited_html
+  module:
+    - ckeditor5
+_core:
+  default_config_hash: '-PXWKqJ9UXGrrVSQFsLDENr-qFdWpZANOP194POIZSE'
+format: limited_html
+editor: ckeditor5
+settings:
+  toolbar:
+    items:
+      - bold
+      - italic
+      - link
+  plugins: {  }
+image_upload:
+  status: false

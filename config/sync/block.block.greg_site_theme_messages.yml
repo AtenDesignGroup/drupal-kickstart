@@ -1,0 +1,22 @@
+uuid: e651bf35-3ff2-4258-bd1c-c0abbe33bad6
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - greg_site_theme
+_core:
+  default_config_hash: aeqlWs7HwctZeZC7ADcbxfqehJzBRfZKmuZz3DsH3_4
+id: greg_site_theme_messages
+theme: greg_site_theme
+region: highlighted
+weight: 0
+provider: null
+plugin: system_messages_block
+settings:
+  id: system_messages_block
+  label: 'Status messages'
+  label_display: '0'
+  provider: system
+visibility: {  }

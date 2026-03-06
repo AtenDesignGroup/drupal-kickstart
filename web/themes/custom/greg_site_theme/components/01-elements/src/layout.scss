@@ -1,0 +1,70 @@
+//
+// Global - Layout
+//
+// - 01 - Imports
+// - 02 - Alignment
+// - 03 - Flex
+//
+
+
+//------------------------------------
+//  01 - Imports
+//------------------------------------
+
+@use 'partials' as *;
+
+
+//------------------------------------
+//  02 - Alignment
+//------------------------------------
+
+.align-left {
+  margin: 0 var(--gregsite-grid-gap) var(--gregsite-grid-gap) 0;
+}
+
+.align-right {
+  margin: 0 0 var(--gregsite-grid-gap) var(--gregsite-grid-gap);
+}
+
+.align-center {
+  margin: var(--gregsite-grid-gap) auto;
+}
+
+
+//------------------------------------
+//  03 - Flex
+//------------------------------------
+
+[class*='l-flex'] > * {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  margin: calc(var(--gregsite-grid-gap) / 2 * -1)
+    calc(var(--gregsite-grid-gap) / 2 * -1);
+}
+
+[class*='l-flex'] > * > * {
+  margin: calc(var(--gregsite-grid-gap) / 2)
+    calc(var(--gregsite-grid-gap) / 2);
+}
+
+.l-flex__alignment--start > * {
+  justify-content: flex-start;
+}
+
+.l-flex__alignment--center > * {
+  justify-content: center;
+}
+
+.l-flex__alignment--end > * {
+  justify-content: flex-end;
+}
+
+.l-flex__alignment--end > * {
+  justify-content: flex-end;
+}
+
+.l-flex__no-wrap > * {
+  flex-wrap: nowrap;
+}

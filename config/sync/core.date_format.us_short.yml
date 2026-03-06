@@ -1,0 +1,10 @@
+uuid: cc3af0dc-f688-4555-b015-f59324d39e91
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 4FFzUlKNdIFQnP5VdRtMQ8QGWp_CvjszNrQdUiHP0_Y
+id: us_short
+label: 'US short'
+locked: false
+pattern: n/j/y

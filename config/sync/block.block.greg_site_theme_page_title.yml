@@ -1,0 +1,20 @@
+uuid: 85ced947-2d0a-44df-a975-bfcde1dd24da
+langcode: en
+status: true
+dependencies:
+  theme:
+    - greg_site_theme
+_core:
+  default_config_hash: Oh72CHUkp6cj6dbrXMK2hzCsM05w9cHVoD22rMLQUfk
+id: greg_site_theme_page_title
+theme: greg_site_theme
+region: content
+weight: -30
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  label_display: '0'
+  provider: core
+visibility: {  }

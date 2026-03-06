@@ -1,0 +1,30 @@
+name: Greg
+type: theme
+description: ''
+package: greg_site_theme
+core_version_requirement: ^11
+dependencies:
+  - 'twig_field_value:twig_field_value'
+  - 'twig_tweak:twig_tweak'
+'base theme': stable9
+regions:
+  alert: Alert
+  branding: Branding
+  navigation: Navigation
+  highlighted: Highlighted
+  help: Help
+  breadcrumb: Breadcrumb
+  content: Content
+  sidebar_first: 'First Sidebar'
+  sidebar_second: 'Second Sidebar'
+  footer: Footer
+libraries:
+  - greg_site_theme/global
+ckeditor5-stylesheets:
+  - components/01-elements/wysiwyg.css
+starterkit: true
+enforce_sdc_schemas: true
+version: 1.0.0
+project: greg_site_theme
+datestamp: 1771211966
+generator: 'prototype:5.3.0'

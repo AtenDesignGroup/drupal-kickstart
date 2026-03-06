@@ -1,0 +1,25 @@
+uuid: eb6803ed-0597-4b8e-852a-22e142566fbb
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - greg_site_theme
+_core:
+  default_config_hash: sG8t_FghbUscJ-GrnQ8zs_vx5YM4bJCfntrK-J5HcAY
+id: greg_site_theme_branding
+theme: greg_site_theme
+region: alert
+weight: 0
+provider: null
+plugin: system_branding_block
+settings:
+  id: system_branding_block
+  label: 'Site branding'
+  label_display: '0'
+  provider: system
+  use_site_logo: true
+  use_site_name: true
+  use_site_slogan: true
+visibility: {  }

@@ -1,0 +1,113 @@
+//
+// @file
+// Libraries - Global - Icons
+//
+
+//
+//  Variables
+//
+$icons_path: '/themes/custom/greg_site_theme/images/icons';
+
+:root {
+  --gregsite-i-arrow-down: url('#{$icons_path}/icon-arrow-down.svg');
+  --gregsite-i-arrow-left: url('#{$icons_path}/icon-arrow-left.svg');
+  --gregsite-i-arrow-right: url('#{$icons_path}/icon-arrow-right.svg');
+  --gregsite-i-arrow-up: url('#{$icons_path}/icon-arrow-up.svg');
+  --gregsite-i-cancel: url('#{$icons_path}/icon-cancel.svg');
+  --gregsite-i-checkmark: url('#{$icons_path}/icon-checkmark.svg');
+  --gregsite-i-circle-check: url('#{$icons_path}/circle-check.svg');
+  --gregsite-i-circle-empty: url('#{$icons_path}/circle-empty.svg');
+  --gregsite-i-circle-filled: url('#{$icons_path}/circle-fill.svg');
+  --gregsite-i-error: url('#{$icons_path}/error.svg');
+  --gregsite-i-minus: url('#{$icons_path}/icon-minus.svg');
+  --gregsite-i-plus: url('#{$icons_path}/icon-plus.svg');
+  --gregsite-i-rectangle-checked: url('#{$icons_path}/rectangle-checked.svg');
+  --gregsite-i-rectangle-empty: url('#{$icons_path}/rectangle-empty.svg');
+  --gregsite-i-search: url('#{$icons_path}/icon-search.svg');
+  --gregsite-i-status: url('#{$icons_path}/status.svg');
+  --gregsite-i-success: url('#{$icons_path}/icon-success.svg');
+  --gregsite-i-warning: url('#{$icons_path}/icon-warning.svg');
+}
+
+//
+// General
+//
+.icon {
+  background-color: var(--gregsite-color-black);
+  block-size: 32px;
+  display: block;
+  font: 0/0 transparent;
+  inline-size: 32px;
+  mask-size: cover;
+}
+
+//
+//  Icons
+//
+.icon--arrow-down {
+  mask: var(--gregsite-i-arrow-down) no-repeat center;
+}
+
+.icon--arrow-left {
+  mask: var(--gregsite-i-arrow-left) no-repeat center;
+}
+
+.icon--arrow-right {
+  mask: var(--gregsite-i-arrow-right) no-repeat center;
+}
+
+.icon--arrow-up {
+  mask: var(--gregsite-i-arrow-up) no-repeat center;
+}
+
+.icon--circle-check {
+  mask: var(--gregsite-i-circle-check) no-repeat center;
+}
+
+.icon--circle-empty {
+  mask: var(--gregsite-i-circle-empty) no-repeat center;
+}
+
+.icon--circle-filled {
+  mask: var(--gregsite-i-circle-filled) no-repeat center;
+}
+
+.icon--cancel {
+  mask: var(--gregsite-i-cancel) no-repeat center;
+}
+
+.icon--checkmark {
+  mask: var(--gregsite-i-checkmark) no-repeat center;
+}
+
+.icon--error {
+  mask: var(--gregsite-i-error) no-repeat center;
+}
+
+.icon--minus {
+  mask: var(--gregsite-i-minus) no-repeat center;
+}
+
+.icon--plus {
+  mask: var(--gregsite-i-plus) no-repeat center;
+}
+
+.icon--rectangle-checked {
+  mask: var(--gregsite-i-rectangle-checked) no-repeat center;
+}
+
+.icon--rectangle-empty {
+  mask: var(--gregsite-i-rectangle-empty) no-repeat center;
+}
+
+.icon--search {
+  mask: var(--gregsite-i-search) no-repeat center;
+}
+
+.icon--success {
+  mask: var(--gregsite-i-success) no-repeat center;
+}
+
+.icon--warning {
+  mask: var(--gregsite-i-warning) no-repeat center;
+}
