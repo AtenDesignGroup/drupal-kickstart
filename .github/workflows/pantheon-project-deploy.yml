@@ -58,6 +58,16 @@ jobs:
         with:
           php-version: ${{ inputs.php_version }}
 
+      # -----------------------------------------------------------------------
+      # Run composer install --no-dev to populate vendor/, web/core,
+      # web/modules/contrib, and web/themes/contrib before the git commit.
+      # Mirrors the pre-deploy-composer-install action from aten-actions.
+      # --no-dev excludes development dependencies (phpunit, phpcs, etc.)
+      # that must not be deployed to Pantheon.
+      # -----------------------------------------------------------------------
+      - name: Composer install (no dev dependencies)
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
       - name: Install Terminus
         run: |
           curl -L https://github.com/pantheon-systems/terminus/releases/latest/download/terminus.phar \
