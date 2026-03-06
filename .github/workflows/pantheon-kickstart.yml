@@ -157,7 +157,8 @@ jobs:
       # Run the installer. DK_USES_PANTHEON=yes causes §17 to execute:
       #   - ddev add-on get ddev/ddev-redis
       #   - ddev restart
-      #   - ddev setup-pantheon (copies pantheon.yml, settings.platform.php,
+      #   - ddev setup-pantheon (copies pantheon.yml, quicksilver scripts,
+      #     injects settings.pantheon.php include into settings.php,
       #     runs formula-pantheon recipe installing Pantheon modules)
       # CI=true is set automatically by GitHub Actions.
       # -----------------------------------------------------------------------
@@ -194,6 +195,12 @@ jobs:
           sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
           sed -i '/^sites\/default\/settings\.php$/d' .gitignore
 
+          # Remove all .gitignore files (root + Drupal scaffold-generated
+          # subdirectory ones such as web/.gitignore which excludes autoload.php)
+          # so git add -A picks up every Composer build artifact.
+          # Pantheon does not run composer install at deploy time and does
+          # not need a development .gitignore in its repository.
+          find . -name .gitignore -not -path './.git/*' -delete
           git add -A
           git commit -m "${{ env.GIT_COMMIT_MESSAGE }}" --no-verify
 
@@ -334,9 +341,9 @@ jobs:
       #    Pantheon. Pantheon injects correct DB credentials at runtime via
       #    pantheon-systems/drupal-integrations.
       #
-      # 2. Add a settings.platform.php include to settings.php.
-      #    ddev setup-pantheon copies the file to web/sites/default/ but does
-      #    not inject the include stanza — we add it here.
+      # 2. Ensure the settings.pantheon.php include is present in settings.php.
+      #    ddev setup-pantheon injects it locally, but settings.php may have
+      #    been absent from the repo (gitignored) — re-apply idempotently here.
       #
       # 3. Exclude settings.ddev.php from git. The file contains the plaintext
       #    hash salt and is DDEV-only; it must never appear in Pantheon's git.
@@ -366,18 +373,24 @@ jobs:
           sed -i '/^\$databases\[/,/^\];$/d' "$SETTINGS"
           echo "Stripped \$databases block from settings.php"
 
-          # 2. Append settings.platform.php include (idempotent guard).
-          if ! grep -q "settings.platform.php" "$SETTINGS"; then
+          # 2. Append settings.pantheon.php include (idempotent guard).
+          if ! grep -q "settings.pantheon.php" "$SETTINGS"; then
             cat >> "$SETTINGS" <<'PHP'
 
-          // Pantheon platform settings.
-          if (file_exists($app_root . '/' . $site_path . '/settings.platform.php')) {
-            include $app_root . '/' . $site_path . '/settings.platform.php';
-          }
+          /**
+           * Include the Pantheon-specific settings file.
+           *
+           * n.b. The settings.pantheon.php file makes some changes
+           *      that affect all environments that this site
+           *      exists in.  Always include this file, even in
+           *      a local development environment, to ensure that
+           *      the site settings remain consistent.
+           */
+          include __DIR__ . "/settings.pantheon.php";
           PHP
-            echo "Appended settings.platform.php include to settings.php"
+            echo "Appended settings.pantheon.php include to settings.php"
           else
-            echo "settings.platform.php include already present — skipping"
+            echo "settings.pantheon.php include already present — skipping"
           fi
 
           # 3. Exclude settings.ddev.php from git commits.
@@ -398,6 +411,12 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Stage and amend merge commit
         run: |
+          # Remove all .gitignore files (root + Drupal scaffold-generated
+          # subdirectory ones such as web/.gitignore which excludes autoload.php)
+          # so git add -A picks up every Composer build artifact.
+          # Pantheon does not run composer install at deploy time and does
+          # not need a development .gitignore in its repository.
+          find . -name .gitignore -not -path './.git/*' -delete
           git add -A
           git commit --amend --no-edit --no-verify
 
@@ -437,16 +456,3 @@ jobs:
 
       - name: 'Verify: terminus site info'
         run: terminus site:info "${{ inputs.site_name }}"
-
-      # -----------------------------------------------------------------------
-      # On failure: surface Drupal logs and DDEV state to help diagnose issues.
-      # -----------------------------------------------------------------------
-      - name: 'Debug: Drupal watchdog log on failure'
-        if: failure()
-        run: |
-          terminus drush "${{ inputs.site_name }}.dev" \
-            -- watchdog:show --count=50 --severity=Warning || true
-
-      - name: 'Debug: DDEV watchdog log on failure'
-        if: failure()
-        run: ddev drush watchdog:show --count=50 --severity=Warning || true
