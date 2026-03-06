@@ -147,14 +147,24 @@ jobs:
         run: bash ./drupal-kickstart.sh
 
       # -----------------------------------------------------------------------
-      # Install PHP + Terminus and authenticate.
-      # Uses the shared reusable action from aten-actions.
+      # Install PHP, Terminus, and authenticate.
+      # Inlined from AtenDesignGroup/aten-actions setup-pantheon-terminus
+      # (private repo — cannot be referenced directly from external runners).
       # -----------------------------------------------------------------------
-      - name: Setup Pantheon Terminus
-        uses: AtenDesignGroup/aten-actions/.github/actions/setup-pantheon-terminus@main
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_TOKEN }}
           php-version: ${{ inputs.php_version }}
+
+      - name: Install Terminus
+        run: |
+          curl -L https://github.com/pantheon-systems/terminus/releases/latest/download/terminus.phar \
+            -o /usr/local/bin/terminus
+          chmod +x /usr/local/bin/terminus
+          terminus --version
+
+      - name: Authenticate Terminus
+        run: terminus auth:login --machine-token="${{ secrets.PANTHEON_MACHINE_TOKEN }}"
 
       # -----------------------------------------------------------------------
       # Create the Pantheon site using the drupal-11 upstream.
@@ -209,12 +219,16 @@ jobs:
       # -----------------------------------------------------------------------
       # Load the SSH private key into the agent and disable strict host key
       # checking so the runner can connect to Pantheon's git server.
-      # Uses the shared reusable action from aten-actions.
+      # Inlined from AtenDesignGroup/aten-actions setup-remote-ssh
+      # (private repo — cannot be referenced directly from external runners).
       # -----------------------------------------------------------------------
-      - name: Setup remote SSH
-        uses: AtenDesignGroup/aten-actions/.github/actions/setup-remote-ssh@main
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Disable SSH strict host key checking
+        run: 'printf "\nHost *\n\tStrictHostKeyChecking no" >> ~/.ssh/config'
 
       # -----------------------------------------------------------------------
       # Configure git identity and add the Pantheon remote.
