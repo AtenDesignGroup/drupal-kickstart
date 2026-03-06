@@ -195,11 +195,12 @@ jobs:
           sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
           sed -i '/^sites\/default\/settings\.php$/d' .gitignore
 
-          # Remove .gitignore so git add -A picks up all Composer build
-          # artifacts (vendor/, web/core/, web/modules/contrib/, etc.).
+          # Remove all .gitignore files (root + Drupal scaffold-generated
+          # subdirectory ones such as web/.gitignore which excludes autoload.php)
+          # so git add -A picks up every Composer build artifact.
           # Pantheon does not run composer install at deploy time and does
           # not need a development .gitignore in its repository.
-          rm -f .gitignore
+          find . -name .gitignore -not -path './.git/*' -delete
           git add -A
           git commit -m "${{ env.GIT_COMMIT_MESSAGE }}" --no-verify
 
@@ -410,11 +411,12 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Stage and amend merge commit
         run: |
-          # Remove .gitignore so git add -A picks up all Composer build
-          # artifacts (vendor/, web/core/, web/modules/contrib/, etc.).
+          # Remove all .gitignore files (root + Drupal scaffold-generated
+          # subdirectory ones such as web/.gitignore which excludes autoload.php)
+          # so git add -A picks up every Composer build artifact.
           # Pantheon does not run composer install at deploy time and does
           # not need a development .gitignore in its repository.
-          rm -f .gitignore
+          find . -name .gitignore -not -path './.git/*' -delete
           git add -A
           git commit --amend --no-edit --no-verify
 
