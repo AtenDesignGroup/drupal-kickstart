@@ -23,6 +23,11 @@ on:
         description: 'Pantheon site human-readable label (e.g. "My Client Site")'
         required: true
         type: string
+      upstream_id:
+        description: 'Pantheon upstream ID. Use "empty" (default) since drupal-kickstart pushes its own fully-built project.'
+        required: false
+        type: string
+        default: 'empty'
       theme_name:
         description: 'Drupal theme machine name (optional — auto-derived from site_name if omitted)'
         required: false
@@ -160,6 +165,39 @@ jobs:
         run: bash ./drupal-kickstart.sh
 
       # -----------------------------------------------------------------------
+      # Commit the full built project to the local git repo.
+      #
+      # drupal-kickstart.sh generates all files on disk (vendor/, web/core,
+      # web/modules/contrib, web/sites/default/settings.php, pantheon.yml,
+      # etc.) but does not commit them. We must commit everything before the
+      # Pantheon upstream merge so the merge operates on the complete built
+      # project — not just the kickstart scripts.
+      #
+      # settings.ddev.php is gitignored before git add so the plaintext hash
+      # salt never enters git history. settings.php is un-gitignored so it IS
+      # committed — Pantheon needs it present in the repo to bootstrap.
+      # --no-verify skips grumphp hooks which are not installed on the runner.
+      # -----------------------------------------------------------------------
+      - name: Commit built project
+        run: |
+          git config --global user.name "Aten CI Bot"
+          git config --global user.email "ci@atendesigngroup.com"
+
+          # Exclude settings.ddev.php (contains plaintext hash salt).
+          DDEV_SETTINGS_ENTRY="web/sites/default/settings.ddev.php"
+          if ! grep -qxF "$DDEV_SETTINGS_ENTRY" .gitignore 2>/dev/null; then
+            echo "$DDEV_SETTINGS_ENTRY" >> .gitignore
+          fi
+
+          # Remove settings.php from .gitignore so it is committed and pushed
+          # to Pantheon. Drupal's scaffold gitignore excludes it by default.
+          sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
+          sed -i '/^sites\/default\/settings\.php$/d' .gitignore
+
+          git add -A
+          git commit -m "${{ env.GIT_COMMIT_MESSAGE }}" --no-verify
+
+      # -----------------------------------------------------------------------
       # Install PHP, Terminus, and authenticate.
       # Inlined from AtenDesignGroup/aten-actions setup-pantheon-terminus
       # (private repo — cannot be referenced directly from external runners).
@@ -180,14 +218,24 @@ jobs:
         run: terminus auth:login --machine-token="${{ secrets.PANTHEON_MACHINE_TOKEN }}"
 
       # -----------------------------------------------------------------------
-      # Create the Pantheon site using the drupal-11 upstream.
+      # List available upstreams for the org so the ID is visible in the log.
+      # Useful for debugging if site:create fails with "upstream not found".
+      # -----------------------------------------------------------------------
+      - name: List available Drupal upstreams
+        run: terminus upstream:list --org="${{ vars.PANTHEON_ORG }}" --framework=drupal || true
+
+      # -----------------------------------------------------------------------
+      # Create the Pantheon site.
+      # Uses the "empty" upstream by default — we push a fully-built Drupal 11
+      # project from drupal-kickstart.sh, so we don't need Pantheon to scaffold
+      # any framework files. An empty repo is cleaner for a full overwrite.
       # -----------------------------------------------------------------------
       - name: Create Pantheon site
         run: |
           terminus site:create \
             "${{ inputs.site_name }}" \
             "${{ inputs.site_label }}" \
-            drupal11 \
+            "${{ inputs.upstream_id }}" \
             --org="${{ vars.PANTHEON_ORG }}"
 
       # -----------------------------------------------------------------------
@@ -299,6 +347,21 @@ jobs:
         run: |
           SETTINGS="web/sites/default/settings.php"
 
+          # settings.php may be absent if Drupal's scaffold .gitignore excluded
+          # it and it was not committed. Create a minimal file so Pantheon bootstraps.
+          if [[ ! -f "$SETTINGS" ]]; then
+            mkdir -p "$(dirname "$SETTINGS")"
+            cat > "$SETTINGS" <<'PHP'
+          <?php
+
+          /**
+           * @file
+           * Drupal site configuration.
+           */
+          PHP
+            echo "Created minimal settings.php (was absent from repo)"
+          fi
+
           # 1. Remove the $databases block written by drush site:install.
           sed -i '/^\$databases\[/,/^\];$/d' "$SETTINGS"
           echo "Stripped \$databases block from settings.php"
@@ -323,6 +386,11 @@ jobs:
             echo "$DDEV_SETTINGS_ENTRY" >> .gitignore
             echo "Added $DDEV_SETTINGS_ENTRY to .gitignore"
           fi
+
+          # 4. Ensure settings.php itself is not excluded by .gitignore.
+          sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
+          sed -i '/^sites\/default\/settings\.php$/d' .gitignore
+          echo "Ensured settings.php is not excluded by .gitignore"
 
       # -----------------------------------------------------------------------
       # Stage all changes and amend the merge commit so settings cleanup and the

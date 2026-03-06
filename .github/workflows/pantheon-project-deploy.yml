@@ -7,8 +7,9 @@ name: Pantheon Project Deploy
 #
 # Prerequisites:
 #   1. drupal-kickstart.sh has been run and the built project is committed.
-#   2. A Pantheon site already exists in Git mode (run pantheon-site-create.yml
-#      first, or create the site manually via the Pantheon dashboard/Terminus).
+#   2. A Pantheon site already exists (run pantheon-site-create.yml first, or
+#      create the site manually via the Pantheon dashboard/Terminus). This
+#      workflow will auto-switch to Git mode if the site is still in SFTP mode.
 #
 # Required secrets (pre-configured in repo settings, NOT workflow inputs):
 #   PANTHEON_MACHINE_TOKEN  — Terminus authentication token
@@ -57,6 +58,16 @@ jobs:
         with:
           php-version: ${{ inputs.php_version }}
 
+      # -----------------------------------------------------------------------
+      # Run composer install --no-dev to populate vendor/, web/core,
+      # web/modules/contrib, and web/themes/contrib before the git commit.
+      # Mirrors the pre-deploy-composer-install action from aten-actions.
+      # --no-dev excludes development dependencies (phpunit, phpcs, etc.)
+      # that must not be deployed to Pantheon.
+      # -----------------------------------------------------------------------
+      - name: Composer install (no dev dependencies)
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
       - name: Install Terminus
         run: |
           curl -L https://github.com/pantheon-systems/terminus/releases/latest/download/terminus.phar \
@@ -68,22 +79,19 @@ jobs:
         run: terminus auth:login --machine-token="${{ secrets.PANTHEON_MACHINE_TOKEN }}"
 
       # -----------------------------------------------------------------------
-      # Confirm the site exists and is in Git mode.
-      # Fails fast with a clear Terminus error if the site name is wrong or
-      # the site is still in SFTP mode (run pantheon-site-create.yml first).
+      # Confirm the site exists and ensure it is in Git mode.
+      # Auto-switches from SFTP to Git if needed — safe to run whether or not
+      # pantheon-site-create.yml was used to provision the site.
       # -----------------------------------------------------------------------
-      - name: Verify site exists and is in Git mode
+      - name: Verify site exists and ensure Git mode
         run: |
-          MODE=$(terminus connection:info "${{ inputs.site_name }}.dev" --field=sftp_url 2>/dev/null \
-            && echo "sftp" || echo "git")
-          # connection:info succeeds regardless — check the connection type directly
+          terminus site:info "${{ inputs.site_name }}"
           TYPE=$(terminus environment:info "${{ inputs.site_name }}.dev" --field=connection_type 2>/dev/null || true)
           echo "Connection type: ${TYPE:-unknown}"
-          if [[ "${TYPE}" == "sftp" ]]; then
+          if [[ "${TYPE}" != "git" ]]; then
             echo "Switching to Git mode..."
             terminus connection:set "${{ inputs.site_name }}.dev" git
           fi
-          terminus site:info "${{ inputs.site_name }}"
 
       # -----------------------------------------------------------------------
       # Capture the Pantheon Git remote URL.
@@ -159,9 +167,25 @@ jobs:
         run: |
           SETTINGS="web/sites/default/settings.php"
 
+          # Drupal's scaffold .gitignore excludes settings.php by default.
+          # If the file is absent, create a minimal one so Pantheon can bootstrap.
+          if [[ ! -f "$SETTINGS" ]]; then
+            mkdir -p "$(dirname "$SETTINGS")"
+            cat > "$SETTINGS" <<'PHP'
+          <?php
+
+          /**
+           * @file
+           * Drupal site configuration.
+           */
+          PHP
+            echo "Created minimal settings.php (was absent from repo — likely gitignored)"
+          fi
+
           # 1. Remove the $databases block written by drush site:install.
+          # The block may be absent if settings.php was gitignored — sed is a no-op then.
           sed -i '/^\$databases\[/,/^\];$/d' "$SETTINGS"
-          echo "Stripped \$databases block from settings.php"
+          echo "Stripped \$databases block from settings.php (no-op if already absent)"
 
           # 2. Append settings.platform.php include (idempotent guard).
           if ! grep -q "settings.platform.php" "$SETTINGS"; then
@@ -183,6 +207,15 @@ jobs:
             echo "$DDEV_SETTINGS_ENTRY" >> .gitignore
             echo "Added $DDEV_SETTINGS_ENTRY to .gitignore"
           fi
+
+          # 4. Remove settings.php from .gitignore so it can be committed and
+          # pushed to Pantheon. Drupal's scaffold gitignore excludes it by
+          # default, but Pantheon needs it present in the repo to bootstrap.
+          # Use sed to remove any line that matches exactly "settings.php" or
+          # "web/sites/default/settings.php" (both forms appear in the wild).
+          sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
+          sed -i '/^sites\/default\/settings\.php$/d' .gitignore
+          echo "Ensured settings.php is not excluded by .gitignore"
 
       # -----------------------------------------------------------------------
       # Stage all changes and amend the merge commit so settings cleanup and
