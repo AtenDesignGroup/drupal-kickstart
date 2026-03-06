@@ -61,13 +61,6 @@ jobs:
         run: terminus auth:login --machine-token="${{ secrets.PANTHEON_MACHINE_TOKEN }}"
 
       # -----------------------------------------------------------------------
-      # List available upstreams for the org so the ID is visible in the log.
-      # Useful for debugging if site:create fails with "upstream not found".
-      # -----------------------------------------------------------------------
-      - name: List available Drupal upstreams
-        run: terminus upstream:list --org="${{ vars.PANTHEON_ORG }}" --framework=drupal || true
-
-      # -----------------------------------------------------------------------
       # Create the Pantheon site.
       # Uses the "empty" upstream by default — we push a fully-built Drupal 11
       # project from drupal-kickstart.sh, so we don't need Pantheon to scaffold
