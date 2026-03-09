@@ -12,7 +12,7 @@ name: Pantheon Site Create
 #
 # Required variables (configured in repo/environment Settings → Variables):
 #   PANTHEON_ORG            — Pantheon organization ID (used as --org flag)
-#   PANTHEON_SITE           — Pantheon site machine name (e.g. my-client-site)
+#   PANTHEON_GREG_SITE           — Pantheon site machine name (e.g. my-client-site)
 
 on:
   workflow_dispatch:
@@ -66,7 +66,7 @@ jobs:
       - name: Create Pantheon site
         run: |
           terminus site:create \
-            "${{ vars.PANTHEON_SITE }}" \
+            "${{ vars.PANTHEON_GREG_SITE }}" \
             "${{ inputs.site_label }}" \
             "${{ inputs.upstream_id }}" \
             --org="${{ vars.PANTHEON_ORG }}"
@@ -81,7 +81,7 @@ jobs:
           echo "Waiting for Pantheon site provisioning to complete..."
           MAX=15
           for i in $(seq 1 $MAX); do
-            STATUS=$(terminus workflow:list "${{ vars.PANTHEON_SITE }}" \
+            STATUS=$(terminus workflow:list "${{ vars.PANTHEON_GREG_SITE }}" \
               --field=status 2>/dev/null | head -1 || true)
             echo "  Attempt ${i}/${MAX} — workflow status: ${STATUS:-unknown}"
             if [[ "$STATUS" == "succeeded" ]]; then
@@ -100,7 +100,7 @@ jobs:
       # Must happen after provisioning completes.
       # -----------------------------------------------------------------------
       - name: Switch Pantheon dev to Git mode
-        run: terminus connection:set "${{ vars.PANTHEON_SITE }}.dev" git
+        run: terminus connection:set "${{ vars.PANTHEON_GREG_SITE }}.dev" git
 
       # -----------------------------------------------------------------------
       # Echo the Pantheon git URL to the run log so the developer has it
@@ -108,16 +108,16 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Echo Pantheon git URL
         run: |
-          GIT_URL=$(terminus connection:info "${{ vars.PANTHEON_SITE }}.dev" --field=git_url)
+          GIT_URL=$(terminus connection:info "${{ vars.PANTHEON_GREG_SITE }}.dev" --field=git_url)
           echo ""
           echo "=========================================================="
           echo "  Pantheon site created and switched to Git mode."
-          echo "  Site name : ${{ vars.PANTHEON_SITE }}"
-          echo "  Dev URL   : https://dev-${{ vars.PANTHEON_SITE }}.pantheonsite.io"
+          echo "  Site name : ${{ vars.PANTHEON_GREG_SITE }}"
+          echo "  Dev URL   : https://dev-${{ vars.PANTHEON_GREG_SITE }}.pantheonsite.io"
           echo "  Git URL   : ${GIT_URL}"
           echo "=========================================================="
           echo ""
           echo "Next step: run pantheon-project-deploy.yml"
 
       - name: 'Verify: terminus site info'
-        run: terminus site:info "${{ vars.PANTHEON_SITE }}"
+        run: terminus site:info "${{ vars.PANTHEON_GREG_SITE }}"
