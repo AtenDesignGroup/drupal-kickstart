@@ -9,16 +9,13 @@ name: Pantheon Kickstart
 #   PANTHEON_MACHINE_TOKEN  — Terminus authentication token
 #   SSH_PRIVATE_KEY         — Private key whose public key is registered in Pantheon dashboard
 #
-# Required variable (pre-configured in repo settings):
+# Required variables (configured in repo/environment Settings → Variables):
 #   PANTHEON_ORG            — Pantheon organization ID (used as --org flag)
+#   PANTHEON_SITE           — Pantheon site machine name (e.g. my-client-site)
 
 on:
   workflow_dispatch:
     inputs:
-      site_name:
-        description: 'Pantheon site machine name (lowercase, hyphens — e.g. my-client-site)'
-        required: true
-        type: string
       site_label:
         description: 'Pantheon site human-readable label (e.g. "My Client Site")'
         required: true
@@ -79,7 +76,7 @@ jobs:
           # Sanitize site_name → valid DDEV/Pantheon machine name
           # (lowercase, spaces → hyphens, strip non-alphanumeric except hyphens,
           # strip leading/trailing hyphens)
-          DDEV_NAME=$(echo "${{ inputs.site_name }}" \
+          DDEV_NAME=$(echo "${{ vars.PANTHEON_SITE }}" \
             | tr '[:upper:]' '[:lower:]' \
             | tr -s '[:space:]_' '-' \
             | tr -cd '[:alnum:]-' \
@@ -92,7 +89,7 @@ jobs:
           if [[ -n "${{ inputs.theme_name }}" ]]; then
             RAW="${{ inputs.theme_name }}"
           else
-            RAW="${{ inputs.site_name }}"
+            RAW="${{ vars.PANTHEON_SITE }}"
           fi
           THEME=$(echo "$RAW" \
             | tr '[:upper:]' '[:lower:]' \
@@ -240,7 +237,7 @@ jobs:
       - name: Create Pantheon site
         run: |
           terminus site:create \
-            "${{ inputs.site_name }}" \
+            "${{ vars.PANTHEON_SITE }}" \
             "${{ inputs.site_label }}" \
             "${{ inputs.upstream_id }}" \
             --org="${{ vars.PANTHEON_ORG }}"
@@ -255,7 +252,7 @@ jobs:
           echo "Waiting for Pantheon site provisioning to complete..."
           MAX=15
           for i in $(seq 1 $MAX); do
-            STATUS=$(terminus workflow:list "${{ inputs.site_name }}" \
+            STATUS=$(terminus workflow:list "${{ vars.PANTHEON_SITE }}" \
               --field=status 2>/dev/null | head -1 || true)
             echo "  Attempt ${i}/${MAX} — workflow status: ${STATUS:-unknown}"
             if [[ "$STATUS" == "succeeded" ]]; then
@@ -273,14 +270,14 @@ jobs:
       # Switch the dev environment from SFTP mode (Pantheon default) to Git.
       # -----------------------------------------------------------------------
       - name: Switch Pantheon dev to Git mode
-        run: terminus connection:set "${{ inputs.site_name }}.dev" git
+        run: terminus connection:set "${{ vars.PANTHEON_SITE }}.dev" git
 
       # -----------------------------------------------------------------------
       # Capture the Pantheon Git remote URL for subsequent steps.
       # -----------------------------------------------------------------------
       - name: Get Pantheon git URL
         run: |
-          GIT_URL=$(terminus connection:info "${{ inputs.site_name }}.dev" --field=git_url)
+          GIT_URL=$(terminus connection:info "${{ vars.PANTHEON_SITE }}.dev" --field=git_url)
           echo "PANTHEON_GIT_URL=$GIT_URL" >> "$GITHUB_ENV"
           echo "Pantheon git URL: $GIT_URL"
 
@@ -433,14 +430,14 @@ jobs:
       # Wait for Pantheon's sync_code workflow to complete.
       # -----------------------------------------------------------------------
       - name: Wait for Pantheon sync_code workflow
-        run: terminus workflow:wait "${{ inputs.site_name }}.dev"
+        run: terminus workflow:wait "${{ vars.PANTHEON_SITE }}.dev"
 
       # -----------------------------------------------------------------------
       # Verify the site responds with HTTP 200 on the Pantheon dev URL.
       # -----------------------------------------------------------------------
       - name: 'Verify: site responds with HTTP 200'
         run: |
-          DEV_URL="https://dev-${{ inputs.site_name }}.pantheonsite.io"
+          DEV_URL="https://dev-${{ vars.PANTHEON_SITE }}.pantheonsite.io"
           echo "Checking $DEV_URL ..."
           STATUS=$(curl --insecure --silent --output /dev/null \
             --write-out "%{http_code}" \
@@ -455,4 +452,4 @@ jobs:
           fi
 
       - name: 'Verify: terminus site info'
-        run: terminus site:info "${{ inputs.site_name }}"
+        run: terminus site:info "${{ vars.PANTHEON_SITE }}"

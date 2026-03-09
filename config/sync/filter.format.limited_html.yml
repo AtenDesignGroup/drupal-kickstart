@@ -1,0 +1,26 @@
+uuid: 6dad07fe-9778-481b-96af-acfb6d67f959
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: I-Qu5_AGyDgn7Z3mpCpEPr2_TEgn8Wuf7Ln1WiVZMCU
+name: 'Limited HTML'
+format: limited_html
+weight: 0
+filters:
+  filter_html:
+    id: filter_html
+    provider: filter
+    status: true
+    weight: -10
+    settings:
+      allowed_html: '<br> <p> <strong> <em> <a href>'
+      filter_html_help: true
+      filter_html_nofollow: false
+  filter_url:
+    id: filter_url
+    provider: filter
+    status: true
+    weight: 0
+    settings:
+      filter_url_length: 72

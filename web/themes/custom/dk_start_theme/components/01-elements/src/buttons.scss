@@ -1,0 +1,31 @@
+@use 'partials' as *;
+
+.button {
+  @include type-scale(label, 18);
+  align-items: center;
+  background-color: var(--n-color-gray-200);
+  display: flex;
+  gap: 10px;
+  padding: rem(10px) rem(20px);
+  text-decoration: none;
+  width: fit-content;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  a,
+  span {
+    color: var(--n-color-black);
+  }
+}
+
+.button__icon {
+  display: inline-flex;
+  height: rem(24px);
+  width: rem(24px);
+
+  svg {
+    fill: var(--n-color-black);
+  }
+}

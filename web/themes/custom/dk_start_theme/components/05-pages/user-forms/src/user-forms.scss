@@ -1,0 +1,42 @@
+//
+// Page - User
+//
+// - 01 - User Login Form
+// - 02 - User Register Form
+// - 03 - User Password Reset Form
+//
+
+@use 'partials' as *;
+
+//------------------------------------
+//  01 - User Login Form
+//  Styles specific to the user login form
+//------------------------------------
+
+.user-login-form {
+  .form-item {
+    margin-top: var(--n-space-36);
+  }
+}
+
+//------------------------------------
+//  02 - User Register Form
+//  Styles specific to the user register form
+//------------------------------------
+
+.user-register-form {
+  .form-item {
+    margin-top: var(--n-space-36);
+  }
+}
+
+//------------------------------------
+//  03 - User Password Reset
+//  Styles specific to the user password reset form
+//------------------------------------
+
+.user-pass {
+  .form-item {
+    margin-top: var(--n-space-36);
+  }
+}

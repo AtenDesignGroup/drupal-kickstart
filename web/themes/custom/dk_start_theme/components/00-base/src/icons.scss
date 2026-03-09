@@ -1,0 +1,113 @@
+//
+// @file
+// Libraries - Global - Icons
+//
+
+//
+//  Variables
+//
+$icons_path: '/themes/custom/dk_start_theme/images/icons';
+
+:root {
+  --n-i-arrow-down: url('#{$icons_path}/icon-arrow-down.svg');
+  --n-i-arrow-left: url('#{$icons_path}/icon-arrow-left.svg');
+  --n-i-arrow-right: url('#{$icons_path}/icon-arrow-right.svg');
+  --n-i-arrow-up: url('#{$icons_path}/icon-arrow-up.svg');
+  --n-i-cancel: url('#{$icons_path}/icon-cancel.svg');
+  --n-i-checkmark: url('#{$icons_path}/icon-checkmark.svg');
+  --n-i-circle-check: url('#{$icons_path}/circle-check.svg');
+  --n-i-circle-empty: url('#{$icons_path}/circle-empty.svg');
+  --n-i-circle-filled: url('#{$icons_path}/circle-fill.svg');
+  --n-i-error: url('#{$icons_path}/error.svg');
+  --n-i-minus: url('#{$icons_path}/icon-minus.svg');
+  --n-i-plus: url('#{$icons_path}/icon-plus.svg');
+  --n-i-rectangle-checked: url('#{$icons_path}/rectangle-checked.svg');
+  --n-i-rectangle-empty: url('#{$icons_path}/rectangle-empty.svg');
+  --n-i-search: url('#{$icons_path}/icon-search.svg');
+  --n-i-status: url('#{$icons_path}/status.svg');
+  --n-i-success: url('#{$icons_path}/icon-success.svg');
+  --n-i-warning: url('#{$icons_path}/icon-warning.svg');
+}
+
+//
+// General
+//
+.icon {
+  background-color: var(--n-color-black);
+  block-size: 32px;
+  display: block;
+  font: 0/0 transparent;
+  inline-size: 32px;
+  mask-size: cover;
+}
+
+//
+//  Icons
+//
+.icon--arrow-down {
+  mask: var(--n-i-arrow-down) no-repeat center;
+}
+
+.icon--arrow-left {
+  mask: var(--n-i-arrow-left) no-repeat center;
+}
+
+.icon--arrow-right {
+  mask: var(--n-i-arrow-right) no-repeat center;
+}
+
+.icon--arrow-up {
+  mask: var(--n-i-arrow-up) no-repeat center;
+}
+
+.icon--circle-check {
+  mask: var(--n-i-circle-check) no-repeat center;
+}
+
+.icon--circle-empty {
+  mask: var(--n-i-circle-empty) no-repeat center;
+}
+
+.icon--circle-filled {
+  mask: var(--n-i-circle-filled) no-repeat center;
+}
+
+.icon--cancel {
+  mask: var(--n-i-cancel) no-repeat center;
+}
+
+.icon--checkmark {
+  mask: var(--n-i-checkmark) no-repeat center;
+}
+
+.icon--error {
+  mask: var(--n-i-error) no-repeat center;
+}
+
+.icon--minus {
+  mask: var(--n-i-minus) no-repeat center;
+}
+
+.icon--plus {
+  mask: var(--n-i-plus) no-repeat center;
+}
+
+.icon--rectangle-checked {
+  mask: var(--n-i-rectangle-checked) no-repeat center;
+}
+
+.icon--rectangle-empty {
+  mask: var(--n-i-rectangle-empty) no-repeat center;
+}
+
+.icon--search {
+  mask: var(--n-i-search) no-repeat center;
+}
+
+.icon--success {
+  mask: var(--n-i-success) no-repeat center;
+}
+
+.icon--warning {
+  mask: var(--n-i-warning) no-repeat center;
+}

@@ -1,0 +1,29 @@
+//
+// Elements - Links
+//
+// - 01 - Imports
+// - 02 - General
+//
+
+
+//------------------------------------
+//  01 - Imports
+//------------------------------------
+
+@use 'partials' as *;
+
+
+//------------------------------------
+//  02 - General
+//------------------------------------
+
+a {
+  color: var(--n-color-primary);
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    color: var(--n-color-secondary);
+    text-decoration: none;
+  }
+}

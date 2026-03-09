@@ -1,0 +1,368 @@
+//
+// Global - Forms
+//
+
+//------------------------------------
+//  01 - Imports
+//------------------------------------
+
+@use 'partials' as *;
+
+//------------------------------------
+//  02 - General
+//------------------------------------
+
+form {
+  display: grid;
+  gap: var(--n-space-20, 1.25rem);
+  grid-template-columns: 1fr;
+}
+
+//------------------------------------
+//  03 - Labels
+//------------------------------------
+
+label,
+legend,
+.form-item__label {
+  @include type-scale(label, 16);
+  display: block;
+  font-weight: var(--n-fw-bold);
+}
+
+legend {
+  margin-block-end: 4px;
+}
+
+//------------------------------------
+// 04 - Fieldsets
+//------------------------------------
+fieldset {
+  border: none;
+  margin-inline: 0;
+  padding: 0;
+}
+
+input[type='date'],
+input[type='datetime-local'],
+input[type='email'],
+input[type='month'],
+input[type='number'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='text'],
+input[type='time'],
+input[type='url'],
+input[type='week'],
+select,
+textarea {
+  @include type-scale(label, 16);
+  border: solid 1px var(--n-color-dark);
+  border-radius: 0;
+  color: var(--n-color-black);
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  padding: 12px;
+
+  &::placeholder {
+    color: var(--n-color-gray-600);
+  }
+}
+
+//------------------------------------
+// 05 - Select
+//------------------------------------
+select {
+  appearance: none;
+  background: var(--n-i-triangle-down) no-repeat calc(100% - 12px) center;
+  background-size: 24px;
+  block-size: 52px;
+}
+
+// Remove default IE arrow
+select::-ms-expand {
+  display: none;
+}
+
+//------------------------------------
+// 06 - Search
+//------------------------------------
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+  display: none;
+}
+
+input[type='search'] {
+  background: var(--n-i-search) no-repeat 12px center;
+  background-size: 28px;
+  padding-inline-start: 24px;
+}
+
+//------------------------------------
+// 07 - Checkboxes / Radios
+//------------------------------------
+
+input[type='radio'],
+input[type='checkbox'] {
+  appearance: none;
+  block-size: 100%;
+  cursor: pointer;
+  inline-size: 100%;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  margin: 0;
+  position: absolute;
+  z-index: var(--n-zindex-default);
+
+  + label[for] {
+    display: flex;
+    font-weight: var(--n-fw-regular);
+    gap: 4px;
+
+    &:before {
+      background-color: var(--n-color-black);
+      block-size: 28px;
+      content: '';
+      display: block;
+      inline-size: 28px;
+      inset-block-start: -4px;
+      inset-inline-start: -2px;
+      mask-size: cover;
+      position: relative;
+
+      @include bp-min(tablet) {
+        inset-block-start: -1px;
+      }
+    }
+  }
+}
+
+input[type='checkbox'] {
+  + label:before {
+    mask: var(--n-i-rectangle-empty) no-repeat center;
+  }
+
+  &:checked + label:before {
+    mask: var(--n-i-rectangle-checked) no-repeat center;
+  }
+}
+
+input[type='radio'] {
+  + label:before {
+    mask: var(--n-i-circle-empty) no-repeat center;
+  }
+
+  &:checked + label:before {
+    mask: var(--n-i-circle-filled) no-repeat center;
+  }
+}
+
+///------------------------------------
+//  Descriptions
+//------------------------------------
+.description,
+.form-item__description,
+.form-item__description p {
+  @include type-scale(label, 14);
+  color: var(--n-color-dark);
+}
+
+//------------------------------------
+//  08 - Passwords
+//------------------------------------
+
+.password-strength__meter {
+  background-color: var(--n-color-gray-100);
+}
+
+.password-strength__indicator {
+  &.is-fair {
+    background-color: var(--n-color-yellow);
+  }
+  &.is-strong {
+    background-color: var(--n-color-green);
+  }
+  &.is-good {
+    background-color: var(--n-color-green);
+  }
+  &.is-weak {
+    background-color: var(--n-color-red);
+  }
+}
+
+.password-confirm,
+.password-strength__title {
+  @include type-scale(label, 14);
+}
+
+.password-strength__text {
+  font-weight: var(--n-fw-bold);
+}
+
+.password-confirm > span {
+  font-weight: var(--n-fw-bold);
+
+  &.error {
+    color: var(--n-color-red);
+  }
+
+  &.ok {
+    color: var(--n-color-green);
+  }
+}
+
+.password-suggestions {
+  @include type-scale(label, 14);
+  font-weight: var(--n-fw-bold);
+
+  > ul {
+    font-weight: var(--n-fw-regular);
+  }
+}
+
+.search-advanced {
+  margin-bottom: 10px;
+  #edit-types-fieldset,
+  #edit-lang-fieldset {
+    .form-type__checkbox {
+      margin-bottom: 5px;
+      input {
+        width: auto;
+      }
+    }
+  }
+}
+
+//------------------------------------
+// 09 - Errors
+//------------------------------------
+.form-error {
+  color: var(--n-color-danger);
+
+  p {
+    color: var(--n-color-danger);
+  }
+
+  input[type='date'],
+  input[type='datetime-local'],
+  input[type='email'],
+  input[type='month'],
+  input[type='number'],
+  input[type='password'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='text'],
+  input[type='time'],
+  input[type='url'],
+  input[type='week'],
+  select,
+  textarea {
+    border: solid 1px var(--n-color-danger);
+  }
+}
+
+//------------------------------------
+// 10 - Disabled
+//------------------------------------
+.form-item--disabled {
+  color: var(--n-color-gray-600);
+
+  p {
+    color: var(--n-color-gray-600);
+  }
+
+  label:before {
+    background-color: var(--n-color-gray-600);
+  }
+
+  input {
+    cursor: not-allowed;
+  }
+
+  input[type='date'],
+  input[type='datetime-local'],
+  input[type='email'],
+  input[type='month'],
+  input[type='number'],
+  input[type='password'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='text'],
+  input[type='time'],
+  input[type='url'],
+  input[type='week']
+  select,
+  textarea {
+    border: solid 1px var(--n-color-gray-600);
+    color: var(--n-color-gray-600);
+
+    &::placeholder {
+      color: var(--n-color-gray-600);
+    }
+  }
+}
+
+//------------------------------------
+// 11 - Actions
+//------------------------------------
+input[type='button'],
+input[type='submit'],
+input[type='reset'] {
+  @include type-scale(body, 18);
+  appearance: none;
+  background-color: var(--n-color-black);
+  border: none;
+  box-shadow: none;
+  color: var(--n-color-white);
+  cursor: pointer;
+  padding-block: 8px;
+  padding-inline: 12px;
+  position: relative;
+  text-decoration: underline transparent;
+  text-underline-offset: 2px;
+
+  &:hover,
+  &:focus {
+    color: var(--n-color-white);
+    text-decoration: underline currentColor;
+  }
+}
+
+input[value='reset'] {
+  background: var(--n-i-close) no-repeat left center;
+  color: var(--n-color-black);
+  background-size: 28px;
+  padding-inline-start: 32px;
+}
+
+.form-actions {
+  align-self: flex-start;
+  display: flex;
+  gap: var(--n-space-20, 1.25rem);
+
+  @include bp-min(tablet) {
+    align-self: auto;
+  }
+}
+
+//------------------------------------
+// 12 - Exposed Filters
+//------------------------------------
+.form--exposed-filters {
+  align-items: flex-end;
+  display: flex;
+  flex-flow: nowrap column;
+  gap: var(--n-space-20, 1.25rem);
+
+  @include bp-min(tablet) {
+    flex-flow: nowrap row;
+  }
+
+  .form-item {
+    margin: 0;
+  }
+}

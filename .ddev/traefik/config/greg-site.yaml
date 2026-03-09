@@ -1,0 +1,123 @@
+#ddev-generated
+# If you remove the ddev-generated line above you
+# are responsible for maintaining this file. DDEV will not then
+# update it, for example if you add `additional_hostnames`, etc.
+
+http:
+  routers:
+    greg-site-solr-8983-http:
+      entrypoints:
+        - http-8983
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-solr-8983"
+      tls: false
+      # middlewares:
+      #   - "greg-site-redirectHttps"
+    greg-site-web-80-http:
+      entrypoints:
+        - http-80
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-web-80"
+      tls: false
+      # middlewares:
+      #   - "greg-site-redirectHttps"
+    greg-site-web-8025-http:
+      entrypoints:
+        - http-8025
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-web-8025"
+      tls: false
+      # middlewares:
+      #   - "greg-site-redirectHttps"
+    greg-site-xhgui-80-http:
+      entrypoints:
+        - http-8143
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-xhgui-80"
+      tls: false
+      # middlewares:
+      #   - "greg-site-redirectHttps"
+    
+    
+    greg-site-solr-8983-https:
+      entrypoints:
+        - http-8943
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-solr-8983"
+      
+      tls: true
+      
+    
+    
+    greg-site-web-80-https:
+      entrypoints:
+        - http-443
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-web-80"
+      
+      tls: true
+      
+    greg-site-web-8025-https:
+      entrypoints:
+        - http-8026
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-web-8025"
+      
+      tls: true
+      
+    
+    greg-site-xhgui-80-https:
+      entrypoints:
+        - http-8142
+      rule: HostRegexp(`^greg-site\.ddev\.site$`)
+      
+      service: "greg-site-xhgui-80"
+      
+      tls: true
+      
+    
+
+  middlewares:
+    greg-site-redirectHttps:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    greg-site-solr-8983:
+      loadbalancer:
+        servers:
+          - url: http://ddev-greg-site-solr:8983
+        
+    
+    greg-site-web-80:
+      loadbalancer:
+        servers:
+          - url: http://ddev-greg-site-web:80
+        
+    greg-site-web-8025:
+      loadbalancer:
+        servers:
+          - url: http://ddev-greg-site-web:8025
+        
+    
+    
+    greg-site-xhgui-80:
+      loadbalancer:
+        servers:
+          - url: http://ddev-greg-site-xhgui:80
+        
+    
+    
+
+tls:
+  certificates:
+    - certFile: /mnt/ddev-global-cache/traefik/certs/greg-site.crt
+      keyFile: /mnt/ddev-global-cache/traefik/certs/greg-site.key

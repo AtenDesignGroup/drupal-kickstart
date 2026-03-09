@@ -1,0 +1,19 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-figure'
+] %}
+
+<figure {{attributes.addClass(classes)}}>
+  {% block media_block %}
+    {{ media }}
+  {% endblock %}
+
+  {% block caption_block %}
+    {% if caption %}
+      <figcaption class='c-figure__caption'>
+        {{caption}}
+      </figcaption>
+    {% endif %}
+  {% endblock %}
+</figure>

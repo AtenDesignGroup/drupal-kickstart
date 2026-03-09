@@ -1,0 +1,11 @@
+// ------------------------------------
+//  Square
+//  Quickly set the height and width of an element to the same dimensions.
+//  - @param $dimension: Value to set the size of the square to.
+//  - @example = @include square(100px);
+// ------------------------------------
+
+@mixin square($dimension) {
+  block-size: $dimension;
+  inline-size: $dimension;
+}

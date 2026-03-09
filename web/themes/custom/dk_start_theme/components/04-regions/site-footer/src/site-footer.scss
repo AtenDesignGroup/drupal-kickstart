@@ -1,0 +1,16 @@
+@use 'partials' as *;
+
+.site-footer {
+  position: relative;
+
+  .site-footer__logo {
+    display: block;
+    width: fit-content;
+
+    img {
+      display: block;
+      max-width: rem(200px);
+      width: 100%;
+    }
+  }
+}

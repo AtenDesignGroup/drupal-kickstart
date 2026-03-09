@@ -1,0 +1,62 @@
+//
+// Layouts - Stack
+//
+// - 01 - Imports
+// - 02 - Stack
+//
+
+//------------------------------------
+//  01 - Imports
+//------------------------------------
+
+@use 'partials' as *;
+
+
+//------------------------------------
+//  02 - Stack
+//------------------------------------
+
+[class*='l-stack'] {
+  --stack-spacing: var(--n-space-36, 2rem);
+}
+
+[class*='l-stack'] > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+[class*='l-stack'] > * + * {
+  margin-top: var(--stack-spacing);
+}
+
+.l-stack--ruled > * + * {
+  padding-top: var(--stack-spacing);
+  border-top:
+    var(--border-size, 1px)
+    var(--border-style, solid)
+    var(--border-color);
+}
+
+.l-stack--none > * + * {
+  margin-top: 0;
+}
+
+.l-stack--small > * + * {
+  --stack-spacing: var(--n-space-20);
+}
+
+.l-stack--medium > * + * {
+  --stack-spacing: var(--n-space-36);
+}
+
+.l-stack--large > * + * {
+  --stack-spacing: var(--n-space-60);
+}
+
+.l-stack--xlarge > * + * {
+  --stack-spacing: var(--n-space-96);
+}
+
+.l-stack--xxlarge > * + * {
+  --stack-spacing: var(--n-space-120);
+}

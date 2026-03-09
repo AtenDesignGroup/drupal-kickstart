@@ -1,0 +1,281 @@
+name: Pantheon Project Deploy
+
+# Deploys an already-built Drupal project from this repository to an existing
+# Pantheon site for the first time. Use this when drupal-kickstart.sh has
+# already been run locally and the built project is committed to the repo,
+# but the code has not yet been pushed to Pantheon.
+#
+# Prerequisites:
+#   1. drupal-kickstart.sh has been run and the built project is committed.
+#   2. A Pantheon site already exists (run pantheon-site-create.yml first, or
+#      create the site manually via the Pantheon dashboard/Terminus). This
+#      workflow will auto-switch to Git mode if the site is still in SFTP mode.
+#
+# Required secrets (pre-configured in repo settings, NOT workflow inputs):
+#   PANTHEON_MACHINE_TOKEN  — Terminus authentication token
+#   SSH_PRIVATE_KEY         — Private key whose public key is registered in Pantheon dashboard
+#
+# This workflow is safe to re-run — all settings cleanup steps are idempotent.
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_name:
+        description: 'Pantheon site machine name (must already exist — e.g. my-client-site)'
+        required: true
+        type: string
+      php_version:
+        description: 'PHP version'
+        required: false
+        type: string
+        default: '8.3'
+
+env:
+  GIT_COMMIT_MESSAGE: 'GitHub Actions Build'
+
+jobs:
+  project-deploy:
+    name: Deploy Project to Pantheon
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # -----------------------------------------------------------------------
+      # Checkout the built project with full history.
+      # fetch-depth: 0 is required so git can create the merge commit that
+      # joins our history with the Pantheon upstream history.
+      # -----------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------------
+      # Install PHP, Terminus, and authenticate.
+      # -----------------------------------------------------------------------
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.php_version }}
+
+      # -----------------------------------------------------------------------
+      # Run composer install --no-dev to populate vendor/, web/core,
+      # web/modules/contrib, and web/themes/contrib before the git commit.
+      # Mirrors the pre-deploy-composer-install action from aten-actions.
+      # --no-dev excludes development dependencies (phpunit, phpcs, etc.)
+      # that must not be deployed to Pantheon.
+      # -----------------------------------------------------------------------
+      - name: Composer install (no dev dependencies)
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Install Terminus
+        run: |
+          curl -L https://github.com/pantheon-systems/terminus/releases/latest/download/terminus.phar \
+            -o /usr/local/bin/terminus
+          chmod +x /usr/local/bin/terminus
+          terminus --version
+
+      - name: Authenticate Terminus
+        run: terminus auth:login --machine-token="${{ secrets.PANTHEON_MACHINE_TOKEN }}"
+
+      # -----------------------------------------------------------------------
+      # Confirm the site exists and ensure it is in Git mode.
+      # Auto-switches from SFTP to Git if needed — safe to run whether or not
+      # pantheon-site-create.yml was used to provision the site.
+      # -----------------------------------------------------------------------
+      - name: Verify site exists and ensure Git mode
+        run: |
+          terminus site:info "${{ inputs.site_name }}"
+          TYPE=$(terminus environment:info "${{ inputs.site_name }}.dev" --field=connection_type 2>/dev/null || true)
+          echo "Connection type: ${TYPE:-unknown}"
+          if [[ "${TYPE}" != "git" ]]; then
+            echo "Switching to Git mode..."
+            terminus connection:set "${{ inputs.site_name }}.dev" git
+          fi
+
+      # -----------------------------------------------------------------------
+      # Capture the Pantheon Git remote URL.
+      # -----------------------------------------------------------------------
+      - name: Get Pantheon git URL
+        run: |
+          GIT_URL=$(terminus connection:info "${{ inputs.site_name }}.dev" --field=git_url)
+          echo "PANTHEON_GIT_URL=$GIT_URL" >> "$GITHUB_ENV"
+          echo "Pantheon git URL: $GIT_URL"
+
+      # -----------------------------------------------------------------------
+      # Load the SSH private key into the agent and disable strict host key
+      # checking so the runner can connect to Pantheon's git server.
+      # -----------------------------------------------------------------------
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Disable SSH strict host key checking
+        run: 'printf "\nHost *\n\tStrictHostKeyChecking no" >> ~/.ssh/config'
+
+      # -----------------------------------------------------------------------
+      # Configure git identity and add the Pantheon remote.
+      # Remote is named "remote" — consistent with other Pantheon workflows.
+      # -----------------------------------------------------------------------
+      - name: Configure git and add Pantheon remote
+        run: |
+          git config --global pull.rebase false
+          git config --global user.name "Aten CI Bot"
+          git config --global user.email "ci@atendesigngroup.com"
+          git remote add remote "${{ env.PANTHEON_GIT_URL }}"
+
+      # -----------------------------------------------------------------------
+      # Fetch Pantheon's master branch (shallow — we only need the ref to
+      # satisfy the merge, not the full upstream history).
+      # -----------------------------------------------------------------------
+      - name: Fetch Pantheon master
+        run: git fetch remote master --depth=1
+
+      # -----------------------------------------------------------------------
+      # Merge the Pantheon upstream history into our built project using
+      # --strategy=ours. This joins the two unrelated git histories (satisfying
+      # Pantheon's git server, which rejects pushes with unrelated histories)
+      # while keeping 100% of our built project files intact.
+      # -----------------------------------------------------------------------
+      - name: Merge Pantheon upstream history
+        run: |
+          git merge remote/master \
+            --allow-unrelated-histories \
+            --strategy=ours \
+            --no-edit \
+            -m "${{ env.GIT_COMMIT_MESSAGE }}"
+
+      # -----------------------------------------------------------------------
+      # Settings cleanup before pushing to Pantheon (all steps are idempotent):
+      #
+      # 1. Strip the $databases block that drush site:install writes — it
+      #    points to DDEV's MySQL server (db:db@db/db) and must not reach
+      #    Pantheon. Pantheon injects correct DB credentials at runtime via
+      #    pantheon-systems/drupal-integrations.
+      #
+      # 2. Ensure the settings.pantheon.php include is present in settings.php.
+      #    The file itself is provided by pantheon-systems/drupal-integrations
+      #    at runtime — we only need the include stanza in settings.php.
+      #
+      # 3. Exclude settings.ddev.php from git. The file contains the plaintext
+      #    hash salt and is DDEV-only; it must never appear in Pantheon's git.
+      #    The settings.php include is already guarded by IS_DDEV_PROJECT so
+      #    it is safe to leave on disk — we only need to .gitignore the file.
+      # -----------------------------------------------------------------------
+      - name: Clean settings for Pantheon
+        run: |
+          SETTINGS="web/sites/default/settings.php"
+
+          # Drupal's scaffold .gitignore excludes settings.php by default.
+          # If the file is absent, create a minimal one so Pantheon can bootstrap.
+          if [[ ! -f "$SETTINGS" ]]; then
+            mkdir -p "$(dirname "$SETTINGS")"
+            cat > "$SETTINGS" <<'PHP'
+          <?php
+
+          /**
+           * @file
+           * Drupal site configuration.
+           */
+          PHP
+            echo "Created minimal settings.php (was absent from repo — likely gitignored)"
+          fi
+
+          # 1. Remove the $databases block written by drush site:install.
+          # The block may be absent if settings.php was gitignored — sed is a no-op then.
+          sed -i '/^\$databases\[/,/^\];$/d' "$SETTINGS"
+          echo "Stripped \$databases block from settings.php (no-op if already absent)"
+
+          # 2. Append settings.pantheon.php include (idempotent guard).
+          if ! grep -q "settings.pantheon.php" "$SETTINGS"; then
+            cat >> "$SETTINGS" <<'PHP'
+
+          /**
+           * Include the Pantheon-specific settings file.
+           *
+           * n.b. The settings.pantheon.php file makes some changes
+           *      that affect all environments that this site
+           *      exists in.  Always include this file, even in
+           *      a local development environment, to ensure that
+           *      the site settings remain consistent.
+           */
+          include __DIR__ . "/settings.pantheon.php";
+          PHP
+            echo "Appended settings.pantheon.php include to settings.php"
+          else
+            echo "settings.pantheon.php include already present — skipping"
+          fi
+
+          # 3. Exclude settings.ddev.php from git commits.
+          DDEV_SETTINGS_ENTRY="web/sites/default/settings.ddev.php"
+          if ! grep -qxF "$DDEV_SETTINGS_ENTRY" .gitignore 2>/dev/null; then
+            echo "$DDEV_SETTINGS_ENTRY" >> .gitignore
+            echo "Added $DDEV_SETTINGS_ENTRY to .gitignore"
+          fi
+
+          # 4. Remove settings.php from .gitignore so it can be committed and
+          # pushed to Pantheon. Drupal's scaffold gitignore excludes it by
+          # default, but Pantheon needs it present in the repo to bootstrap.
+          # Use sed to remove any line that matches exactly "settings.php" or
+          # "web/sites/default/settings.php" (both forms appear in the wild).
+          sed -i '/^web\/sites\/default\/settings\.php$/d' .gitignore
+          sed -i '/^sites\/default\/settings\.php$/d' .gitignore
+          echo "Ensured settings.php is not excluded by .gitignore"
+
+      # -----------------------------------------------------------------------
+      # Stage all changes and amend the merge commit so settings cleanup and
+      # the merge are a single atomic commit. --no-verify skips grumphp hooks.
+      # -----------------------------------------------------------------------
+      - name: Stage and amend merge commit
+        run: |
+          # Remove all .gitignore files (root + Drupal scaffold-generated
+          # subdirectory ones such as web/.gitignore which excludes autoload.php)
+          # so git add -A picks up every Composer build artifact.
+          # Pantheon does not run composer install at deploy time and does
+          # not need a development .gitignore in its repository.
+          find . -name .gitignore -not -path './.git/*' -delete
+          git add -A
+          git commit --amend --no-edit --no-verify
+
+      # -----------------------------------------------------------------------
+      # Push the built project to Pantheon's master branch.
+      # --force-with-lease only overwrites the remote if it is still at the ref
+      # we fetched, preventing accidental overwrites from concurrent pushes.
+      # -----------------------------------------------------------------------
+      - name: Push to Pantheon master
+        run: git push remote HEAD:master --force-with-lease
+
+      # -----------------------------------------------------------------------
+      # Wait for Pantheon's sync_code workflow to complete.
+      # -----------------------------------------------------------------------
+      - name: Wait for Pantheon sync_code workflow
+        run: terminus workflow:wait "${{ inputs.site_name }}.dev"
+
+      # -----------------------------------------------------------------------
+      # Verify the site responds with HTTP 200 on the Pantheon dev URL.
+      # -----------------------------------------------------------------------
+      - name: 'Verify: site responds with HTTP 200'
+        run: |
+          DEV_URL="https://dev-${{ inputs.site_name }}.pantheonsite.io"
+          echo "Checking $DEV_URL ..."
+          STATUS=$(curl --insecure --silent --output /dev/null \
+            --write-out "%{http_code}" \
+            --max-time 30 \
+            --retry 5 \
+            --retry-delay 15 \
+            "$DEV_URL")
+          echo "HTTP status: ${STATUS}"
+          if [[ "${STATUS}" != "200" ]]; then
+            echo "ERROR: Expected HTTP 200, got ${STATUS}"
+            exit 1
+          fi
+
+      # -----------------------------------------------------------------------
+      # On failure: surface Pantheon Drupal logs to help diagnose issues.
+      # -----------------------------------------------------------------------
+      - name: 'Debug: Drupal watchdog log on failure'
+        if: failure()
+        run: |
+          terminus drush "${{ inputs.site_name }}.dev" \
+            -- watchdog:show --count=50 --severity=Warning || true

@@ -1,0 +1,110 @@
+services:
+  php:
+    # Specify the version of Drupal you wish to use for Tugboat below.
+    image: q0rban/tugboat-drupal:10
+    default: true
+    http: false
+    depends: mysql
+    commands:
+      init:
+        # Install nodejs
+        - apt-get update
+        - apt-get install -y ca-certificates curl gnupg
+        - mkdir -p /etc/apt/keyrings
+        - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+        - echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+        - apt-get update
+        - apt-get install nodejs -y
+        - node -v
+        - npm -v
+        # Install cypress dependencies
+        - apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+        - set -eux
+        # Use the tugboat-specific Drupal settings.
+        - cp "${TUGBOAT_ROOT}/.tugboat/settings.php" "${DOCROOT}/sites/default/"
+        - cp "${TUGBOAT_ROOT}/.tugboat/settings.local.php" "${DOCROOT}/sites/default/"
+        # Check out a branch using the unique Tugboat ID for this repository, to
+        # ensure we don't clobber an existing branch.
+        - git checkout -b $TUGBOAT_REPO_ID
+        # Composer is hungry. You need a Tugboat project with a pretty sizeable
+        # chunk of memory.
+        - export COMPOSER_MEMORY_LIMIT=-1
+      update: |
+        # This is an environment variable we added in the Dockerfile that
+        # provides the path to Drupal composer root (not the web root).
+        cd $DRUPAL_COMPOSER_ROOT
+        # Set minimum viability to dev.
+        composer config minimum-stability dev
+        # We configure the Drupal project to use the checkout of the module as a
+        # Composer package repository.
+        composer config repositories.tugboat vcs $TUGBOAT_ROOT
+        # Update drupal core.
+        composer update "drupal/core*" --with-dependencies
+        # Use Drush 12
+        composer require drush/drush
+        # Now we can require this module, specifing the branch name we created
+        # above that uses the $TUGBOAT_REPO_ID environment variable.
+        composer require drupal/prototype:dev-$TUGBOAT_REPO_ID --with-dependencies
+        composer require drupal/storybook
+        composer require drupal/styleguide
+        # Install Drupal on the site.
+        vendor/bin/drush \
+          --yes \
+          --db-url=mysql://tugboat:tugboat@mysql:3306/tugboat \
+          --site-name="Live preview for ${TUGBOAT_PREVIEW_NAME}" \
+          --account-pass=admin \
+          site:install standard
+        # Set up the files directory permissions.
+        mkdir -p $DRUPAL_DOCROOT/sites/default/files
+        chgrp -R www-data $DRUPAL_DOCROOT/sites/default/files
+        chmod 2775 $DRUPAL_DOCROOT/sites/default/files
+        chmod -R g+w $DRUPAL_DOCROOT/sites/default/files
+        # Enable the modules.
+        vendor/bin/drush --yes pm:enable sdc
+        vendor/bin/drush --yes pm:enable twig_field_value
+        vendor/bin/drush --yes pm:enable twig_tweak
+        vendor/bin/drush --yes pm:enable storybook
+        vendor/bin/drush --yes role:perm:add anonymous 'render storybook stories'
+        vendor/bin/drush --yes pm:enable styleguide
+        vendor/bin/drush --yes role:perm:add anonymous 'view style guides'
+        # Make cyress script executable.
+        chmod 775 ${TUGBOAT_ROOT}/.tugboat/cypress.sh
+        # Initialialize Storybook.
+        cd "${TUGBOAT_ROOT}/.tugboat"
+        npm install
+      build: |
+        set -eux
+        # Delete and re-check out this branch in case this is built from a Base Preview.
+        git branch -D $TUGBOAT_REPO_ID && git checkout -b $TUGBOAT_REPO_ID || true
+        export COMPOSER_MEMORY_LIMIT=-1
+        cd $DRUPAL_COMPOSER_ROOT
+        composer install --optimize-autoloader
+        # Update this module, including all dependencies.
+        composer update drupal/prototype --with-all-dependencies
+        vendor/bin/drush --yes updb
+        vendor/bin/drush cache:rebuild
+        # Generate the theme.
+        cd "${DOCROOT}/themes/contrib/prototype"
+        php "generator.php" -n prototest -d "PrototypeTest" -p themes/custom -a proto
+        cd $DRUPAL_COMPOSER_ROOT
+        vendor/bin/drush --yes theme:install prototest
+        vendor/bin/drush --yes config:set system.theme default prototest
+        vendor/bin/drush cache:rebuild
+        vendor/bin/drush --yes --force --uri=${TUGBOAT_DEFAULT_SERVICE_URL} storybook:generate-all-stories
+        # Build Storybook.
+        cd "${TUGBOAT_ROOT}/.tugboat"
+        npm run build-storybook -- -o "${DRUPAL_DOCROOT}/storybook"
+        # # Copy tugboat config.
+        cp "${TUGBOAT_ROOT}/.tugboat/cypress.config.js" "${DOCROOT}/themes/contrib/prototype/tests/cypress/"
+        # # Install cypress.
+        cd "${DOCROOT}/themes/contrib/prototype/tests/cypress"
+        npm install
+      online: |
+        .tugboat/cypress.sh
+        # Reset back to the original test theme after running cypress tests.
+        cd $DRUPAL_COMPOSER_ROOT
+        vendor/bin/drush --yes config:set system.theme default prototest
+        vendor/bin/drush --yes theme:uninstall cypresstest
+        vendor/bin/drush cache:rebuild
+  mysql:
+    image: tugboatqa/mariadb

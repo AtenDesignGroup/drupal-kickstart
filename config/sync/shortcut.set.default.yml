@@ -1,0 +1,8 @@
+uuid: 84857f3c-383f-4992-99ad-fada38fd7ad4
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: OoNUehebTre-mMjTh0XGoJmd9P6u2lq5h0h9vnlCarI
+id: default
+label: 'Default Shortcuts'

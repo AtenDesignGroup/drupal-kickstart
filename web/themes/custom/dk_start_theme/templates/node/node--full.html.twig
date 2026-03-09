@@ -1,0 +1,18 @@
+<article{{attributes.addClass(['article'])}}>
+
+  <header class="article__header l-container">
+    {{ title_prefix }}
+    {{ include('dk_start_theme:page-title', {
+      title: label
+    }, with_context = false) }}
+    {{ title_suffix }}
+  </header>
+
+  <div class="l--1-col l-container">
+    <div class="l__primary">
+      {% if content %}
+        {{ content }}
+      {% endif %}
+    </div>
+  </div>
+</article>
