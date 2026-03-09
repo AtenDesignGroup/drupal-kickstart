@@ -153,14 +153,18 @@ jobs:
       #    Pantheon. Pantheon injects correct DB credentials at runtime via
       #    pantheon-systems/drupal-integrations.
       #
-      # 2. Ensure the settings.pantheon.php include is present in settings.php.
-      #    The file itself is provided by pantheon-systems/drupal-integrations
-      #    at runtime — we only need the include stanza in settings.php.
+      # 2. Copy settings.pantheon.php from the vendor assets into sites/default.
+      #    Pantheon's filesystem is read-only after deploy and build_step is
+      #    false, so composer scaffold never runs on Pantheon. The file must
+      #    arrive via git.
       #
-      # 3. Exclude settings.ddev.php from git. The file contains the plaintext
-      #    hash salt and is DDEV-only; it must never appear in Pantheon's git.
-      #    The settings.php include is already guarded by IS_DDEV_PROJECT so
-      #    it is safe to leave on disk — we only need to .gitignore the file.
+      # 3. Ensure the settings.pantheon.php include is present in settings.php.
+      #
+      # 4. Generate a hash_salt if settings.php contains an empty one. Pantheon's
+      #    read-only filesystem means the installer cannot write it at runtime.
+      #
+      # 5. Exclude settings.ddev.php from git. The file is DDEV-only and must
+      #    never appear in Pantheon's git.
       # -----------------------------------------------------------------------
       - name: Clean settings for Pantheon
         run: |
@@ -186,7 +190,20 @@ jobs:
           sed -i '/^\$databases\[/,/^\];$/d' "$SETTINGS"
           echo "Stripped \$databases block from settings.php (no-op if already absent)"
 
-          # 2. Append settings.pantheon.php include (idempotent guard).
+          # 2. Copy settings.pantheon.php from vendor into sites/default.
+          # Pantheon does not run composer install (build_step: false), so the
+          # scaffold-generated file must be committed to git explicitly.
+          PANTHEON_PHP="vendor/pantheon-systems/drupal-integrations/assets/settings.pantheon.php"
+          DEST="web/sites/default/settings.pantheon.php"
+          if [[ -f "$PANTHEON_PHP" ]]; then
+            cp "$PANTHEON_PHP" "$DEST"
+            echo "Copied settings.pantheon.php from vendor assets"
+          else
+            echo "ERROR: $PANTHEON_PHP not found — is pantheon-systems/drupal-integrations installed?"
+            exit 1
+          fi
+
+          # 3. Append settings.pantheon.php include (idempotent guard).
           if ! grep -q "settings.pantheon.php" "$SETTINGS"; then
             cat >> "$SETTINGS" <<'PHP'
 
@@ -206,14 +223,25 @@ jobs:
             echo "settings.pantheon.php include already present — skipping"
           fi
 
-          # 3. Exclude settings.ddev.php from git commits.
+          # 4. Generate a hash_salt if the current value is empty.
+          # Pantheon's code filesystem is read-only at runtime, so the installer
+          # cannot write it. A salt must be committed in settings.php.
+          if grep -q "\$settings\['hash_salt'\] = '';" "$SETTINGS"; then
+            SALT=$(php -r "echo str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(random_bytes(55)));")
+            sed -i "s|\\\$settings\['hash_salt'\] = '';|\$settings['hash_salt'] = '$SALT';|" "$SETTINGS"
+            echo "Generated and set hash_salt in settings.php"
+          else
+            echo "hash_salt already set — skipping"
+          fi
+
+          # 5. Exclude settings.ddev.php from git commits.
           DDEV_SETTINGS_ENTRY="web/sites/default/settings.ddev.php"
           if ! grep -qxF "$DDEV_SETTINGS_ENTRY" .gitignore 2>/dev/null; then
             echo "$DDEV_SETTINGS_ENTRY" >> .gitignore
             echo "Added $DDEV_SETTINGS_ENTRY to .gitignore"
           fi
 
-          # 4. Remove settings.php from .gitignore so it can be committed and
+          # 6. Remove settings.php from .gitignore so it can be committed and
           # pushed to Pantheon. Drupal's scaffold gitignore excludes it by
           # default, but Pantheon needs it present in the repo to bootstrap.
           # Use sed to remove any line that matches exactly "settings.php" or
