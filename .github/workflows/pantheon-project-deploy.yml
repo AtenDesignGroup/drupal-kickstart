@@ -16,7 +16,7 @@ name: Pantheon Project Deploy
 #   SSH_PRIVATE_KEY         — Private key whose public key is registered in Pantheon dashboard
 #
 # Required variable (configured in repo/environment Settings → Variables):
-#   PANTHEON_SITE           — Pantheon site machine name (e.g. my-client-site)
+#   PANTHEON_GREG_SITE           — Pantheon site machine name (e.g. my-client-site)
 #
 # This workflow is safe to re-run — all settings cleanup steps are idempotent.
 
@@ -84,12 +84,12 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Verify site exists and ensure Git mode
         run: |
-          terminus site:info "${{ vars.PANTHEON_SITE }}"
-          TYPE=$(terminus environment:info "${{ vars.PANTHEON_SITE }}.dev" --field=connection_type 2>/dev/null || true)
+          terminus site:info "${{ vars.PANTHEON_GREG_SITE }}"
+          TYPE=$(terminus environment:info "${{ vars.PANTHEON_GREG_SITE }}.dev" --field=connection_type 2>/dev/null || true)
           echo "Connection type: ${TYPE:-unknown}"
           if [[ "${TYPE}" != "git" ]]; then
             echo "Switching to Git mode..."
-            terminus connection:set "${{ vars.PANTHEON_SITE }}.dev" git
+            terminus connection:set "${{ vars.PANTHEON_GREG_SITE }}.dev" git
           fi
 
       # -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Get Pantheon git URL
         run: |
-          GIT_URL=$(terminus connection:info "${{ vars.PANTHEON_SITE }}.dev" --field=git_url)
+          GIT_URL=$(terminus connection:info "${{ vars.PANTHEON_GREG_SITE }}.dev" --field=git_url)
           echo "PANTHEON_GIT_URL=$GIT_URL" >> "$GITHUB_ENV"
           echo "Pantheon git URL: $GIT_URL"
 
@@ -277,14 +277,14 @@ jobs:
       # Wait for Pantheon's sync_code workflow to complete.
       # -----------------------------------------------------------------------
       - name: Wait for Pantheon sync_code workflow
-        run: terminus workflow:wait "${{ vars.PANTHEON_SITE }}.dev"
+        run: terminus workflow:wait "${{ vars.PANTHEON_GREG_SITE }}.dev"
 
       # -----------------------------------------------------------------------
       # Verify the site responds with HTTP 200 on the Pantheon dev URL.
       # -----------------------------------------------------------------------
       - name: 'Verify: site responds with HTTP 200'
         run: |
-          DEV_URL="https://dev-${{ vars.PANTHEON_SITE }}.pantheonsite.io"
+          DEV_URL="https://dev-${{ vars.PANTHEON_GREG_SITE }}.pantheonsite.io"
           echo "Checking $DEV_URL ..."
           STATUS=$(curl --insecure --silent --output /dev/null \
             --write-out "%{http_code}" \
