@@ -47,6 +47,7 @@ module:
   pantheon_secrets: 0
   path: 0
   path_alias: 0
+  prototype_slideshow_test: 0
   rabbit_hole: 0
   redirect: 0
   redis: 0
@@ -78,4 +79,5 @@ theme:
   stable9: 0
   gin: 0
   dk_start_theme: 0
+  prototype: 0
 profile: minimal
