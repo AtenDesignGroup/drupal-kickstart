@@ -1,0 +1,20 @@
+uuid: 22e64a03-2728-4645-8113-2067d702840c
+langcode: en
+status: true
+dependencies:
+  theme:
+    - dk_start_theme
+_core:
+  default_config_hash: ABoKnlk20KHqZRw_2Qr4EvaFvH4lnQ2nuhunHeE1JIU
+id: dk_start_theme_local_actions
+theme: dk_start_theme
+region: content
+weight: -10
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  label_display: '0'
+  provider: core
+visibility: {  }

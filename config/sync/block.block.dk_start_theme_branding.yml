@@ -1,0 +1,25 @@
+uuid: 19a8907d-4773-4075-9fff-5b10fe8fdae1
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - dk_start_theme
+_core:
+  default_config_hash: sG8t_FghbUscJ-GrnQ8zs_vx5YM4bJCfntrK-J5HcAY
+id: dk_start_theme_branding
+theme: dk_start_theme
+region: alert
+weight: 0
+provider: null
+plugin: system_branding_block
+settings:
+  id: system_branding_block
+  label: 'Site branding'
+  label_display: '0'
+  provider: system
+  use_site_logo: true
+  use_site_name: true
+  use_site_slogan: true
+visibility: {  }

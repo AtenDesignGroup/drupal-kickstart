@@ -1,0 +1,32 @@
+@use 'partials' as *;
+
+.to-top {
+  display: flex;
+  justify-content: right;
+}
+
+.to-top__inner {
+  background-color: black;
+  border-radius: 50%;
+  box-shadow: 0px 2px 16px -8px #231f20;
+  box-sizing: content-box;
+  display: flex;
+  height: rem(24px);
+  line-height: 1;
+  transition: all 0.35s ease-in-out;
+  padding: rem(16px);
+  will-change: transform;
+  width: rem(24px);
+
+  svg {
+    height: rem(24px);
+    width: rem(24px);
+    path {
+      fill: white;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}

@@ -1,0 +1,78 @@
+#
+# Global libraries
+#
+global:
+  version: 5.x
+  css:
+    base:
+      components/00-base/animations.css: {}
+      components/00-base/colors.css: {}
+      components/00-base/grid.css: {}
+      components/00-base/icons.css: {}
+      components/00-base/layers.css: {}
+      components/00-base/sizes.css: {}
+      components/00-base/spacing.css: {}
+      components/00-base/typography.css: {}
+      components/01-elements/reset.css: {}
+      components/01-elements/buttons.css: {}
+      components/01-elements/forms.css: {}
+      components/01-elements/headings.css: {}
+      components/01-elements/links.css: {}
+      components/01-elements/lists.css: {}
+      components/01-elements/media.css: {}
+      components/01-elements/page.css: {}
+      components/01-elements/tables.css: {}
+      components/01-elements/text.css: {}
+    layout:
+      components/01-elements/layout.css: {}
+      components/03-layouts/container/container.css: {}
+      components/03-layouts/grid/grid.css: {}
+      components/03-layouts/stack/stack.css: {}
+    component:
+      components/04-regions/site-branding/site-branding.css: {}
+      components/04-regions/site-footer/site-footer.css: {}
+      components/04-regions/site-header/site-header.css: {}
+    theme:
+      components/05-pages/user-forms/user-forms.css: {}
+  dependencies:
+    - dk_start_theme/fonts
+
+fonts:
+  version: 5.x
+  css:
+    base:
+      'https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap': { type: external, minified: true }
+
+
+#
+# Vendor libraries
+#
+splide:
+  version: 4.1.4
+  css:
+    base:
+      'https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css': { type: external, minified: true }
+  js:
+    'https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js': { type: external, minified: true }
+
+
+
+#
+# Page specific libraries
+#
+page-basic:
+  css:
+    theme:
+      components/05-pages/basic/basic.css: {}
+
+
+#
+# Utility libraries
+#
+
+js-block-link:
+  js:
+    components/07-utilities/js-block-link/js-block-link.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
