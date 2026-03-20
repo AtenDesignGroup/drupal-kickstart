@@ -3,10 +3,10 @@ name: Pantheon Deploy Development
 on:
   push:
     branches:
-      - main
+      - dk-start-build
 env:
   PANTHEON_MULTIDEV: 'dev'
-  GIT_COMMIT_MESSAGE: '{JIRASHORT}-000: GitHub Actions Build'
+  GIT_COMMIT_MESSAGE: 'GitHub Actions Build'
 
 jobs:
   build-theme:
