@@ -1,0 +1,134 @@
+name: Sync build → 11.0.x
+
+# Runs when files that belong in the starter template are pushed to
+# dk-start-build. Opens a PR against 11.0.x containing only those files.
+#
+# Files intentionally excluded from the sync (build artifacts):
+#   composer.json, composer.lock, vendor/, web/, config/sync/,
+#   pantheon.yml, private/, .env, .kickstart.env
+#
+# To trigger manually: Actions → "Sync build → 11.0.x" → Run workflow.
+
+on:
+  push:
+    branches: [dk-start-build]
+    paths:
+      - 'recipes/**'
+      - 'assets/**'
+      - 'docs/**'
+      - '.ddev/commands/**'
+      - 'drupal-kickstart.sh'
+      - 'composer.custom.json'
+      - 'composer.patches.json'
+      - 'grumphp.yml'
+      - 'phpcs.xml'
+      - 'phpunit.xml'
+      - 'eslint.config.js'
+      - '.stylelintrc.cjs'
+      - '.stylelintignore'
+      - 'AGENTS.md'
+      - 'README.md'
+      - '.gitignore'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Promote starter files to 11.0.x
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout 11.0.x
+        uses: actions/checkout@v4
+        with:
+          ref: '11.0.x'
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch dk-start-build
+        run: git fetch origin dk-start-build
+
+      # Pull only the starter-scoped paths from dk-start-build.
+      # Build artifacts (composer.json, web/, vendor/, config/sync/, etc.)
+      # are never listed here and therefore never land in 11.0.x.
+      - name: Checkout starter-scoped files from build branch
+        run: |
+          SYNC_PATHS=(
+            "recipes/"
+            "assets/"
+            "docs/"
+            ".ddev/commands/"
+            "drupal-kickstart.sh"
+            "composer.custom.json"
+            "composer.patches.json"
+            "grumphp.yml"
+            "phpcs.xml"
+            "phpunit.xml"
+            "eslint.config.js"
+            ".stylelintrc.cjs"
+            ".stylelintignore"
+            "AGENTS.md"
+            "README.md"
+            ".gitignore"
+          )
+
+          for path in "${SYNC_PATHS[@]}"; do
+            git checkout origin/dk-start-build -- "$path" \
+              && echo "  ✔ $path" \
+              || echo "  ⚠ Skipped (not in source): $path"
+          done
+
+      - name: Detect staged changes
+        id: diff
+        run: |
+          if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to sync — skipping PR creation."
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Changed files:"
+            git diff --cached --name-only
+          fi
+
+      - name: Create Pull Request
+        if: steps.diff.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: sync/build-to-starter-${{ github.run_number }}
+          base: 11.0.x
+          title: 'sync: promote starter files from dk-start-build'
+          commit-message: |
+            sync: promote starter files from dk-start-build
+
+            Source: ${{ github.sha }}
+          body: |
+            ## Automated Sync: `dk-start-build` → `11.0.x`
+
+            Triggered by push to `dk-start-build`.
+
+            **Source commit:** [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+            **Commit message:** ${{ github.event.head_commit.message }}
+
+            ### What this PR contains
+
+            Only starter-template files are included. The following are
+            intentionally excluded:
+            - `composer.json` / `composer.lock` (Drupal-generated)
+            - `web/` (Drupal scaffold & contrib)
+            - `vendor/` (Composer vendor)
+            - `config/sync/` (exported Drupal config)
+            - `pantheon.yml`, `private/`, `.env`, `.kickstart.env`
+
+            ### Review checklist
+            - [ ] Recipe changes are intentional and correct
+            - [ ] `drupal-kickstart.sh` changes are valid for fresh project setup
+            - [ ] No build artifacts are accidentally included (`git diff --stat`)
+          labels: 'sync,automated'
+          delete-branch: true
