@@ -147,13 +147,18 @@ jobs:
 
           REVERSED=0
           for f in "${TOKEN_FILES[@]}"; do
+            # DK_COMMIT_PREFIX MUST run first, before any DK_* token names are
+            # restored into the file. The prefix value (e.g. "DK") is a substring
+            # of every DK_* placeholder, so running it last would corrupt already-
+            # restored tokens (e.g. DK_PHP_VERSION → DK_COMMIT_PREFIXPHP_VERSION).
+            # Matching with the trailing hyphen (DK-) avoids false positives.
             sed -i \
+              -e "s|${DK_COMMIT_PREFIX}-|DK_COMMIT_PREFIX-|g" \
               -e "s|web/themes/custom/${DK_THEME_NAME}|DK_THEME_PATH|g" \
               -e "s|${DK_DDEV_NAME}|DK_DDEV_NAME|g" \
               -e "s|${DK_THEME_NAME}|DK_THEME_NAME|g" \
               -e "s|${DK_THEME_DESC}|DK_THEME_DESC|g" \
               -e "s|${DK_PHP_VERSION}|DK_PHP_VERSION|g" \
-              -e "s|${DK_COMMIT_PREFIX}|DK_COMMIT_PREFIX|g" \
               "$f"
             REVERSED=$((REVERSED + 1))
           done
