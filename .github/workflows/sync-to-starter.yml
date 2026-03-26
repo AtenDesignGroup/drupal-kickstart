@@ -1,11 +1,29 @@
 name: Sync build → 11.0.x
 
-# Runs when files that belong in the starter template are pushed to
-# dk-start-build. Opens a PR against 11.0.x containing only those files.
+# Runs when starter-scoped files are pushed to dk-start-build.
+# Opens a PR against 11.0.x containing only those files, with all
+# project-specific DK_* token values reversed back to their placeholders.
 #
-# Files intentionally excluded from the sync (build artifacts):
+# TOKEN SUBSTITUTION REVERSAL:
+#   drupal-kickstart.sh step 8 replaces DK_* tokens with real values in every
+#   YAML file under recipes/, assets/, and grumphp.yml (e.g. DK_COMMIT_PREFIX
+#   becomes "GRE", DK_THEME_NAME becomes "dk_start_theme"). Those substituted
+#   values must never land in 11.0.x — they are project-specific, not template
+#   values. This workflow reads the DK_* values from GitHub repository variables
+#   and reverses the substitution before opening the PR.
+#
+# PREREQUISITE — set these repository variables once in GitHub:
+#   Settings → Secrets and variables → Actions → Variables → New repository variable
+#
+#   DK_DDEV_NAME      e.g. my-client-site
+#   DK_THEME_NAME     e.g. dk_start_theme
+#   DK_THEME_DESC     e.g. DK Start Theme
+#   DK_COMMIT_PREFIX  e.g. GRE
+#   DK_PHP_VERSION    e.g. 8.3
+#
+# FILES INTENTIONALLY EXCLUDED FROM SYNC (build artifacts):
 #   composer.json, composer.lock, vendor/, web/, config/sync/,
-#   pantheon.yml, private/, .env, .kickstart.env
+#   pantheon.yml, private/, .env, .kickstart.env, .gitignore
 #
 # To trigger manually: Actions → "Sync build → 11.0.x" → Run workflow.
 
@@ -28,7 +46,6 @@ on:
       - '.stylelintignore'
       - 'AGENTS.md'
       - 'README.md'
-      - '.gitignore'
   workflow_dispatch:
 
 jobs:
@@ -54,9 +71,34 @@ jobs:
       - name: Fetch dk-start-build
         run: git fetch origin dk-start-build
 
-      # Pull only the starter-scoped paths from dk-start-build.
+      # Validate that all required repository variables are configured.
+      # Set them at: Settings → Secrets and variables → Actions → Variables.
+      - name: Validate required repository variables
+        run: |
+          MISSING=()
+          [[ -z "${{ vars.DK_DDEV_NAME }}"      ]] && MISSING+=("DK_DDEV_NAME")
+          [[ -z "${{ vars.DK_THEME_NAME }}"     ]] && MISSING+=("DK_THEME_NAME")
+          [[ -z "${{ vars.DK_THEME_DESC }}"     ]] && MISSING+=("DK_THEME_DESC")
+          [[ -z "${{ vars.DK_COMMIT_PREFIX }}"  ]] && MISSING+=("DK_COMMIT_PREFIX")
+          [[ -z "${{ vars.DK_PHP_VERSION }}"    ]] && MISSING+=("DK_PHP_VERSION")
+
+          if [[ ${#MISSING[@]} -gt 0 ]]; then
+            echo "::error::Missing repository variables: ${MISSING[*]}"
+            echo "::error::Set them at: Settings → Secrets and variables → Actions → Variables"
+            exit 1
+          fi
+
+          echo "Repository variables loaded:"
+          echo "  DK_DDEV_NAME      = ${{ vars.DK_DDEV_NAME }}"
+          echo "  DK_THEME_NAME     = ${{ vars.DK_THEME_NAME }}"
+          echo "  DK_THEME_DESC     = ${{ vars.DK_THEME_DESC }}"
+          echo "  DK_COMMIT_PREFIX  = ${{ vars.DK_COMMIT_PREFIX }}"
+          echo "  DK_PHP_VERSION    = ${{ vars.DK_PHP_VERSION }}"
+
+      # Pull only starter-scoped paths from dk-start-build.
       # Build artifacts (composer.json, web/, vendor/, config/sync/, etc.)
       # are never listed here and therefore never land in 11.0.x.
+      # .gitignore is excluded — each branch maintains its own version.
       - name: Checkout starter-scoped files from build branch
         run: |
           SYNC_PATHS=(
@@ -75,7 +117,6 @@ jobs:
             ".stylelintignore"
             "AGENTS.md"
             "README.md"
-            ".gitignore"
           )
 
           for path in "${SYNC_PATHS[@]}"; do
@@ -84,15 +125,65 @@ jobs:
               || echo "  ⚠ Skipped (not in source): $path"
           done
 
+      # Reverse the DK_* token substitution that drupal-kickstart.sh performed.
+      # After this step every YAML file has the original DK_* placeholders, so
+      # 11.0.x always contains a clean, reusable template — never project values.
+      #
+      # Substitution order matters:
+      #   1. DK_THEME_PATH (full path) before DK_THEME_NAME (substring of the path)
+      #   2. All other tokens in any order
+      - name: Reverse DK_* token substitution in YAML files
+        env:
+          DK_DDEV_NAME:     ${{ vars.DK_DDEV_NAME }}
+          DK_THEME_NAME:    ${{ vars.DK_THEME_NAME }}
+          DK_THEME_DESC:    ${{ vars.DK_THEME_DESC }}
+          DK_COMMIT_PREFIX: ${{ vars.DK_COMMIT_PREFIX }}
+          DK_PHP_VERSION:   ${{ vars.DK_PHP_VERSION }}
+        run: |
+          # Collect every YAML file in the synced paths that may contain tokens.
+          mapfile -t TOKEN_FILES < <(
+            find recipes assets grumphp.yml -type f -name "*.yml" 2>/dev/null
+          )
+
+          REVERSED=0
+          for f in "${TOKEN_FILES[@]}"; do
+            sed -i \
+              -e "s|web/themes/custom/${DK_THEME_NAME}|DK_THEME_PATH|g" \
+              -e "s|${DK_DDEV_NAME}|DK_DDEV_NAME|g" \
+              -e "s|${DK_THEME_NAME}|DK_THEME_NAME|g" \
+              -e "s|${DK_THEME_DESC}|DK_THEME_DESC|g" \
+              -e "s|${DK_PHP_VERSION}|DK_PHP_VERSION|g" \
+              -e "s|${DK_COMMIT_PREFIX}|DK_COMMIT_PREFIX|g" \
+              "$f"
+            REVERSED=$((REVERSED + 1))
+          done
+
+          echo "Reverse substitution applied to ${REVERSED} YAML files."
+
+          # Unstage any files that are now identical to 11.0.x after reversal.
+          git diff --cached --name-only | while read -r f; do
+            if git diff --cached -- "$f" | grep -qE '^\+|^-'; then
+              : # keep staged — real content changed
+            fi
+          done
+          # Reset files whose only diff was the token substitution (no structural change).
+          git diff --cached --name-only | while read -r f; do
+            if git diff HEAD -- "$f" 2>/dev/null | grep -qv '^[-+][-+][-+] \|^@@\|^diff\|^index'; then
+              : # has real diffs — leave staged
+            else
+              git restore --staged "$f" 2>/dev/null || true
+            fi
+          done
+
       - name: Detect staged changes
         id: diff
         run: |
           if git diff --cached --quiet; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No changes to sync — skipping PR creation."
+            echo "No structural changes to sync after token reversal — skipping PR."
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
-            echo "Changed files:"
+            echo "Files with structural changes to sync:"
             git diff --cached --name-only
           fi
 
@@ -108,6 +199,7 @@ jobs:
             sync: promote starter files from dk-start-build
 
             Source: ${{ github.sha }}
+            DK_* tokens restored from build values.
           body: |
             ## Automated Sync: `dk-start-build` → `11.0.x`
 
@@ -116,19 +208,28 @@ jobs:
             **Source commit:** [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
             **Commit message:** ${{ github.event.head_commit.message }}
 
-            ### What this PR contains
+            ### Token restoration
+            All project-specific `DK_*` tokens substituted by `drupal-kickstart.sh`
+            (e.g. `DK_COMMIT_PREFIX`, `DK_THEME_NAME`) have been **reversed back to
+            their placeholder form** in this PR. The values were read from
+            repository variables configured in GitHub Actions settings.
 
+            Files whose only diff was a token value (no structural change) are
+            automatically excluded from this PR.
+
+            ### What this PR contains
             Only starter-template files are included. The following are
             intentionally excluded:
             - `composer.json` / `composer.lock` (Drupal-generated)
             - `web/` (Drupal scaffold & contrib)
             - `vendor/` (Composer vendor)
             - `config/sync/` (exported Drupal config)
-            - `pantheon.yml`, `private/`, `.env`, `.kickstart.env`
+            - `pantheon.yml`, `private/`, `.env`, `.gitignore`
 
             ### Review checklist
-            - [ ] Recipe changes are intentional and correct
-            - [ ] `drupal-kickstart.sh` changes are valid for fresh project setup
-            - [ ] No build artifacts are accidentally included (`git diff --stat`)
+            - [ ] Recipe changes are structural (no project-specific values visible)
+            - [ ] `grumphp.yml` regex uses `DK_COMMIT_PREFIX`, not a project prefix
+            - [ ] `drupal-kickstart.sh` changes work for fresh project setup
+            - [ ] No build artifacts are present (`git diff --stat`)
           labels: 'sync,automated'
           delete-branch: true
