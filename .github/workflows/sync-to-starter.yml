@@ -197,7 +197,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: sync/build-to-starter-${{ github.run_number }}
+          branch: sync/build-to-starter
           base: 11.0.x
           title: 'sync: promote starter files from dk-start-build'
           commit-message: |
