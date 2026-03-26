@@ -1,0 +1,21 @@
+{
+  "name": "aten/formula-content-fields",
+  "description": "Recipe bundle for richer field types and media handling: Image Widget Crop, Entity Extra Field, Custom Field, Name, Smart Date, SVG Image, and Media Entity Download.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/custom_field": "^4.0",
+    "drupal/entity_extra_field": "^2.1",
+    "drupal/image_widget_crop": "^3.0",
+    "drupal/media_entity_download": "^2.4",
+    "drupal/name": "^1.1",
+    "drupal/smart_date": "^4.2",
+    "drupal/svg_image": "^3.2"
+  }
+}

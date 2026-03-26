@@ -1,0 +1,21 @@
+{
+  "name": "aten/formula-editorial",
+  "description": "Recipe bundle for enhanced authoring and editorial experience tools: Editor Advanced Link, Menu Attributes, Menu Item Extras, Entity Browser, Block Field, Replicate, and Auto Entity Label.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Aten Design Group",
+      "email": "devteam@atendesigngroup.com"
+    }
+  ],
+  "require": {
+    "drupal/auto_entitylabel": "^3.4",
+    "drupal/block_field": "^1.0@RC",
+    "drupal/editor_advanced_link": "^2.3",
+    "drupal/entity_browser": "^2.15",
+    "drupal/menu_attributes": "^2.0",
+    "drupal/menu_item_extras": "^3.1",
+    "drupal/replicate": "^1.3"
+  }
+}
