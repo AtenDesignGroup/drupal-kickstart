@@ -30,22 +30,6 @@ name: Sync build → 11.0.x
 on:
   push:
     branches: [dk-start-build]
-    paths:
-      - 'recipes/**'
-      - 'assets/**'
-      - 'docs/**'
-      - '.ddev/commands/**'
-      - 'drupal-kickstart.sh'
-      - 'composer.custom.json'
-      - 'composer.patches.json'
-      - 'grumphp.yml'
-      - 'phpcs.xml'
-      - 'phpunit.xml'
-      - 'eslint.config.js'
-      - '.stylelintrc.cjs'
-      - '.stylelintignore'
-      - 'AGENTS.md'
-      - 'README.md'
   workflow_dispatch:
 
 jobs:
