@@ -104,7 +104,119 @@ fi
 ddev recipe formula-pantheon
 
 # =============================================================================
-# 4. UPDATE DDEV CONFIG (web_environment)
+# 4. PREPARE SETTINGS.PHP FOR PANTHEON
+# These one-time setup tasks ensure settings.php is ready for both local dev
+# and Pantheon deployment. All steps are idempotent.
+# =============================================================================
+header "Preparing settings.php for Pantheon"
+
+SETTINGS="${PROJECT_ROOT}/web/sites/default/settings.php"
+
+# Ensure settings.php exists (Drupal scaffold may .gitignore it)
+if [[ ! -f "$SETTINGS" ]]; then
+  mkdir -p "$(dirname "$SETTINGS")"
+  cat > "$SETTINGS" <<'SETTINGSPHP'
+<?php
+
+/**
+ * @file
+ * Drupal site configuration.
+ */
+SETTINGSPHP
+  info "Created minimal settings.php (was absent)"
+fi
+
+# Verify settings.pantheon.php exists in vendor (installed via recipe)
+PANTHEON_PHP="${PROJECT_ROOT}/vendor/pantheon-systems/drupal-integrations/assets/settings.pantheon.php"
+if [[ ! -f "$PANTHEON_PHP" ]]; then
+  echo -e "${RED}${BOLD}Error:${RESET} $PANTHEON_PHP not found"
+  echo "  → Is pantheon-systems/drupal-integrations installed?"
+  exit 1
+fi
+
+# Copy settings.pantheon.php to sites/default for local development
+# This file will be in .gitignore (not committed), but will be available
+# on Pantheon via the workflow's composer install + vendor/ commit
+DEST="${PROJECT_ROOT}/web/sites/default/settings.pantheon.php"
+if [[ ! -f "$DEST" ]]; then
+  cp "$PANTHEON_PHP" "$DEST"
+  info "Copied settings.pantheon.php to sites/default/"
+else
+  warn "settings.pantheon.php already exists in sites/default/ — skipped"
+fi
+
+# Insert settings.pantheon.php include at the top of settings.php (idempotent)
+# Place it right after the file docblock so it loads before any other settings
+if ! grep -q "settings.pantheon.php" "$SETTINGS"; then
+  # Insert after the FIRST closing */ of the file docblock only
+  # Use range 1,/pattern/ to match only the first occurrence
+  sed -i.bak '1,/^ \*\/$/{/^ \*\/$/a\
+\
+/**\
+ * Include the Pantheon-specific settings file.\
+ *\
+ * n.b. The settings.pantheon.php file makes some changes\
+ *      that affect all environments that this site\
+ *      exists in.  Always include this file, even in\
+ *      a local development environment, to ensure that\
+ *      the site settings remain consistent.\
+ */\
+include __DIR__ . "/settings.pantheon.php";\
+
+}' "$SETTINGS" && rm -f "${SETTINGS}.bak"
+  info "Added settings.pantheon.php include at top of settings.php"
+else
+  warn "settings.pantheon.php include already present — skipped"
+fi
+
+# Generate hash_salt if empty (Pantheon's read-only filesystem requires it pre-generated)
+if grep -q "\$settings\['hash_salt'\] = '';" "$SETTINGS"; then
+  SALT=$(ddev exec php -r "echo str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(random_bytes(55)));")
+  # Use | as sed delimiter to avoid conflicts with / in the salt
+  sed -i.bak "s|\\\$settings\['hash_salt'\] = '';|\$settings['hash_salt'] = '$SALT';|" "$SETTINGS" \
+    && rm -f "${SETTINGS}.bak"
+  info "Generated and set hash_salt in settings.php"
+else
+  warn "hash_salt already set — skipped"
+fi
+
+# Comment out $databases declarations from settings.php
+# Pantheon injects the correct database config via settings.pantheon.php
+# Commenting preserves the original line for reference while disabling it
+if grep -q '^\$databases' "$SETTINGS"; then
+  sed -i.bak 's/^\$databases/\/\/ $databases/' "$SETTINGS" \
+    && rm -f "${SETTINGS}.bak"
+  info "Commented out \$databases declaration in settings.php"
+else
+  warn "No \$databases declaration found — skipped"
+fi
+
+# Update .gitignore to exclude DDEV-specific files (never commit)
+DDEV_SETTINGS_ENTRY="web/sites/default/settings.ddev.php"
+PANTHEON_SETTINGS_ENTRY="web/sites/default/settings.pantheon.php"
+
+if ! grep -qxF "$DDEV_SETTINGS_ENTRY" "${PROJECT_ROOT}/.gitignore" 2>/dev/null; then
+  echo "$DDEV_SETTINGS_ENTRY" >> "${PROJECT_ROOT}/.gitignore"
+  info "Added $DDEV_SETTINGS_ENTRY to .gitignore"
+else
+  warn "$DDEV_SETTINGS_ENTRY already in .gitignore — skipped"
+fi
+
+if ! grep -qxF "$PANTHEON_SETTINGS_ENTRY" "${PROJECT_ROOT}/.gitignore" 2>/dev/null; then
+  echo "$PANTHEON_SETTINGS_ENTRY" >> "${PROJECT_ROOT}/.gitignore"
+  info "Added $PANTHEON_SETTINGS_ENTRY to .gitignore"
+else
+  warn "$PANTHEON_SETTINGS_ENTRY already in .gitignore — skipped"
+fi
+
+# Remove settings.php from .gitignore so it can be committed for Pantheon
+# Drupal scaffold excludes it by default, but Pantheon needs it in the repo
+sed -i.bak '/^web\/sites\/default\/settings\.php$/d; /^sites\/default\/settings\.php$/d' "${PROJECT_ROOT}/.gitignore" \
+  && rm -f "${PROJECT_ROOT}/.gitignore.bak"
+info "Ensured settings.php is not excluded by .gitignore"
+
+# =============================================================================
+# 5. UPDATE DDEV CONFIG (web_environment)
 # Adds REDIS_ENABLED=true and CUSTOMER_SECRETS_FAKE_FILE.
 # REDIS_ENABLED must be set AFTER the recipe installs the redis module —
 # settings.ddev.php gates cache.backend.redis on this variable so that
@@ -168,7 +280,7 @@ else
 fi
 
 # =============================================================================
-# 5. RESTART to pick up new web_environment
+# 6. RESTART to pick up new web_environment
 # =============================================================================
 header "Restarting DDEV"
 

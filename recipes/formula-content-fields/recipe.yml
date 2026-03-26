@@ -1,0 +1,15 @@
+name: '🦄 🌈  Formula: Content Fields'
+description: 'Recipe to install richer field types and media handling tools for Drupal.'
+type: 'Site'
+
+recipes:
+  - formula-image-widget-crop
+  - formula-entity-extra-field
+  - formula-custom-field
+  - formula-name
+  - formula-smart-date
+  - formula-svg-image
+  - formula-media-entity-download
+
+config:
+  strict: false
