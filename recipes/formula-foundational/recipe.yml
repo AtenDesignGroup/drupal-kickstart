@@ -64,7 +64,7 @@ install:
   # Themes
   - claro
   - gin
-  - DK_THEME_NAME
+  - DK_COMMIT_PREFIX_THEME_NAME
 
 config:
   strict: false
@@ -72,4 +72,4 @@ config:
     system.theme:
       simple_config_update:
         admin: 'gin'
-        default: 'DK_THEME_NAME'
+        default: 'DK_COMMIT_PREFIX_THEME_NAME'

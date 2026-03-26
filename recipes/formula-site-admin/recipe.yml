@@ -1,0 +1,12 @@
+name: '🦄 🌈  Formula: Site Admin'
+description: 'Recipe to install backend site administration tools for Drupal.'
+type: 'Site'
+
+recipes:
+  - formula-admin-toolbar
+  - formula-flood-control
+  - formula-ultimate-cron
+  - formula-entity-usage
+
+config:
+  strict: false

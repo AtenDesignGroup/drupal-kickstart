@@ -1,6 +1,6 @@
 api_version: 1
 web_docroot: true
-php_version: DK_PHP_VERSION
+php_version: DK_COMMIT_PREFIX_PHP_VERSION
 build_step: false
 database:
   version: 10.6
