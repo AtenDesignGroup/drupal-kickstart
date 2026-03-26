@@ -125,6 +125,21 @@ jobs:
               || echo "  ⚠ Skipped (not in source): $path"
           done
 
+      # Unstage any file that DDEV auto-generated (marked with #ddev-generated).
+      # These are installed by ddev addon commands and should never land in 11.0.x.
+      - name: Unstage ddev-generated files
+        run: |
+          DDEV_GEN=$(git diff --cached --name-only | xargs grep -rl '#ddev-generated' 2>/dev/null || true)
+          if [[ -n "$DDEV_GEN" ]]; then
+            echo "Unstaging ddev-generated files:"
+            echo "$DDEV_GEN" | while read -r f; do
+              git restore --staged "$f"
+              echo "  ✖ $f"
+            done
+          else
+            echo "No ddev-generated files found in staged changes."
+          fi
+
       # Reverse the DK_* token substitution that drupal-kickstart.sh performed.
       # After this step every YAML file has the original DK_* placeholders, so
       # 11.0.x always contains a clean, reusable template — never project values.
