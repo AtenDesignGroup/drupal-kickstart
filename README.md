@@ -40,7 +40,7 @@ Description of project intention & goals.
 
 **Production**
 
-- **Provider:** Pantheon/Platform.sh/Acquia
+- **Provider:** Pantheon/Acquia
 - **Owner:** Aten/Client
 
 ## Automated Testing
