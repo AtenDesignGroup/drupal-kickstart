@@ -1,0 +1,15 @@
+name: '🦄 🌈  Formula: Editorial'
+description: 'Recipe to install enhanced authoring and editorial experience tools for Drupal.'
+type: 'Site'
+
+recipes:
+  - formula-editor-advanced-link
+  - formula-menu-attributes
+  - formula-menu-item-extras
+  - formula-entity-browser
+  - formula-block-field
+  - formula-replicate
+  - formula-auto-entitylabel
+
+config:
+  strict: false
