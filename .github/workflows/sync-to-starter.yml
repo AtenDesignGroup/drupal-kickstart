@@ -133,7 +133,10 @@ jobs:
           while IFS= read -r f; do
             if [[ -f "$f" ]] && grep -q '#ddev-generated' "$f" 2>/dev/null; then
               git restore --staged "$f"
-              echo "  ✖ Unstaged (ddev-generated): $f"
+              # Also remove from working tree — peter-evans/create-pull-request
+              # uses the working tree, not just the index.
+              git restore "$f" 2>/dev/null || rm -f "$f"
+              echo "  ✖ Removed (ddev-generated): $f"
               FOUND=$((FOUND + 1))
             fi
           done < <(git diff --cached --name-only)
