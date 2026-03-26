@@ -129,16 +129,18 @@ jobs:
       # These are installed by ddev addon commands and should never land in 11.0.x.
       - name: Unstage ddev-generated files
         run: |
-          DDEV_GEN=$(git diff --cached --name-only | xargs grep -rl '#ddev-generated' 2>/dev/null || true)
-          if [[ -n "$DDEV_GEN" ]]; then
-            echo "Unstaging ddev-generated files:"
-            echo "$DDEV_GEN" | while read -r f; do
+          FOUND=0
+          while IFS= read -r f; do
+            if [[ -f "$f" ]] && grep -q '#ddev-generated' "$f" 2>/dev/null; then
               git restore --staged "$f"
-              echo "  ✖ $f"
-            done
-          else
+              echo "  ✖ Unstaged (ddev-generated): $f"
+              FOUND=$((FOUND + 1))
+            fi
+          done < <(git diff --cached --name-only)
+          if [[ $FOUND -eq 0 ]]; then
             echo "No ddev-generated files found in staged changes."
           fi
+
 
       # Reverse the DK_* token substitution that drupal-kickstart.sh performed.
       # After this step every YAML file has the original DK_* placeholders, so
