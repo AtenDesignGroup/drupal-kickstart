@@ -141,7 +141,6 @@ jobs:
             echo "No ddev-generated files found in staged changes."
           fi
 
-
       # Reverse the DK_* token substitution that drupal-kickstart.sh performed.
       # After this step every YAML file has the original DK_* placeholders, so
       # 11.0.x always contains a clean, reusable template — never project values.
