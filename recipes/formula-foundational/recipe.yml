@@ -71,5 +71,5 @@ config:
   actions:
     system.theme:
       simple_config_update:
-        admin: 'gin'
+        admin: 'claro'
         default: 'DK_THEME_NAME'
