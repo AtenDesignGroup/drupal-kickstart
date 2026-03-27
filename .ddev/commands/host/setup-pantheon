@@ -89,15 +89,6 @@ else
   warn "private/pantheon_secrets already exists — skipped"
 fi
 
-# settings.platform.php → web/sites/default/settings.platform.php
-PLATFORM_SETTINGS="${PROJECT_ROOT}/web/sites/default/settings.platform.php"
-if [[ ! -f "$PLATFORM_SETTINGS" ]]; then
-  cp "${ASSETS}/settings.platform.php" "$PLATFORM_SETTINGS"
-  info "settings.platform.php → web/sites/default/"
-else
-  warn "settings.platform.php already exists — skipped"
-fi
-
 # =============================================================================
 # 3. APPLY RECIPE
 # =============================================================================
