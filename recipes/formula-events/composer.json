@@ -10,9 +10,7 @@
         }
     ],
     "require": {
-        "drupal/layout_paragraphs": "^2.1",
         "drupal/metatag": "*",
-        "drupal/paragraphs": "^1.18",
         "drupal/pathauto": "*"
     }
 }

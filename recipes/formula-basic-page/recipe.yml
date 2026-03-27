@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Basic Page'
+description: 'Recipe to enhance the basic page content type with components, primary media, and rich text.'
+type: 'Site'
+
+recipes:
+  - formula-media
+  - formula-paragraphs
+
+config:
+  strict: false

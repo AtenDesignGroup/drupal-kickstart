@@ -2,14 +2,14 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_content
-    - node.type.event
+    - field.storage.node.field_components
+    - node.type.news
   module:
     - entity_reference_revisions
-id: node.event.field_content
-field_name: field_content
+id: node.news.field_components
+field_name: field_components
 entity_type: node
-bundle: event
+bundle: news
 label: Content
 description: ''
 required: false
@@ -19,7 +19,7 @@ default_value_callback: ''
 settings:
   handler: 'default:paragraph'
   handler_settings:
-    target_bundles: null
+    target_bundles: {  }
     negate: 0
     target_bundles_drag_drop:
       call_to_action:
