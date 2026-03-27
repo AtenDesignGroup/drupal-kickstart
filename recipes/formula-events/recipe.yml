@@ -1,3 +1,10 @@
 name: '🦄 🌈  Formula: Events'
 description: 'Recipe to build event functionality in Drupal.'
 type: 'Site'
+
+recipes:
+  - formula-media
+  - formula-paragraphs
+
+config:
+  strict: false

@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.event.field_content
+    - field.field.node.event.field_components
     - field.field.node.event.field_event_date
     - field.field.node.event.field_media
     - field.field.node.event.field_summary_text
@@ -24,7 +24,7 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_content:
+  field_components:
     type: layout_paragraphs
     weight: 3
     region: content
