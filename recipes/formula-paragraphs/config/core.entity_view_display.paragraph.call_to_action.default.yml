@@ -9,7 +9,6 @@ dependencies:
   module:
     - link
     - nomarkup
-    - sdc_display
     - text
 id: paragraph.call_to_action.default
 targetEntityType: paragraph
@@ -53,11 +52,6 @@ content:
         enabled: true
         separator: '|'
         referenced_entity: ''
-      sdc_display:
-        enabled: 0
-        component:
-          machine_name: null
-          show_deprecated: 0
     weight: 0
     region: content
 hidden:

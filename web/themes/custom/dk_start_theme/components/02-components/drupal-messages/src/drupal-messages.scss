@@ -26,6 +26,11 @@
     display: block;
     margin-right: rem(10px);
     width: rem(32px);
+
+    svg {
+      width: 100%;
+      height: auto;
+    }
   }
 }
 
