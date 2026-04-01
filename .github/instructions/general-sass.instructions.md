@@ -22,6 +22,7 @@ applyTo: "**/themes/custom/**.*scss"
 - Write full selectors.
 - DO NOT use `&--` or `&__` to concatenate selectors.
 - DO NOT group selectors inside media or container queries. Nest queries within selectors.
+- Queries must be nested inside their own **top-level selector only** — never inside nested descendants. This keeps all responsive behavior for a given selector in one place without hiding queries deep in the nesting tree.
 - Use a mobile-first approach. Write base styles for small screens, then layer on overrides for larger sizes.
 - Always use the theme's breakpoint mixins instead of writing raw `@media` queries. Available mixins:
   - `@include bp-min(tablet) {}` — applies at and above the given breakpoint
@@ -51,7 +52,7 @@ applyTo: "**/themes/custom/**.*scss"
 ```
 
 ```scss
-// Do this...
+// Do this — each top-level selector owns its own queries...
 .c-item__element1 {
   @container () {}
 }
@@ -59,10 +60,21 @@ applyTo: "**/themes/custom/**.*scss"
   @container () {}
 }
 
-// Not this...
+// Not this — grouping selectors inside a query...
 @container () {
   .c-item__element1 {}
   .c-item__element2 {}
+}
+
+// Not this — queries buried inside nested descendants...
+.header {
+  .menu {
+    .menu-item {
+      @include bp-min(tablet) {
+        // Never nest queries this deep.
+      }
+    }
+  }
 }
 ```
 
