@@ -1,5 +1,5 @@
 ---
-applyTo: "*.scss"
+applyTo: "**/themes/custom/**.*scss"
 ---
 # General SCSS Standards
 
