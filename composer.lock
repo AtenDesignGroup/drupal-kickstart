@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5c4b70d00c650cbc5177a1fd8b7cae0a",
+    "content-hash": "1dace336a6d3f06efcede100994cb526",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1654,17 +1654,17 @@
         },
         {
             "name": "drupal/editoria11y",
-            "version": "2.2.21",
+            "version": "2.2.22",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/editoria11y.git",
-                "reference": "2.2.21"
+                "reference": "2.2.22"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/editoria11y-2.2.21.zip",
-                "reference": "2.2.21",
-                "shasum": "61665339c3eedbdc8d0fa342e5e41f8b5e62dbd1"
+                "url": "https://ftp.drupal.org/files/projects/editoria11y-2.2.22.zip",
+                "reference": "2.2.22",
+                "shasum": "91758f1dc9c1d4d7f7347172ce5b4103f1d85658"
             },
             "require": {
                 "drupal/core": "^9 || ^10 || ^11"
@@ -1675,8 +1675,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.2.21",
-                    "datestamp": "1774488747",
+                    "version": "2.2.22",
+                    "datestamp": "1775421663",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -2425,17 +2425,17 @@
         },
         {
             "name": "drupal/layout_paragraphs",
-            "version": "2.1.1",
+            "version": "2.1.2",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/layout_paragraphs.git",
-                "reference": "2.1.1"
+                "reference": "2.1.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/layout_paragraphs-2.1.1.zip",
-                "reference": "2.1.1",
-                "shasum": "6fc90954c67939933a6eb24000892822715e4f90"
+                "url": "https://ftp.drupal.org/files/projects/layout_paragraphs-2.1.2.zip",
+                "reference": "2.1.2",
+                "shasum": "304ffcddc924302186de9847745f2b0bbf6d4945"
             },
             "require": {
                 "drupal/core": "^10 || ^11",
@@ -2444,13 +2444,14 @@
             "require-dev": {
                 "drupal/block_field": "~1.0",
                 "drupal/entity_usage": "2.x-dev",
+                "drupal/field_group": "^3.6",
                 "drupal/paragraphs-paragraphs_library": "*"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.1.1",
-                    "datestamp": "1732724895",
+                    "version": "2.1.2",
+                    "datestamp": "1775845197",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -4053,6 +4054,10 @@
                 {
                     "name": "berdir",
                     "homepage": "https://www.drupal.org/user/214652"
+                },
+                {
+                    "name": "dieterholvoet",
+                    "homepage": "https://www.drupal.org/user/3567222"
                 },
                 {
                     "name": "gielfeldt",
