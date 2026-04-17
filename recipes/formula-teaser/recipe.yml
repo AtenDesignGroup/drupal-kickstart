@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Teaser'
+description: 'Provides a Teaser paragraph type wired to the DK_THEME_NAME SDC teaser component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+  - formula-media        # provides image media type
+
+config:
+  strict: false

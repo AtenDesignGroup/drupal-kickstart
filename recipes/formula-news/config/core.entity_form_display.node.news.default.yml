@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.news.field_content
+    - field.field.node.news.field_components
     - field.field.node.news.field_media
     - field.field.node.news.field_news_category
     - field.field.node.news.field_published_date
@@ -25,7 +25,7 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
-  field_content:
+  field_components:
     type: layout_paragraphs
     weight: 3
     region: content

@@ -2,7 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.node.event.field_content
+    - field.field.node.event.field_components
     - field.field.node.event.field_event_date
     - field.field.node.event.field_media
     - field.field.node.event.field_summary_text
@@ -12,14 +12,13 @@ dependencies:
     - datetime
     - layout_paragraphs
     - media
-    - nomarkup
     - user
 id: node.event.default
 targetEntityType: node
 bundle: event
 mode: default
 content:
-  field_content:
+  field_components:
     type: layout_paragraphs
     label: hidden
     settings:
@@ -45,11 +44,7 @@ content:
       image_style: full_size
       image_loading:
         attribute: lazy
-    third_party_settings:
-      nomarkup:
-        enabled: false
-        separator: '|'
-        referenced_entity: ''
+    third_party_settings: {  }
     weight: 1
     region: content
   links:

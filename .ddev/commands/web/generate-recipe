@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+## Description: Generate a paragraph recipe scaffold from a prototype SDC component.
+## Usage: generate-recipe <component-name|all> [--theme-name=NAME]
+## Example: "ddev generate-recipe cta"
+## Example: "ddev generate-recipe all"
+## Example: "ddev generate-recipe teaser --theme-name=my_theme"
+
+set -euo pipefail
+
+exec php /var/www/html/.ddev/generate-recipe.php "$@"

@@ -1,0 +1,9 @@
+name: '🦄 🌈  Formula: CTA'
+description: 'Provides a CTA paragraph type wired to the DK_THEME_NAME SDC cta component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+
+config:
+  strict: false
