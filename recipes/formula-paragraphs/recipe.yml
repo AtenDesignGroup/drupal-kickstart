@@ -6,3 +6,6 @@ install:
   - paragraphs
   - layout_paragraphs
   - nomarkup
+
+config:
+  strict: false

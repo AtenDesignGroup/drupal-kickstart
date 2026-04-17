@@ -53,6 +53,17 @@ fi
 
 mkdir -p "$SITES_DEFAULT"
 
+# drush site:install locks sites/default (555) and settings.php (444).
+# Temporarily unlock so we can write, then restore after.
+chmod u+w "$SITES_DEFAULT"
+[[ -f "${SITES_DEFAULT}/settings.php" ]] && chmod u+w "${SITES_DEFAULT}/settings.php"
+
+cleanup_permissions() {
+  chmod 555 "$SITES_DEFAULT" 2>/dev/null || true
+  [[ -f "${SITES_DEFAULT}/settings.php" ]] && chmod 444 "${SITES_DEFAULT}/settings.php" 2>/dev/null || true
+}
+trap 'cleanup_permissions' EXIT
+
 # =============================================================================
 # 1. settings.ddev.php — copy from assets and inject hash salt
 # =============================================================================

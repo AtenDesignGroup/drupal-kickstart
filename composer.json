@@ -44,6 +44,7 @@
         "drupal/markerio": "^1.0",
         "drupal/metatag": "*",
         "drupal/multiple_selects": "^1.0",
+        "drupal/nomarkup": "^1.0",
         "drupal/pantheon_advanced_page_cache": "^2.3",
         "drupal/pantheon_secrets": "^1.0",
         "drupal/paragraphs": "^1.18",

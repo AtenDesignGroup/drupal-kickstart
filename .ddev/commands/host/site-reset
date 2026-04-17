@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+## Description: Wipe the Drupal database and reinstall from scratch (keeps composer deps and theme).
+## Usage: site-reset [--profile=PROFILE] [--skip-recipes] [--yes]
+## Example: "ddev site-reset"
+## Example: "ddev site-reset --profile=standard"
+## Example: "ddev site-reset --skip-recipes --yes"
+
+set -euo pipefail
+
+# -----------------------------------------------------------------------------
+# Colors / styling
+# -----------------------------------------------------------------------------
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+trap 'echo -e "\n${RED}${BOLD}site-reset failed.${RESET} Check messages above." >&2' ERR
+
+header() { echo -e "\n${BOLD}${CYAN}==> $1${RESET}"; }
+info()   { echo -e "    ${GREEN}✔${RESET} $1"; }
+warn()   { echo -e "    ${YELLOW}⚠${RESET}  $1"; }
+
+# -----------------------------------------------------------------------------
+# Parse arguments
+# -----------------------------------------------------------------------------
+PROFILE="minimal"
+SKIP_RECIPES="no"
+AUTO_YES="no"
+
+for arg in "$@"; do
+  case "$arg" in
+    --profile=*)      PROFILE="${arg#*=}" ;;
+    --skip-recipes)   SKIP_RECIPES="yes" ;;
+    --yes|-y)         AUTO_YES="yes" ;;
+  esac
+done
+
+# -----------------------------------------------------------------------------
+# Paths & credentials
+# -----------------------------------------------------------------------------
+PROJECT_ROOT="${DDEV_APPROOT}"
+ENV_FILE="${PROJECT_ROOT}/.env"
+
+# Load credentials from .env
+if [[ -f "$ENV_FILE" ]]; then
+  # shellcheck source=.env
+  source "$ENV_FILE"
+fi
+
+SITE_NAME="${DDEV_SITENAME:-Drupal}"
+ADMIN_USER="${DK_DRUPAL_ADMIN_USERNAME:-admin}"
+ADMIN_PASS="${DK_DRUPAL_ADMIN_PASSWORD:-admin}"
+HASH_SALT="${DK_DRUPAL_HASH_SALT:-}"
+
+# Detect if Redis is active in the DDEV environment (set by the Redis addon).
+# When true, Drupal tries to use cache.backend.redis on bootstrap — which
+# fails on a fresh install before the redis module is enabled. Recipes must
+# be applied via a direct drush call with REDIS_ENABLED=false override.
+REDIS_ACTIVE="no"
+if grep -q "REDIS_ENABLED=true" "${PROJECT_ROOT}/.ddev/config.yaml" 2>/dev/null; then
+  REDIS_ACTIVE="yes"
+fi
+
+# -----------------------------------------------------------------------------
+# Confirm
+# -----------------------------------------------------------------------------
+header "site-reset — Fresh Drupal Install"
+echo
+echo -e "  ${BOLD}Project         :${RESET} ${SITE_NAME} (${DDEV_SITENAME:-${DDEV_PROJECT:-unknown}})"
+echo -e "  ${BOLD}Profile         :${RESET} ${PROFILE}"
+echo -e "  ${BOLD}Admin user      :${RESET} ${ADMIN_USER}"
+echo -e "  ${BOLD}Skip recipes    :${RESET} ${SKIP_RECIPES}"
+echo
+echo -e "  ${RED}${BOLD}WARNING:${RESET} This will drop the database and wipe settings files."
+echo
+
+if [[ "$AUTO_YES" != "yes" ]]; then
+  read -r -p "$(echo -e "  ${BOLD}Continue?${RESET} [${CYAN}y/N${RESET}]: ")" _confirm
+  _confirm="${_confirm:-N}"
+  if [[ ! "$_confirm" =~ ^[Yy] ]]; then
+    echo -e "\n${YELLOW}Cancelled.${RESET}"
+    exit 0
+  fi
+fi
+
+# =============================================================================
+# 1. DROP DATABASE
+# =============================================================================
+header "Dropping database"
+ddev exec drush sql:drop --yes
+info "Database dropped"
+
+# =============================================================================
+# 2. REMOVE SETTINGS FILES
+# =============================================================================
+header "Removing settings files"
+
+SITES_DEFAULT="${PROJECT_ROOT}/web/sites/default"
+
+# settings.php is owned by www-data inside the container — chmod then remove
+ddev exec bash -c "chmod 644 /var/www/html/web/sites/default/settings.php 2>/dev/null || true"
+
+rm -f "${SITES_DEFAULT}/settings.php"
+rm -f "${SITES_DEFAULT}/settings.ddev.php"
+rm -f "${SITES_DEFAULT}/settings.local.php"
+info "Removed settings.php, settings.ddev.php, settings.local.php"
+
+# =============================================================================
+# 3. CLEAR CONFIG SYNC
+# =============================================================================
+header "Clearing config/sync"
+CONFIG_SYNC="${PROJECT_ROOT}/config/sync"
+mkdir -p "$CONFIG_SYNC"
+find "$CONFIG_SYNC" -name "*.yml" -delete
+info "config/sync cleared"
+
+# =============================================================================
+# 4. RESTORE SETTINGS FILES
+# =============================================================================
+header "Restoring settings files"
+ddev exec bash /var/www/html/.ddev/commands/web/setup-settings \
+  --hash-salt="${HASH_SALT}"
+info "settings files restored"
+
+# =============================================================================
+# 5. SITE INSTALL
+# =============================================================================
+header "Installing Drupal (${PROFILE} profile)"
+
+# When REDIS_ENABLED=true, settings.ddev.php (restored in step 4) activates the
+# Redis service container. drush site:install bootstraps Drupal to validate the
+# profile, hits "non-existent service redis.factory", and dies with a cryptic
+# "getInstallTasks() on null" error.  Override the env var for this call only.
+if [[ "$REDIS_ACTIVE" == "yes" ]]; then
+  warn "REDIS_ENABLED detected — installing with Redis bypassed"
+  ddev exec bash -c "REDIS_ENABLED=false drush site:install '${PROFILE}' \
+    --yes \
+    --site-name='${SITE_NAME}' \
+    --account-name='${ADMIN_USER}' \
+    --account-pass='${ADMIN_PASS}'"
+else
+  SITE_NAME="${SITE_NAME}" \
+    ACCOUNT_NAME="${ADMIN_USER}" \
+    ACCOUNT_PASS="${ADMIN_PASS}" \
+    ddev site-install "${PROFILE}"
+fi
+
+# =============================================================================
+# 6. RESTORE SETTINGS INCLUDE (site:install rewrites settings.php)
+# =============================================================================
+header "Restoring settings include"
+ddev exec bash /var/www/html/.ddev/commands/web/setup-settings \
+  --hash-salt="${HASH_SALT}"
+info "settings.php include restored"
+
+# =============================================================================
+# 7. RECIPES
+# =============================================================================
+if [[ "$SKIP_RECIPES" == "no" ]]; then
+
+  # ---------------------------------------------------------------------------
+  # Helper: apply a named recipe safely.
+  #
+  # When REDIS_ENABLED=true, Drupal's service container is configured to use
+  # cache.backend.redis on bootstrap.  Before the redis module is actually
+  # installed that service doesn't exist, so any `drush` invocation (including
+  # the `drush cache:rebuild` step inside `ddev recipe`) blows up with:
+  #   "You have requested a non-existent service cache.backend.redis."
+  #
+  # Fix: bypass `ddev recipe` (which calls drush internally) and call drush
+  # directly inside the container with REDIS_ENABLED overridden to false.
+  # The bash subprocess assignment overrides the container env variable for the
+  # duration of that command only.
+  # ---------------------------------------------------------------------------
+  apply_recipe() {
+    local name="$1"
+    local path="/var/www/html/recipes/${name}"
+    if [[ "$REDIS_ACTIVE" == "yes" ]]; then
+      warn "REDIS_ENABLED detected — applying ${name} with Redis bypassed"
+      ddev exec bash -c "REDIS_ENABLED=false drush cache:rebuild 2>/dev/null || true"
+      ddev exec bash -c "REDIS_ENABLED=false drush recipe '${path}'"
+    else
+      ddev recipe "${name}"
+    fi
+  }
+
+  header "Applying formula-foundational recipe"
+  apply_recipe "formula-foundational"
+  ddev exec drush theme:uninstall stark --yes 2>/dev/null || true
+
+  if [[ "$REDIS_ACTIVE" == "yes" ]]; then
+    # Apply the Pantheon recipe with the same bypass so the redis module gets
+    # installed.  Once it is installed, subsequent drush calls bootstrap fine
+    # with REDIS_ENABLED=true and setup-pantheon can run normally.
+    apply_recipe "formula-pantheon"
+    # setup-pantheon re-patches settings.php (needed because site:install
+    # rewrites it) and is otherwise idempotent.
+    ddev setup-pantheon
+  elif [[ "${CI:-}" != "true" ]]; then
+    # Interactive recipe picker for non-Pantheon projects.
+    ddev recipe
+  fi
+
+else
+  warn "Skipping recipes (--skip-recipes)"
+fi
+
+# =============================================================================
+# 8. CACHE REBUILD
+# =============================================================================
+header "Rebuilding caches"
+ddev exec drush cr
+info "Caches rebuilt"
+
+# =============================================================================
+# DONE
+# =============================================================================
+echo
+echo -e "${GREEN}${BOLD}============================================================${RESET}"
+echo -e "${GREEN}${BOLD}  Site reset complete!${RESET}"
+echo -e "${GREEN}${BOLD}============================================================${RESET}"
+echo
+echo -e "  ${BOLD}Site URL        :${RESET} https://${DDEV_SITENAME:-${DDEV_PROJECT:-unknown}}.ddev.site"
+echo -e "  ${BOLD}Admin login     :${RESET} ${ADMIN_USER} / ${ADMIN_PASS}"
+echo -e "  ${BOLD}Profile used    :${RESET} ${PROFILE}"
+echo

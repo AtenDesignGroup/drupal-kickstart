@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 ## Description: Generate a custom Drupal theme with the prototype starterkit, then enable it as the site default.
-## Usage: setup-prototype --theme-name=NAME [--theme-desc=DESCRIPTION] [--theme-abbreviated=ABBR] [--generate-only]
+## Usage: setup-prototype --theme-name=NAME [--theme-desc=DESCRIPTION] [--theme-abbreviated=ABBR] [--generate-only] [--generate-recipes]
 ## Example: "ddev setup-prototype --theme-name=my_theme --theme-desc='My Theme' --theme-abbreviated=mt"
+## Example: "ddev setup-prototype --theme-name=my_theme --generate-only --generate-recipes"
 
 set -euo pipefail
 
@@ -28,12 +29,14 @@ THEME_NAME=""
 THEME_DESC=""
 THEME_ABBREVIATED=""
 GENERATE_ONLY="no"
+GENERATE_RECIPES="no"
 for arg in "$@"; do
   case "$arg" in
     --theme-name=*)        THEME_NAME="${arg#*=}" ;;
     --theme-desc=*)        THEME_DESC="${arg#*=}" ;;
     --theme-abbreviated=*) THEME_ABBREVIATED="${arg#*=}" ;;
     --generate-only)       GENERATE_ONLY="yes" ;;
+    --generate-recipes)    GENERATE_RECIPES="yes" ;;
   esac
 done
 
@@ -75,6 +78,15 @@ else
   # Remove prototype — it's only needed for generation.
   cd "${ROOT}" && composer remove drupal/prototype --no-interaction
   info "drupal/prototype removed from require"
+fi
+
+# =============================================================================
+# 1b. GENERATE PARAGRAPH RECIPES (optional)
+# =============================================================================
+if [[ "$GENERATE_RECIPES" == "yes" ]]; then
+  header "Generating paragraph recipes from prototype SDC components"
+  php /var/www/html/.ddev/generate-recipe.php all --theme-name="${THEME_NAME}"
+  info "Recipe scaffolds generated — review any REVIEW items above"
 fi
 
 # =============================================================================

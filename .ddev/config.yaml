@@ -6,6 +6,8 @@ webserver_type: nginx-fpm
 xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
+router_http_port: "8080"
+router_https_port: "8443"
 database:
     type: mariadb
     version: "10.6"

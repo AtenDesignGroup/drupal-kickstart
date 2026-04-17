@@ -1,0 +1,10 @@
+{# Link: extract raw values (requires twig_field_value module). #}
+{%- set _link_items = content.field_link|field_value -%}
+{%- set _link = _link_items is not empty ? _link_items|first : null -%}
+
+{{- include('dk_start_theme:teaser', {
+  title: content.field_title|render|striptags|trim,
+  media: content.field_media,
+  link: _link ? {text: _link.title, url: _link.url.toString} : {},
+  body: content.field_formatted_text
+}) -}}

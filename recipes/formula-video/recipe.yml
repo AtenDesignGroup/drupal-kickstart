@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Video'
+description: 'Provides a Video paragraph type wired to the dk_start_theme SDC video component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+  - formula-media        # provides remote_video media type
+
+config:
+  strict: false
