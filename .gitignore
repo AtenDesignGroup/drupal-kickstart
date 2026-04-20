@@ -84,3 +84,4 @@ private/pantheon_secrets/secrets.json
 .env
 !.ddev/solr/configsets/dev
 web/sites/default/settings.ddev.php
+web/sites/default/settings.pantheon.php

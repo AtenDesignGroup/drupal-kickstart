@@ -4,6 +4,7 @@ type: 'Site'
 
 install:
   - file
+  - focal_point
   - image
   - views
   - media

@@ -97,6 +97,66 @@ substitute_recipe_tokens() {
     return 0
 }
 
+# Recursively collect all entries from `install:` blocks across a recipe tree.
+# Outputs one module name per line.
+collect_install_modules() {
+    local recipe_name=$1
+    local -n _ci_visited=$2
+    local recipes_dir="/var/www/html/recipes"
+    local recipe_path="${recipes_dir}/${recipe_name}"
+
+    if [[ -v "_ci_visited[$recipe_name]" ]]; then
+        return 0
+    fi
+    _ci_visited[$recipe_name]=1
+
+    if [ -f "${recipe_path}/recipe.yml" ]; then
+        # Recurse into sub-recipes first.
+        local sub_recipes
+        sub_recipes=$(grep -E '^\s+-\s+formula-' "${recipe_path}/recipe.yml" 2>/dev/null \
+            | sed 's/^\s*-\s*//' | tr -d "'" | tr -d '"' || true)
+        for sub in $sub_recipes; do
+            collect_install_modules "$sub" _ci_visited
+        done
+
+        # Emit install: entries — lines that are list items under the install block.
+        awk '/^install:/{p=1;next} p && /^[^ ]/{p=0} p && /^\s+-/{gsub(/^\s+-\s*/,""); print}' \
+            "${recipe_path}/recipe.yml" 2>/dev/null || true
+    fi
+}
+
+# Recursively collect composer deps from a recipe and all its sub-recipes.
+# Outputs a space-separated list of "package:version" strings.
+# Visited set (passed as a nameref array) prevents infinite loops.
+collect_deps() {
+    local recipe_name=$1
+    local -n _visited=$2   # nameref to caller's associative array
+    local recipes_dir="/var/www/html/recipes"
+    local recipe_path="${recipes_dir}/${recipe_name}"
+
+    # Guard against cycles and recipes we've already processed.
+    if [[ -v "_visited[$recipe_name]" ]]; then
+        return 0
+    fi
+    _visited[$recipe_name]=1
+
+    # Recurse into sub-recipes listed under `recipes:` in recipe.yml first.
+    if [ -f "${recipe_path}/recipe.yml" ]; then
+        local sub_recipes
+        sub_recipes=$(grep -E '^\s+-\s+formula-' "${recipe_path}/recipe.yml" 2>/dev/null \
+            | sed 's/^\s*-\s*//' | tr -d "'" | tr -d '"' || true)
+        for sub in $sub_recipes; do
+            collect_deps "$sub" _visited
+        done
+    fi
+
+    # Emit this recipe's own composer deps.
+    if [ -f "${recipe_path}/composer.json" ]; then
+        jq -r '.require // {} | to_entries[] | "\(.key):\(.value)"' \
+            "${recipe_path}/composer.json" 2>/dev/null || true
+    fi
+}
+
 # Function to apply a single recipe
 apply_recipe() {
     local RECIPE_NAME=$1
@@ -124,48 +184,80 @@ apply_recipe() {
     print_success "Recipe validated: $RECIPE_PATH"
     echo ""
 
-    # Step 2: Merge dependencies if composer.json exists
-    if [ -f "$RECIPE_PATH/composer.json" ]; then
-        print_info "Step 2/5: Merging composer dependencies..."
+    # Step 2: Merge dependencies — recursively collect from this recipe and all sub-recipes
+    print_info "Step 2/5: Merging composer dependencies (including sub-recipes)..."
 
-        # Ensure jq is installed
-        if ! command -v jq &> /dev/null; then
-            print_warning "jq not found, attempting to install..."
-            apt-get update -qq && apt-get install -y -qq jq > /dev/null 2>&1
-        fi
+    # Ensure jq is installed
+    if ! command -v jq &> /dev/null; then
+        print_warning "jq not found, attempting to install..."
+        apt-get update -qq && apt-get install -y -qq jq > /dev/null 2>&1
+    fi
 
-        # Extract dependencies from recipe's composer.json
-        RECIPE_DEPS=$(jq -r '.require // {} | to_entries | map("\(.key):\(.value)") | join(" ")' "$RECIPE_PATH/composer.json")
-        RECIPE_DEV_DEPS=$(jq -r '."require-dev" // {} | to_entries | map("\(.key):\(.value)") | join(" ")' "$RECIPE_PATH/composer.json")
+    declare -A _seen_recipes=()
+    # Collect all deps from the full recipe tree (deduped by sort -u)
+    RECIPE_DEPS=$(collect_deps "$RECIPE_NAME" _seen_recipes \
+        | grep -v '^drupal-recipe-unpack\|^composer/' \
+        | sort -u \
+        | tr '\n' ' ')
 
-        if [ -n "$RECIPE_DEPS" ] && [ "$RECIPE_DEPS" != "" ]; then
-            print_info "Found dependencies to merge: $(echo "$RECIPE_DEPS" | wc -w | tr -d ' ') packages"
-            print_warning "This may take a few minutes..."
+    if [ -n "$RECIPE_DEPS" ] && [ "$RECIPE_DEPS" != " " ]; then
+        print_info "Found dependencies to merge across recipe tree: $(echo "$RECIPE_DEPS" | wc -w | tr -d ' ') packages"
+        print_warning "This may take a few minutes..."
 
-            # Use composer require to add all dependencies
-            if composer require $RECIPE_DEPS --working-dir=/var/www/html --no-interaction; then
-                print_success "Dependencies merged and installed"
-            else
-                print_error "Failed to install dependencies"
-                return 1
-            fi
+        # Use composer require to add all dependencies
+        if composer require $RECIPE_DEPS --working-dir=/var/www/html --no-interaction; then
+            print_success "Dependencies merged and installed"
         else
-            print_warning "No require dependencies found in recipe's composer.json"
+            print_error "Failed to install dependencies"
+            return 1
         fi
+    else
+        print_warning "No require dependencies found in recipe tree"
+    fi
 
+    # Dev deps from the top-level recipe only (sub-recipe dev deps are not inherited)
+    if [ -f "$RECIPE_PATH/composer.json" ]; then
+        RECIPE_DEV_DEPS=$(jq -r '."require-dev" // {} | to_entries | map("\(.key):\(.value)") | join(" ")' \
+            "$RECIPE_PATH/composer.json")
         if [ -n "$RECIPE_DEV_DEPS" ] && [ "$RECIPE_DEV_DEPS" != "" ]; then
-            print_info "Found dev dependencies to merge: $(echo "$RECIPE_DEV_DEPS" | wc -w | tr -d ' ') packages"
-
-            # Use composer require --dev for dev dependencies
+            print_info "Found dev dependencies: $(echo "$RECIPE_DEV_DEPS" | wc -w | tr -d ' ') packages"
             if composer require --dev $RECIPE_DEV_DEPS --working-dir=/var/www/html --no-interaction; then
                 print_success "Dev dependencies merged and installed"
             else
                 print_warning "Failed to install dev dependencies (continuing anyway)"
             fi
         fi
-    else
-        print_warning "Step 2/5: No composer.json found in recipe, skipping dependency merge"
     fi
+    echo ""
+
+    # Step 2b: Pre-flight — verify every contrib module in install: blocks is on disk
+    print_info "Step 2b/5: Verifying module availability..."
+    declare -A _ci_seen=()
+    MISSING_MODS=()
+    # Core modules are in web/core/modules — anything not there must be contrib.
+    while IFS= read -r mod; do
+        mod=$(echo "$mod" | xargs)  # trim whitespace
+        [[ -z "$mod" ]] && continue
+        # Skip if already in core.
+        if [ -d "/var/www/html/web/core/modules/$mod" ]; then
+            continue
+        fi
+        # Check contrib path.
+        if [ ! -d "/var/www/html/web/modules/contrib/$mod" ]; then
+            MISSING_MODS+=("$mod")
+        fi
+    done < <(collect_install_modules "$RECIPE_NAME" _ci_seen | sort -u)
+
+    if [ ${#MISSING_MODS[@]} -gt 0 ]; then
+        print_error "The following modules are listed in install: but not found on disk:"
+        for m in "${MISSING_MODS[@]}"; do
+            echo "  • $m  (missing from web/modules/contrib/$m)"
+        done
+        echo ""
+        print_error "Add the missing package(s) to the recipe's composer.json and re-run."
+        return 1
+    fi
+    print_success "All install: modules are available on disk"
     echo ""
 
     # Step 3: Clear Drupal cache
