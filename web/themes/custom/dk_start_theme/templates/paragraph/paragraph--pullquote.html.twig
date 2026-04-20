@@ -1,0 +1,4 @@
+{{ include('dk_start_theme:pullquote', {
+  text: content.field_formatted_text,
+  credit: content.field_title|render|striptags|trim
+}) }}

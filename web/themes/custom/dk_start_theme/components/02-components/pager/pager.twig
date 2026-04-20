@@ -1,0 +1,138 @@
+{#
+/**
+ * @file
+ * Components - Components - Pager
+ *
+ * Available props:
+ * - attributes: [array] Any custom attributes needed for this component.
+ * - items: [array] The full collection of elements needed to make up this component.
+ * - ellipses: [array] A group of items representing continuations of pagination.
+ * - current: [integer] The number representative of the current page.
+ *
+ * Available slots:
+ * - pager
+ */
+#}
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-pager',
+] %}
+
+{% block pager %}
+  {% if items is not empty %}
+    <nav
+      {{ attributes.addClass(classes) }}
+      role="navigation"
+      aria-label="{{ 'Pagination'|t }}"
+    >
+      <ol class='c-pager__items js-pager__items'>
+        {% if items.first %}
+          {# Print first item if we are not on the first page. #}
+          <li class="c-pager__item c-pager__item--first">
+            <a
+              {{ items.first.attributes }}
+              href="{{ items.first.href }}"
+              class="c-pager__link"
+              title="{{ 'Go to first page'|t }}"
+            >
+              <span class="visually-hidden">{{ 'First page'|t }}</span>
+              <span aria-hidden="true">{{ items.first.text|default('« First'|t) }}</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% if items.previous %}
+          {# Print previous item if we are not on the first page. #}
+          <li class="c-pager__item c-pager__item--previous">
+            <a
+              {{ items.previous.attributes }}
+              href="{{ items.previous.href }}"
+              class="c-pager__link"
+              title="{{ 'Go to previous page'|t }}"
+              rel="prev"
+            >
+              <span class="visually-hidden">{{ 'Previous page'|t }}</span>
+              <span aria-hidden="true">{{ items.previous.text|default('‹ Previous'|t) }}</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% if ellipses.previous %}
+          {# Add an ellipsis if there are further previous pages. #}
+          <li class="c-pager__item c-pager__item--ellipsis">
+            <span class="visually-hidden">{{ 'Numerous prior pages not currently shown'|t }}</span>
+            <span aria-hidden="true">&hellip;</span>
+          </li>
+        {% endif %}
+
+        {% for key, item in items.pages %}
+          {# Set aria and related classes #}
+          {% set is_active = current == key ? 'is-active' : '' %}
+          {% set is_current = current == key ? 'aria-current="page"' : '' %}
+
+          {# Now generate the actual pager piece. #}
+          <li class='c-pager__item {{ is_active }}'>
+            {% if current == key %}
+              {% set title = 'Current page'|t %}
+            {% else %}
+              {% set title = 'Go to page @key'|t({'@key': key}) %}
+            {% endif %}
+
+            <a
+              {{ item.attributes }}
+              href="{{ item.href }}"
+              class="c-pager__link"
+              title="{{ title }}"
+              {{ current == key ? 'aria-current="page"' }}
+            >
+              <span class='visually-hidden'>
+                {{ current == key ? 'Current page'|t : 'Page'|t }}
+              </span>
+              {{- key -}}
+            </a>
+          </li>
+        {% endfor %}
+
+        {% if ellipses.next %}
+          {# Add an ellipsis if there are further next pages. #}
+          <li class="c-pager__item c-pager__item--ellipsis">
+            <span class="visually-hidden">{{ 'Numerous following pages not currently shown'|t }}</span>
+            <span aria-hidden="true">&hellip;</span>
+          </li>
+        {% endif %}
+
+        {% if items.next %}
+          {# Print next item if we are not on the last page. #}
+          <li class="c-pager__item c-pager__item--next">
+            <a
+              {{ items.next.attributes }}
+              href="{{ items.next.href }}"
+              title="{{ 'Go to next page'|t }}"
+              class="c-pager__link"
+              rel="next"
+            >
+              <span class="visually-hidden">{{ 'Next page'|t }}</span>
+              <span aria-hidden="true">{{ items.next.text|default('Next ›'|t) }}</span>
+            </a>
+          </li>
+        {% endif %}
+
+        {% if items.last %}
+          {# Print last item if we are not on the last page. #}
+          <li class="c-pager__item c-pager__item--last">
+            <a
+              {{ items.last.attributes }}
+              href="{{ items.last.href }}"
+              class="c-pager__link"
+              title="{{ 'Go to last page'|t }}"
+            >
+              <span class="visually-hidden">{{ 'Last page'|t }}</span>
+              <span aria-hidden="true">{{ items.last.text|default('Last »'|t) }}</span>
+            </a>
+          </li>
+        {% endif %}
+      </ol>
+    </nav>
+  {% endif %}
+{% endblock %}

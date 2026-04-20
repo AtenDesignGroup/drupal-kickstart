@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="drupal-project">
+  <rule ref="Drupal" />
+
+  <!-- Ignore files -->
+  <exclude-pattern>*/dist/*\.(css|js)$</exclude-pattern>
+  <exclude-pattern>*/js/*\.js$</exclude-pattern>
+  <exclude-pattern>*/webpack.config.js</exclude-pattern>
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/tests/cypress/node_modules/*</exclude-pattern>
+
+  <!-- Add tests for .theme files -->
+  <arg name="extensions" value="php,inc,install,test,profile,theme,info,txt,md,yml" />
+</ruleset>

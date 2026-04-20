@@ -1,0 +1,20 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Figure
+status: 'experimental'
+description: 'A simple figure component'
+slots:
+  media_block: { title: Figure Content }
+  caption_block: { title: Figure Caption }
+props:
+  type: object
+  properties:
+    media:
+      type: string
+      title: Rendered media
+      examples:
+        - '<img src="https://www.example.org/image.jpg" alt="Image description">'
+    caption:
+      type: string
+      title: Caption Text
+      examples:
+        - '<p>Image caption in exercitation in tempor ea enim elit id consequat.</p>'

@@ -1,0 +1,24 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-breadcrumb',
+] %}
+
+<nav role='navigation' aria-labelledby="{{ id }}" {{ attributes.addClass(classes)}}>
+  <h2 id="{{ id }}" class="visually-hidden">{{ 'Breadcrumb'|t }}</h2>
+  {% block items_block %}
+    <ol class='c-breadcrumb__list'>
+      {% for item in items %}
+        {% if item.url %}
+          <li class='c-breadcrumb__item'>
+            <a href="{{ item.url }}" class="c-breadcrumb__link">{{ item.text }}</a>
+          </li>
+        {% else %}
+          <li class='c-breadcrumb__item'>
+            {{ item.text }}
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ol>
+  {% endblock %}
+</nav>

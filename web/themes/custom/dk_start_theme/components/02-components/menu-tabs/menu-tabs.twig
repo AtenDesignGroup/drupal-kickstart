@@ -1,0 +1,30 @@
+{#
+/**
+ * @file
+ * Molecule component for Menu - Tabs
+ *
+ * Available props:
+ * - attributes - [string] Any additional attributes needing to be specified.
+ * - menu_tabs_content - [object] Expecting all elemental parts of this menu.
+ * - menu_tabs_label - [string] Expecting an identifying value.
+ *
+ * Available slots:
+ * - menu_tabs_content
+ * - menu_tabs_prefix
+ *
+ */
+#}
+
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-menu-tabs',
+] %}
+
+<nav role="navigation" aria-label="{{ menu_tabs_label }}" {{ attributes.addClass(classes)|without('role', 'aria-label') }}>
+  {% block menu_tabs_prefix %}{% endblock %}
+
+  {% block menu_tabs_content %}
+    {{ menu_tabs_content }}
+  {% endblock %}
+</nav>

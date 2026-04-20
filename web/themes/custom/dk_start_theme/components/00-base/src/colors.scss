@@ -1,0 +1,60 @@
+//
+// Base - Color
+//
+// - 01 - Theme Colors
+// - 02 - Grayscale
+// - 03 - Semantic Colors
+//
+
+
+//------------------------------------
+//  01 - Theme Colors
+//------------------------------------
+
+:root {
+  --dk_start_theme-color-blue: #0d6efd;
+  --dk_start_theme-color-indigo: #6610f2;
+  --dk_start_theme-color-purple: #6f42c1;
+  --dk_start_theme-color-pink: #d63384;
+  --dk_start_theme-color-red: #dc3545;
+  --dk_start_theme-color-orange: #fd7e14;
+  --dk_start_theme-color-yellow: #ffc107;
+  --dk_start_theme-color-green: #198754;
+  --dk_start_theme-color-teal: #20c997;
+  --dk_start_theme-color-cyan: #0dcaf0;
+}
+
+
+//------------------------------------
+//  02 - Grayscale
+//------------------------------------
+
+:root {
+  --dk_start_theme-color-white: #ffffff;
+  --dk_start_theme-color-gray-100: #f8f9fa;
+  --dk_start_theme-color-gray-200: #e9ecef;
+  --dk_start_theme-color-gray-300: #dee2e6;
+  --dk_start_theme-color-gray-400: #ced4da;
+  --dk_start_theme-color-gray-500: #adb5bd;
+  --dk_start_theme-color-gray-600: #6c757d;
+  --dk_start_theme-color-gray-700: #495057;
+  --dk_start_theme-color-gray-800: #343a40;
+  --dk_start_theme-color-gray-900: #212529;
+  --dk_start_theme-color-black: #000000;
+}
+
+
+//------------------------------------
+//  03 - Semantic Colors
+//------------------------------------
+
+:root {
+  --dk_start_theme-color-primary: var(--dk_start_theme-color-blue);
+  --dk_start_theme-color-secondary: var(--dk_start_theme-color-gray-900);
+  --dk_start_theme-color-success: var(--dk_start_theme-color-green);
+  --dk_start_theme-color-info: var(--dk_start_theme-color-cyan);
+  --dk_start_theme-color-warning: var(--dk_start_theme-color-yellow);
+  --dk_start_theme-color-danger: var(--dk_start_theme-color-red);
+  --dk_start_theme-color-light: var(--dk_start_theme-color-gray-100);
+  --dk_start_theme-color-dark: var(--dk_start_theme-color-gray-900);
+}

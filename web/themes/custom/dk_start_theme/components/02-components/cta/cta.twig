@@ -1,0 +1,40 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-cta',
+] %}
+
+<section {{ attributes.addClass(classes) }}>
+
+  <div class='c-cta__wrap'>
+    <div class='c-cta__inner-wrap'>
+
+      {% block title_block %}
+        {% if title %}
+          <h2 class='c-cta__title'>{{title}}</h2>
+        {% endif %}
+      {% endblock %}
+
+
+      {% block text_block %}
+        {% if text %}
+          <div class='c-cta__text'>
+            {{ text }}
+          </div>
+        {% endif %}
+      {% endblock %}
+
+
+      {% block link_block %}
+        {% if link.url %}
+          {{ include('dk_start_theme:link', {
+            classes: ['c-cta__link'],
+            link_link: { url: link.url, title: link.title },
+            link_icon: icon,
+            attr: create_attribute(),
+          }, with_context = false) }}
+        {% endif %}
+      {% endblock %}
+    </div>
+  </div>
+</section>
