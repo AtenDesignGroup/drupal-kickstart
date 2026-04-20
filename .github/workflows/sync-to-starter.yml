@@ -90,6 +90,7 @@ jobs:
             "assets/"
             "docs/"
             ".ddev/commands/"
+            ".ddev/generate-recipe.php"
             "drupal-kickstart.sh"
             "composer.custom.json"
             "composer.patches.json"
