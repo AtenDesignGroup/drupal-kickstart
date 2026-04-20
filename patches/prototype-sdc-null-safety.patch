@@ -1,0 +1,174 @@
+diff --git a/components/02-components/cta/cta.component.yml b/components/02-components/cta/cta.component.yml
+index 6984ce3..7d3047c 100644
+--- a/components/02-components/cta/cta.component.yml
++++ b/components/02-components/cta/cta.component.yml
+@@ -10,14 +10,14 @@ props:
+   type: object
+   properties:
+     title:
+-      type: string
++      type: ['string', 'null']
+       title: Title
+       examples:
+         - Basic page with a long title
+         - Basic page
+     text:
+       title: Text
+-      type: string
++      type: ['string', 'null']
+       examples:
+         - '<p><strong>Example paragraph</strong>. Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed. Purus ut eu fermentum non. Arcu lectus sed in quisque vitae posuere. Adipiscing nullam mauris iaculis leo turpis leo, congue.</p>'
+     link:
+@@ -25,18 +25,18 @@ props:
+       type: object
+       properties:
+         title:
+-          type: string
++          type: ['string', 'null']
+           title: Link Text
+           examples:
+             - Read more about this topic
+             - Submit now
+         url:
+           title: Link Url
+-          type: string
++          type: ['string', 'null']
+           examples:
+             - 'https://www.example.org'
+     icon:
+-      type: string
++      type: ['string', 'null']
+       title: Icon Type
+       examples:
+         - icon-arrow-right
+diff --git a/components/02-components/pullquote/pullquote.component.yml b/components/02-components/pullquote/pullquote.component.yml
+index 426675c..a013b42 100644
+--- a/components/02-components/pullquote/pullquote.component.yml
++++ b/components/02-components/pullquote/pullquote.component.yml
+@@ -7,17 +7,15 @@ slots:
+   citation: { title: Pullquote Citation }
+ props:
+   type: object
+-  required:
+-    - text
+   properties:
+     text:
+-      type: string
++      type: ['string', 'null']
+       title: Quote
+       description: The quote paragraph
+       examples:
+         - 'Example quote paragraph. Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed.'
+     credit:
+-      type: string
++      type: ['string', 'null']
+       title: Quote Credit
+       description: The optional second quote credit.
+       examples:
+diff --git a/components/02-components/slideshow/slideshow.component.yml b/components/02-components/slideshow/slideshow.component.yml
+index 1fbbbde..edfd1ed 100644
+--- a/components/02-components/slideshow/slideshow.component.yml
++++ b/components/02-components/slideshow/slideshow.component.yml
+@@ -18,7 +18,7 @@ props:
+   type: object
+   properties:
+     heading:
+-      type: string
++      type: ['string', 'null']
+       title: Slideshow Heading
+       description: Visible (but visually-hidden) heading for the slideshow section.
+       examples:
+@@ -53,7 +53,7 @@ props:
+           type: boolean
+           title: Autoplay
+     slides:
+-      type: array
++      type: ['array', 'null']
+       title: Slides
+       description: Fallback slide data when the slides_block slot is not filled.
+       items:
+@@ -63,5 +63,5 @@ props:
+             type: object
+             title: Slide Attributes
+           content:
+-            type: string
++            type: ['string', 'null']
+             title: Slide Content
+diff --git a/components/02-components/teaser/teaser.component.yml b/components/02-components/teaser/teaser.component.yml
+index 15fe511..e17aee5 100644
+--- a/components/02-components/teaser/teaser.component.yml
++++ b/components/02-components/teaser/teaser.component.yml
+@@ -4,22 +4,20 @@ status: 'experimental'
+ description: A Teaser component
+ props:
+   type: object
+-  required:
+-    - title
+   properties:
+     variant:
+-      type: string
++      type: ['string', 'null']
+       title: Variant
+       enum:
+         - card
+         - panel
+     title:
+-      type: 'string'
++      type: ['string', 'null']
+       title: 'Title'
+       examples:
+         - 'A new exhibit opens at the Student Visitor Center'
+     media:
+-      type: string
++      type: ['string', 'null']
+       title: Media
+       description: 'Rendered media markup (image, video, etc.) displayed above the teaser content.'
+     link:
+@@ -27,11 +25,11 @@ props:
+       title: 'More Link'
+       properties:
+         text:
+-          type: string
++          type: ['string', 'null']
+         url:
+-          type: string
++          type: ['string', 'null']
+     body:
+       title: Body
+-      type: string
++      type: ['string', 'null']
+       examples:
+         - '<p>The human body is a marvel and does so amazing things for us everyday.</p>'
+diff --git a/components/02-components/video/video.component.yml b/components/02-components/video/video.component.yml
+index dee65e0..b5545b0 100644
+--- a/components/02-components/video/video.component.yml
++++ b/components/02-components/video/video.component.yml
+@@ -7,25 +7,23 @@ slots:
+   caption_block: { title: Video Caption }
+ props:
+   type: object
+-  required:
+-    - media
+   properties:
+     title:
+-      type: 'string'
++      type: ['string', 'null']
+       title: 'Video Title'
+       description: 'The title for the video.'
+       examples:
+         - 'YouTube Example'
+         - 'Vimeo Example'
+     media:
+-      type: 'string'
++      type: ['string', 'null']
+       title: 'Video URL'
+       description: 'The embed url for either YouTube or Vimeo.'
+       examples:
+         - 'https://youtu.be/0RWs6uxR9yg'
+         - 'https://player.vimeo.com/video/728948316'
+     caption:
+-      type: 'string'
++      type: ['string', 'null']
+       title: 'Caption Text'
+       description: 'The caption text for video.'
+       examples:
