@@ -1,0 +1,14 @@
+{% import 'dk_start_theme:icons' as icon %}
+
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'to-top',
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  <a class='to-top__inner' href='#top'>
+    {{ icon.inline(iconType|default('arrow-up')) }}
+    <span class='visually-hidden'>{{ text|default('Back to Top') }}</span>
+  </a>
+</div>

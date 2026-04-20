@@ -1,0 +1,46 @@
+//
+// Elements - Text
+//
+// - 01 - Body
+// - 02 - General
+// - 03 - Bold
+// - 04 - Blockquote
+//
+
+//------------------------------------
+//  01 - Imports
+//------------------------------------
+
+@use 'partials' as *;
+
+//------------------------------------
+//  02 - Body
+//------------------------------------
+
+body {
+  @include type-scale(body, base);
+  color: var(--dk_start_theme-color-black);
+  font-family: var(--dk_start_theme-ff-base);
+}
+
+//------------------------------------
+//  03 - Bold
+//------------------------------------
+
+strong,
+b {
+  font-weight: var(--dk_start_theme-fw-bold);
+}
+
+//------------------------------------
+//  04 - Blockquote
+//------------------------------------
+
+blockquote {
+  text-indent: -0.4em;
+  font-style: italic;
+}
+
+* + blockquote {
+  margin-top: 16px;
+}

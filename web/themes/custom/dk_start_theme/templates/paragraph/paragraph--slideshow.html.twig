@@ -1,0 +1,15 @@
+{# Build slides array from multi-value media field — iterate numeric deltas only.
+   Note: field_slides uses media_thumbnail formatter WITHOUT nomarkup so each delta
+   is a separate render array item we can pass as slide content. #}
+{% set slide_items = [] %}
+{% for delta, item in content.field_slides if delta matches '/^\\d+$/' %}
+  {% set slide_items = slide_items|merge([{
+    attributes: create_attribute(),
+    content: item
+  }]) %}
+{% endfor %}
+
+{{ include('dk_start_theme:slideshow', {
+  heading: content.field_title|render|striptags|trim,
+  slides: slide_items
+}) }}

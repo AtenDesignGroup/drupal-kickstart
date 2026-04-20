@@ -1,0 +1,25 @@
+{
+  "name": "prototype-storybook",
+  "version": "1.0.0",
+  "description": "Starting with a standard foundation for all our Drupal projects is a way for us to maintain/manage our sites in a more consistent manner. The packages installed here should be universal throughout our sites at least 90% of the time.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.0.0",
+    "@storybook/addon-links": "^8.0.0",
+    "@storybook/addon-webpack5-compiler-swc": "^1.0.2",
+    "@storybook/blocks": "^8.0.0",
+    "@storybook/server": "^8.0.0",
+    "@storybook/server-webpack5": "^8.0.0",
+    "storybook": "^8.0.0"
+  }
+}

@@ -1,0 +1,34 @@
+{# Utilize Drupal default menu template #}
+{% import _self as menus %}
+
+{% set attributes = create_attribute(attributes) %}
+
+{% set wrapper_attributes = create_attribute(wrapper_attributes|default({}))
+    .addClass(['c-menu'])
+    .setAttribute('data-breakpoint', breakpoint|default(768))
+    .setAttribute('id', 'c-menu'|clean_unique_id)
+%}
+
+{# Add 'data-mobile' attribute only if 'mobile_control' is set #}
+{% if mobile_control is defined and mobile_control %}
+  {% set wrapper_attributes = wrapper_attributes.setAttribute('data-mobile', mobile_control|clean_unique_id) %}
+{% endif %}
+
+<div {{ wrapper_attributes }}>
+  {{ menus.menu_links(items, attributes.addClass('c-menu__list'), 0, menu_name) }}
+  {% macro menu_links(items, attributes, menu_level, modifier) %}
+    {% import _self as menus %}
+    {% if items %}
+      <ul {{ attributes.setAttribute('data-depth', menu_level) }}>
+        {% for item in items %}
+          <li {{ item.attributes.addClass(classes) }}>
+            {{ link(item.title, item.url) }}
+            {% if item.below %}
+              {{ menus.menu_links(item.below, attributes, menu_level + 1, modifier) }}
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endmacro %}
+</div>

@@ -1,0 +1,6 @@
+{{ include('dk_start_theme:teaser', {
+  title: label|default(''),
+  body: content.body|default(''),
+  link:{ url: url, text: label|render},
+  attr: attributes
+}) }}

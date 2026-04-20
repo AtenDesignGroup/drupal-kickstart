@@ -1,0 +1,55 @@
+<div class="layout-container l-stack">
+  {% if alert %}
+    <div class="l-container">
+      {{ page.alert }}
+    </div>
+  {% endif %}
+  {# /alert #}
+
+  {% block header %}
+    <header class="site-header" role="banner">
+      <div class="site-header__inner l-container">
+        {{ page.branding }}
+        {{ page.navigation }}
+      </div>
+    </header>
+  {% endblock %}
+  {# /header #}
+
+  <a id="main-content" tabindex="-1"></a>
+
+  {% block breadcrumb %}
+    {{page.breadcrumb}}
+  {% endblock %}
+  {# /breadcrumb #}
+
+  {% block highlighted %}
+    {{ page.highlighted }}
+  {% endblock %}
+
+  {% block help %}
+    {{ page.help }}
+  {% endblock %}
+
+
+  {% block main %}
+    <main>
+
+      {% block content %}
+        <div class="l-container">
+          {{ page.content }}
+        </div>
+      {% endblock %}
+      {# /content #}
+
+    </main>
+  {% endblock %}
+  {# /main #}
+
+  {% block footer %}
+    {{page.footer}}
+  {% endblock %}
+  {# /footer #}
+
+</div>
+{# /.layout-container #}

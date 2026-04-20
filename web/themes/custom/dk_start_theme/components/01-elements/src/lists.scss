@@ -1,0 +1,30 @@
+//
+// Elements - Lists
+//
+// - 01 - General
+//
+
+//------------------------------------
+//  01 - General
+//------------------------------------
+
+ul:not([class]),
+ol:not([class]) {
+  font-size: inherit;
+  line-height: inherit;
+  list-style-position: inside;
+}
+
+ul:not([class]):not(:first-child),
+ol:not([class]):not(:first-child) {
+  margin-top: 16px;
+}
+
+//------------------------------------
+//  02 - Generic Menus
+//------------------------------------
+
+ul.menu {
+  margin: 0;
+  padding: 0;
+}

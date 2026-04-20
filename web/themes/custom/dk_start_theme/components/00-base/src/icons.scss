@@ -1,0 +1,113 @@
+//
+// @file
+// Libraries - Global - Icons
+//
+
+//
+//  Variables
+//
+$icons_path: '/themes/custom/dk_start_theme/images/icons';
+
+:root {
+  --dk_start_theme-i-arrow-down: url('#{$icons_path}/icon-arrow-down.svg');
+  --dk_start_theme-i-arrow-left: url('#{$icons_path}/icon-arrow-left.svg');
+  --dk_start_theme-i-arrow-right: url('#{$icons_path}/icon-arrow-right.svg');
+  --dk_start_theme-i-arrow-up: url('#{$icons_path}/icon-arrow-up.svg');
+  --dk_start_theme-i-cancel: url('#{$icons_path}/icon-cancel.svg');
+  --dk_start_theme-i-checkmark: url('#{$icons_path}/icon-checkmark.svg');
+  --dk_start_theme-i-circle-check: url('#{$icons_path}/circle-check.svg');
+  --dk_start_theme-i-circle-empty: url('#{$icons_path}/circle-empty.svg');
+  --dk_start_theme-i-circle-filled: url('#{$icons_path}/circle-fill.svg');
+  --dk_start_theme-i-error: url('#{$icons_path}/error.svg');
+  --dk_start_theme-i-minus: url('#{$icons_path}/icon-minus.svg');
+  --dk_start_theme-i-plus: url('#{$icons_path}/icon-plus.svg');
+  --dk_start_theme-i-rectangle-checked: url('#{$icons_path}/rectangle-checked.svg');
+  --dk_start_theme-i-rectangle-empty: url('#{$icons_path}/rectangle-empty.svg');
+  --dk_start_theme-i-search: url('#{$icons_path}/icon-search.svg');
+  --dk_start_theme-i-status: url('#{$icons_path}/status.svg');
+  --dk_start_theme-i-success: url('#{$icons_path}/icon-success.svg');
+  --dk_start_theme-i-warning: url('#{$icons_path}/icon-warning.svg');
+}
+
+//
+// General
+//
+.icon {
+  background-color: var(--dk_start_theme-color-black);
+  block-size: 32px;
+  display: block;
+  font: 0/0 transparent;
+  inline-size: 32px;
+  mask-size: cover;
+}
+
+//
+//  Icons
+//
+.icon--arrow-down {
+  mask: var(--dk_start_theme-i-arrow-down) no-repeat center;
+}
+
+.icon--arrow-left {
+  mask: var(--dk_start_theme-i-arrow-left) no-repeat center;
+}
+
+.icon--arrow-right {
+  mask: var(--dk_start_theme-i-arrow-right) no-repeat center;
+}
+
+.icon--arrow-up {
+  mask: var(--dk_start_theme-i-arrow-up) no-repeat center;
+}
+
+.icon--circle-check {
+  mask: var(--dk_start_theme-i-circle-check) no-repeat center;
+}
+
+.icon--circle-empty {
+  mask: var(--dk_start_theme-i-circle-empty) no-repeat center;
+}
+
+.icon--circle-filled {
+  mask: var(--dk_start_theme-i-circle-filled) no-repeat center;
+}
+
+.icon--cancel {
+  mask: var(--dk_start_theme-i-cancel) no-repeat center;
+}
+
+.icon--checkmark {
+  mask: var(--dk_start_theme-i-checkmark) no-repeat center;
+}
+
+.icon--error {
+  mask: var(--dk_start_theme-i-error) no-repeat center;
+}
+
+.icon--minus {
+  mask: var(--dk_start_theme-i-minus) no-repeat center;
+}
+
+.icon--plus {
+  mask: var(--dk_start_theme-i-plus) no-repeat center;
+}
+
+.icon--rectangle-checked {
+  mask: var(--dk_start_theme-i-rectangle-checked) no-repeat center;
+}
+
+.icon--rectangle-empty {
+  mask: var(--dk_start_theme-i-rectangle-empty) no-repeat center;
+}
+
+.icon--search {
+  mask: var(--dk_start_theme-i-search) no-repeat center;
+}
+
+.icon--success {
+  mask: var(--dk_start_theme-i-success) no-repeat center;
+}
+
+.icon--warning {
+  mask: var(--dk_start_theme-i-warning) no-repeat center;
+}

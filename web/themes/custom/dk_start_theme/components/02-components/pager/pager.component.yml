@@ -1,0 +1,34 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Pager
+status: stable
+group: Components
+props:
+  type: object
+  properties:
+    attributes:
+      title: Attributes
+      type: string
+    items:
+      title: Pager items
+      type: array
+      items:
+        type: object
+        properties:
+          label: { type: string }
+          type: { type: string }
+          value: { type: string }
+    ellipses:
+      title: Ellipses
+      type: array
+      items:
+        type: object
+        properties:
+          label: { type: string }
+          type: { type: string }
+          value: { type: string }
+    current:
+      title: Current
+      type: integer
+slots:
+  pager:
+    title: Pager
