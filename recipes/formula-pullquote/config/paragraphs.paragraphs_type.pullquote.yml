@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: pullquote
+label: Pullquote
+icon_uuid: null
+icon_default: null
+description: 'Use a <em>pullquote</em> to highlight a key passage of text.'
+behavior_plugins: {  }

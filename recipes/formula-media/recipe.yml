@@ -1,3 +1,13 @@
 name: '🦄 🌈  Formula: Media'
 description: 'Recipe to build media functionality in Drupal.'
 type: 'Site'
+
+install:
+  - file
+  - image
+  - views
+  - media
+  - media_library
+
+config:
+  strict: false

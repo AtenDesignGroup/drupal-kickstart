@@ -439,7 +439,7 @@ header "Generating Custom Theme"
 # by the foundational recipe before drush theme:install runs.
 PROTOTYPE_ARGS=(--theme-name="${DK_THEME_NAME}" --theme-desc="${DK_THEME_DESC}")
 [[ -n "${DK_THEME_ABBREVIATED}" ]] && PROTOTYPE_ARGS+=(--theme-abbreviated="${DK_THEME_ABBREVIATED}")
-PROTOTYPE_ARGS+=(--generate-only)
+PROTOTYPE_ARGS+=(--generate-only --generate-recipes)
 ddev setup-prototype "${PROTOTYPE_ARGS[@]}"
 
 # =============================================================================

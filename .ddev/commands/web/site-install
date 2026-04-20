@@ -4,13 +4,17 @@
 ## Example: "site-install"
 ## Example: "site-install --site-name=mysite --account-pass=secret"
 
-# Defaults — can be overridden by passing flags
+# Defaults — can be overridden by passing flags or env vars
 SITE_NAME="${SITE_NAME:-${PROJECT_NAME:-Drupal}}"
 ACCOUNT_NAME="${ACCOUNT_NAME:-admin}"
 ACCOUNT_PASS="${ACCOUNT_PASS:-admin}"
+# First positional arg is the install profile; default to minimal.
+PROFILE="${1:-minimal}"
+shift || true
 
-drush site:install \
+drush site:install "${PROFILE}" \
   --yes \
+  --db-url="mysql://db:db@db/db" \
   --site-name="${SITE_NAME}" \
   --account-name="${ACCOUNT_NAME}" \
   --account-pass="${ACCOUNT_PASS}" \

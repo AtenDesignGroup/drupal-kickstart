@@ -1,0 +1,16 @@
+{
+    "name": "aten/formula-basic-page",
+    "description": "Recipe for basic page.",
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Seth Hill",
+            "email": "seth@atendesigngroup.com"
+        }
+    ],
+    "require": {
+        "drupal/metatag": "*",
+        "drupal/pathauto": "*"
+    }
+}

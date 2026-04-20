@@ -3,7 +3,7 @@ status: true
 dependencies:
   config:
     - core.entity_view_mode.node.teaser
-    - field.field.node.event.field_content
+    - field.field.node.event.field_components
     - field.field.node.event.field_event_date
     - field.field.node.event.field_media
     - field.field.node.event.field_summary_text
@@ -52,5 +52,5 @@ content:
     weight: 2
     region: content
 hidden:
-  field_content: true
+  field_components: true
   links: true
