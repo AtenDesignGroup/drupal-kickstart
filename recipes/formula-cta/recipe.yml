@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: CTA'
-description: 'Provides a CTA paragraph type wired to the DK_THEME_NAME SDC cta component.'
+description: 'Provides a CTA paragraph type wired to the dk_start_theme SDC cta component.'
 type: 'Paragraphs'
 
 recipes:

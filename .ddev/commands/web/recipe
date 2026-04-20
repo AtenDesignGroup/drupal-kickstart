@@ -116,7 +116,7 @@ collect_install_modules() {
         sub_recipes=$(grep -E '^\s+-\s+formula-' "${recipe_path}/recipe.yml" 2>/dev/null \
             | sed 's/^\s*-\s*//' | tr -d "'" | tr -d '"' || true)
         for sub in $sub_recipes; do
-            collect_install_modules "$sub" _ci_visited
+            collect_install_modules "$sub" "$2"
         done
 
         # Emit install: entries — lines that are list items under the install block.
@@ -146,7 +146,7 @@ collect_deps() {
         sub_recipes=$(grep -E '^\s+-\s+formula-' "${recipe_path}/recipe.yml" 2>/dev/null \
             | sed 's/^\s*-\s*//' | tr -d "'" | tr -d '"' || true)
         for sub in $sub_recipes; do
-            collect_deps "$sub" _visited
+            collect_deps "$sub" "$2"
         done
     fi
 

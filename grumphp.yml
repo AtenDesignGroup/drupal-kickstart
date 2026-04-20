@@ -52,7 +52,7 @@ grumphp:
       max_body_width: 0
       max_subject_width: 0
       matchers:
-        Must contain project issue number: /(DK_COMMIT_PREFIX-\d+|GitHub Actions Build)/
+        Must contain project issue number: /(PROJ-\d+|GitHub Actions Build)/
       case_insensitive: true
       multiline: true
       additional_modifiers: ''

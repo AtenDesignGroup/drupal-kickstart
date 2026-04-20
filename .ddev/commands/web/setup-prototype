@@ -58,9 +58,11 @@ header "Generating theme '${THEME_NAME}'"
 if [[ -d "${ROOT}/${THEME_PATH}" ]]; then
   info "Theme '${THEME_NAME}' already exists at ${THEME_PATH} — skipping generation"
 else
-  # Install prototype temporarily — it registers itself as a starterkit.
-  composer require 'drupal/prototype:^5.3' --no-interaction
-  info "drupal/prototype installed"
+  # Install prototype if not already present — it registers itself as a starterkit.
+  if [[ ! -d "${ROOT}/web/themes/contrib/prototype" ]]; then
+    cd "${ROOT}" && composer require 'drupal/prototype:^5.3' --no-interaction
+    info "drupal/prototype installed"
+  fi
 
   # Build the generator command; -a (abbreviated) is optional.
   GENERATOR_CMD=(php generator.php -n "${THEME_NAME}" -d "${THEME_DESC}" -p themes/custom)
@@ -74,16 +76,18 @@ else
   fi
 
   info "Theme '${THEME_NAME}' generated at ${THEME_PATH}"
-
-  # Remove prototype — it's only needed for generation.
-  cd "${ROOT}" && composer remove drupal/prototype --no-interaction
-  info "drupal/prototype removed from require"
 fi
 
 # =============================================================================
 # 1b. GENERATE PARAGRAPH RECIPES (optional)
 # =============================================================================
 if [[ "$GENERATE_RECIPES" == "yes" ]]; then
+  # Ensure prototype is present — install if missing.
+  if [[ ! -d "${ROOT}/web/themes/contrib/prototype" ]]; then
+    cd "${ROOT}" && composer require 'drupal/prototype:^5.3' --no-interaction
+    info "drupal/prototype installed for recipe generation"
+  fi
+
   header "Generating paragraph recipes from prototype SDC components"
   php /var/www/html/.ddev/generate-recipe.php all --theme-name="${THEME_NAME}"
   info "Recipe scaffolds generated — review any REVIEW items above"
