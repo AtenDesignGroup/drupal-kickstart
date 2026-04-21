@@ -1,0 +1,12 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.3.x/core/assets/schemas/v1/metadata.schema.json
+name: spacer
+description: A spacer component to add vertical spacing between elements, also supports displaying a divider.
+status: stable
+group: Components
+props:
+  type: object
+  properties:
+    spacer_divider:
+      type: boolean
+    spacer_size:
+      type: string

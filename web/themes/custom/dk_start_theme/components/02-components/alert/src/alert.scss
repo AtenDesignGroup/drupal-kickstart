@@ -1,0 +1,95 @@
+//
+//  @file
+//  Components - Alert
+//
+
+//  Imports
+@use 'partials' as *;
+
+//  Base
+:root {
+  --dk-alert-icon: var(--dk-i-status);
+  --dk-alert-background-content: var(--dk-color-success);
+  --dk-alert-background-icon: var(--dk-color-white);
+  --dk-alert-text-color: var(--dk-color-white);
+}
+
+.c-alert {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  margin-block: 32px;
+}
+
+//  Icon
+.c-alert__icon {
+  align-items: center;
+  background-color: var(--dk-alert-background-icon);
+  display: flex;
+  justify-content: center;
+
+  &:before {
+    background-color: var(--dk-alert-background-icon);
+    block-size: 40px;
+    content: '';
+    display: block;
+    inline-size: 40px;
+    mask-image: var(--dk-alert-icon);
+    mask-size: cover;
+    mask-position: center;
+    mask-repeat: no-repeat;
+  }
+}
+
+//  Content
+.c-alert__content {
+  background-color: var(--dk-alert-background-content);
+  color: var(--dk-alert-text-color);
+  padding: 20px;
+  
+  a {
+    color: var(--dk-alert-text-color);
+    font-weight: bold;
+    text-decoration: underline currentColor;
+    transition: text-decoration 0.2s ease-in-out;
+
+    &:hover,
+    &:focus {
+      color: inherit;
+      text-decoration: underline transparent;
+    }
+  }
+}
+
+//  Items
+.c-alert__list,
+.c-alert__item {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.c-alert__item {
+  font-weight: 500;
+}
+
+//  Modifiers
+.c-alert--status {
+  --dk-alert-icon: var(--dk-i-status);
+  --dk-alert-background-content: var(--dk-color-success);
+  --dk-alert-background-icon: var(--dk-color-white);
+  --dk-alert-text-color: var(--dk-color-white);
+}
+
+.c-alert--warning {
+  --dk-alert-icon: var(--dk-i-warning);
+  --dk-alert-background-content: var(--dk-color-warning);
+  --dk-alert-background-icon: var(--dk-color-black);
+  --dk-alert-text-color: var(--dk-color-black);
+}
+
+.c-alert--error {
+  --dk-alert-icon: var(--dk-i-error);
+  --dk-alert-background-content: var(--dk-color-danger);
+  --dk-alert-background-icon: var(--dk-color-white);
+  --dk-alert-text-color: var(--dk-color-white);
+}
