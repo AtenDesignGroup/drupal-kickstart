@@ -24,8 +24,8 @@
 //------------------------------------
 
 [class*="l-container"] {
-  --container-gutter: var(--dk_start_theme-space-36);
-  --container-width: var(--dk_start_theme-width-xlarge);
+  --container-gutter: var(--dk-space-36);
+  --container-width: var(--dk-width-xlarge);
   padding-inline: var(--container-gutter);
   margin-inline: auto;
   max-width: var(--container-width);
@@ -50,15 +50,15 @@
 }
 
 .l-container--gutter-large {
-  --container-gutter: var(--dk_start_theme-space-20);
+  --container-gutter: var(--dk-space-20);
 }
 
 .l-container--gutter-medium {
-  --container-gutter: var(--dk_start_theme-space-36);
+  --container-gutter: var(--dk-space-36);
 }
 
 .l-container--gutter-small {
-  --container-gutter: var(--dk_start_theme-space-60);
+  --container-gutter: var(--dk-space-60);
 }
 
 
@@ -73,31 +73,31 @@
 //------------------------------------
 
 .l-container--width-xxlarge {
-  --container-width: var(--dk_start_theme-width-xxlarge);
+  --container-width: var(--dk-width-xxlarge);
 }
 
 .l-container--width-xlarge {
-  --container-width: var(--dk_start_theme-width-xlarge);
+  --container-width: var(--dk-width-xlarge);
 }
 
 .l-container--width-large {
-  --container-width: var(--dk_start_theme-width-large);
+  --container-width: var(--dk-width-large);
 }
 
 .l-container--width-medium {
-  --container-width: var(--dk_start_theme-width-medium);
+  --container-width: var(--dk-width-medium);
 }
 
 .l-container--width-small {
-  --container-width: var(--dk_start_theme-width-small);
+  --container-width: var(--dk-width-small);
 }
 
 .l-container--width-xsmall {
-  --container-width: var(--dk_start_theme-width-xsmall);
+  --container-width: var(--dk-width-xsmall);
 }
 
 .l-container--width-xxsmall {
-  --container-width: var(--dk_start_theme-width-xxsmall);
+  --container-width: var(--dk-width-xxsmall);
 }
 
 

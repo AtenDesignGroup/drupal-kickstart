@@ -7,25 +7,23 @@ slots:
   caption_block: { title: Video Caption }
 props:
   type: object
-  required:
-    - media
   properties:
     title:
-      type: 'string'
+      type: ['string', 'null']
       title: 'Video Title'
       description: 'The title for the video.'
       examples:
         - 'YouTube Example'
         - 'Vimeo Example'
     media:
-      type: 'string'
+      type: ['string', 'null']
       title: 'Video URL'
       description: 'The embed url for either YouTube or Vimeo.'
       examples:
         - 'https://youtu.be/0RWs6uxR9yg'
         - 'https://player.vimeo.com/video/728948316'
     caption:
-      type: 'string'
+      type: ['string', 'null']
       title: 'Caption Text'
       description: 'The caption text for video.'
       examples:

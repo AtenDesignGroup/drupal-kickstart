@@ -10,14 +10,14 @@ props:
   type: object
   properties:
     title:
-      type: string
+      type: ['string', 'null']
       title: Title
       examples:
         - Basic page with a long title
         - Basic page
     text:
       title: Text
-      type: string
+      type: ['string', 'null']
       examples:
         - '<p><strong>Example paragraph</strong>. Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed. Purus ut eu fermentum non. Arcu lectus sed in quisque vitae posuere. Adipiscing nullam mauris iaculis leo turpis leo, congue.</p>'
     link:
@@ -25,18 +25,18 @@ props:
       type: object
       properties:
         title:
-          type: string
+          type: ['string', 'null']
           title: Link Text
           examples:
             - Read more about this topic
             - Submit now
         url:
           title: Link Url
-          type: string
+          type: ['string', 'null']
           examples:
             - 'https://www.example.org'
     icon:
-      type: string
+      type: ['string', 'null']
       title: Icon Type
       examples:
         - icon-arrow-right

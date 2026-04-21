@@ -6,7 +6,6 @@
 // - 03 - Rule
 //
 
-
 //------------------------------------
 //  01 - Page
 //------------------------------------
@@ -19,16 +18,15 @@ html {
   tab-size: 4;
 }
 
-
 //------------------------------------
 //  02 - Skip Link
 //------------------------------------
 
 .skip-link {
   display: block;
-  background-color: var(--dk_start_theme-color-black);
+  background-color: var(--dk-color-black);
   border-radius: 0 0 4px 4px;
-  color: var(--dk_start_theme-color-white) !important;
+  color: var(--dk-color-white) !important;
   font-size: 1em;
   left: 50%;
   outline: red dotted 2px;
@@ -42,12 +40,14 @@ html {
   }
 }
 
-
 //------------------------------------
 //  03 - Rule
 //------------------------------------
 
 hr {
+  background-color: var(--dk-color-gray-500);
   border: 0;
-  border-bottom: 1px solid var(--dk_start_theme-color-dark);
+  margin: 0;
+  height: 1px;
+  width: 100%;
 }

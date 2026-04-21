@@ -1,7 +1,8 @@
 {
     "patches": {
         "drupal/prototype": {
-            "Strict Prop validations fix for d11": "patches/prototype-sdc-null-safety.patch"
+            "Strict Prop validations fix for d11": "patches/prototype-sdc-null-safety.patch",
+            "Fix class name spelling for StarterKit.php": "patches/prototype-starterkit-class-name-change.patch"
         }
     }
 }

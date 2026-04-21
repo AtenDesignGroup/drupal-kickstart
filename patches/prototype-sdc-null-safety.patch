@@ -94,6 +94,19 @@ index 1fbbbde..edfd1ed 100644
 -            type: string
 +            type: ['string', 'null']
              title: Slide Content
+diff --git a/components/02-components/slideshow/slideshow.twig b/components/02-components/slideshow/slideshow.twig
+index 1693058..6287d62 100644
+--- a/components/02-components/slideshow/slideshow.twig
++++ b/components/02-components/slideshow/slideshow.twig
+@@ -20,7 +20,7 @@
+   'keyboard': true,
+   'pagination': false,
+   'perPage': 3,
+-  'type': loop,
++  'type': 'loop',
+ } %}
+ 
+ {% set data_splide = default_options|merge(options|default({})) %}
 diff --git a/components/02-components/teaser/teaser.component.yml b/components/02-components/teaser/teaser.component.yml
 index 15fe511..e17aee5 100644
 --- a/components/02-components/teaser/teaser.component.yml

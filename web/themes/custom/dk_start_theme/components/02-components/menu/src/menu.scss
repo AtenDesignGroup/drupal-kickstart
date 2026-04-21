@@ -9,7 +9,7 @@
     display: flex;
     flex-flow: column;
     width: fit-content;
-    @include list--no-bullets;
+    @include list-no-bullets;
 
     li {
       position: relative;
@@ -26,7 +26,7 @@
 
   // Secondary level menu wrapper styles
   ul[data-depth='1'] {
-    @include list--no-bullets;
+    @include list-no-bullets;
 
     @include bp-min(tablet) {
       position: absolute;
@@ -68,7 +68,7 @@
     visibility: visible;
     transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
     transition-delay: 1s;
-    z-index: var(--dk_start_theme-zindex-over);
+    z-index: var(--dk-zindex-over);
   }
 
   // All span menus display as open
@@ -77,6 +77,6 @@
     visibility: visible;
     transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
     transition-delay: 1s;
-    z-index: var(--dk_start_theme-zindex-over);
+    z-index: var(--dk-zindex-over);
   }
 }

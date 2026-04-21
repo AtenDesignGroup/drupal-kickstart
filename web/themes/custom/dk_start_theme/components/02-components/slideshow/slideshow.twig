@@ -6,7 +6,6 @@
 ] %}
 
 {% set label_id = 'media-heading'|clean_unique_id  %}
-{% set index_id = 'slide-index'|clean_unique_id  %}
 
 {% set default_options = {
   'breakpoints': {
@@ -21,16 +20,12 @@
   'keyboard': true,
   'pagination': false,
   'perPage': 3,
-  'type': loop,
+  'type': 'loop',
 } %}
 
-{% set data_splide = options|default({})|merge(default_options) %}
+{% set data_splide = default_options|merge(options|default({})) %}
 
-<section
-  aria-labelledby="{{label_id}}"
-  data-splide="{{data_splide|json_encode}}"
-  {{ attributes.addClass(classes)|without('aria-labelledby', 'data-splide') }}
->
+<section aria-labelledby="{{label_id}}" data-splide="{{data_splide|json_encode}}" {{ attributes.addClass(classes)|without('aria-labelledby', 'data-splide') }}>
   <h2 id="{{label_id}}" class="c-slideshow__heading visually-hidden">{{ heading|default('Slideshow'|t) }}</h2>
   <div class="splide__track" aria-roledescription="carousel">
     <ul class="c-slideshow__list splide__list">

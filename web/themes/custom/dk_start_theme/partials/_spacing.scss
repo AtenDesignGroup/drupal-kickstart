@@ -1,16 +1,10 @@
-//
 // Mixins - Spacing
 // Use these mixins to setup base spacing custom properties and utility classes.
-//
 // - 01 - Imports
 // - 02 - Custom Properties
 // - 03 - Utility Classes
-//
 
-
-// ------------------------------------
 // 01 - Imports
-// ------------------------------------
 
 @use 'sass:list';
 @use 'sass:map';
@@ -18,13 +12,8 @@
 @use './breakpoints';
 @use './base';
 
-
-
-
-// ------------------------------------
 // 02 - Custom Properties
 // The following mixins generate custom properties for spacing scales.
-// ------------------------------------
 
 /// Converts the map to a format that can be used to generate custom properties.
 /// grouped by breakpoint. This allows for more concise output in the final .css file.
@@ -78,13 +67,14 @@
   @each $size, $breakpoints in $input-map {
     @each $breakpoint, $value in $breakpoints {
       $output-map: map.deep-merge(
-        $output-map, (
+        $output-map,
+        (
           $breakpoint: (
-            $size: (
-              math.div($value, 16),
-              $value,
+              $size: (
+                  math.div($value, 16),
+                  $value,
+                ),
             ),
-          ),
         )
       );
     }
@@ -115,10 +105,7 @@
 /// @example scss - Usage
 ///   @include spacing-scale-custom-props($spacing-map);
 ///   @include spacing-scale-custom-props($spacing-map, 'theme-name');
-@mixin spacing-scale-custom-props(
-  $scale,
-  $prefix: base.$property-prefix
-) {
+@mixin spacing-scale-custom-props($scale, $prefix: base.$property-prefix) {
   $map: convert-spacing-map($scale);
 
   @if $prefix != '' {
@@ -140,9 +127,9 @@
           // rem values.
           @each $size, $value in $sizes {
             --#{$prefix}space-rem-#{$size}: #{list.nth(
-              $value,
-              1
-            )}rem; /* #{list.nth($value, 2)}px */
+                $value,
+                1
+              )}rem; /* #{list.nth($value, 2)}px */
           }
         } @else {
           @include breakpoints.bp-min($breakpoint) {
@@ -154,9 +141,9 @@
             // rem values.
             @each $size, $value in $sizes {
               --#{$prefix}space-rem-#{$size}: #{list.nth(
-                $value,
-                1
-              )}rem; /* #{list.nth($value, 2)}px */
+                  $value,
+                  1
+                )}rem; /* #{list.nth($value, 2)}px */
             }
           }
         }
@@ -165,13 +152,8 @@
   }
 }
 
-
-
-
-// ------------------------------------
 // 03 - Utility Classes
 // The following mixins generate utility classes for padding, margin, and gap.
-// ------------------------------------
 
 /// This mixin generates a full range of gap utility classes for each size in
 /// the provided scale.
@@ -217,10 +199,7 @@
 /// @example scss - Usage
 /// @include padding-utility-classes($spacing-map, 'theme-name');
 ///
-@mixin padding-utility-classes(
-  $scale,
-  $prefix: base.$property-prefix
-) {
+@mixin padding-utility-classes($scale, $prefix: base.$property-prefix) {
   @if $prefix != '' {
     $prefix: $prefix + '-';
   }

@@ -3,7 +3,7 @@
 .button {
   @include type-scale(label, 18);
   align-items: center;
-  background-color: var(--dk_start_theme-color-gray-200);
+  background-color: var(--dk-color-gray-200);
   display: flex;
   gap: 10px;
   padding: rem(10px) rem(20px);
@@ -16,7 +16,7 @@
 
   a,
   span {
-    color: var(--dk_start_theme-color-black);
+    color: var(--dk-color-black);
   }
 }
 
@@ -26,6 +26,6 @@
   width: rem(24px);
 
   svg {
-    fill: var(--dk_start_theme-color-black);
+    fill: var(--dk-color-black);
   }
 }

@@ -1,0 +1,15 @@
+{
+    "name": "aten/formula-slideshow",
+    "description": "Recipe for a slideshow paragraph type and configuration.",
+    "type": "drupal-recipe",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Greg Carlson",
+            "email": "greg@atendesigngroup.com"
+        }
+    ],
+    "require": {
+        "drupal/focal_point": "^2.1"
+    }
+}

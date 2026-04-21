@@ -2,8 +2,12 @@
 {%- set _link_items = content.field_link|field_value -%}
 {%- set _link = _link_items is not empty ? _link_items|first : null -%}
 
-{{- include('dk_start_theme:cta', {
+{%- set _props = {
   title: content.field_title|render|striptags|trim,
-  text: content.field_formatted_text,
-  link: _link ? {title: _link.title, url: _link.url.toString} : {}
-}) -}}
+  text: content.field_formatted_text
+} -%}
+{%- if _link -%}
+  {%- set _props = _props|merge({link: {title: _link.title, url: _link.url.toString}}) -%}
+{%- endif -%}
+
+{{- include('dk_start_theme:cta', _props) -}}

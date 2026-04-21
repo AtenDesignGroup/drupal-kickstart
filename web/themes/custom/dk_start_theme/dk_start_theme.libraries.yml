@@ -8,7 +8,6 @@ global:
       components/00-base/animations.css: {}
       components/00-base/colors.css: {}
       components/00-base/grid.css: {}
-      components/00-base/icons.css: {}
       components/00-base/layers.css: {}
       components/00-base/sizes.css: {}
       components/00-base/spacing.css: {}
@@ -36,6 +35,7 @@ global:
       components/05-pages/user-forms/user-forms.css: {}
   dependencies:
     - dk_start_theme/fonts
+    - dk_start_theme/js-table-wrap
 
 fonts:
   version: 5.x
@@ -73,6 +73,13 @@ page-basic:
 js-block-link:
   js:
     components/07-utilities/js-block-link/js-block-link.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+js-table-wrap:
+  js:
+    components/07-utilities/js-table-wrap/js-table-wrap.js: { minified: true }
   dependencies:
     - core/drupal
     - core/once

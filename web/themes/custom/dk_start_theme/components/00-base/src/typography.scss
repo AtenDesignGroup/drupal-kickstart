@@ -19,7 +19,7 @@
 //------------------------------------
 
 :root {
-  --dk_start_theme-ff-base: 'Inter', sans-serif;
+  --dk-ff-base: 'Inter', sans-serif;
 }
 
 
@@ -143,11 +143,11 @@ $typographic-scale: (
 //------------------------------------
 
 :root {
-  --dk_start_theme-fw-thin: 100;
-  --dk_start_theme-fw-light: 300;
-  --dk_start_theme-fw-regular: 400;
-  --dk_start_theme-fw-book: 400;
-  --dk_start_theme-fw-medium: 500;
-  --dk_start_theme-fw-semibold: 600;
-  --dk_start_theme-fw-bold: 700;
+  --dk-fw-thin: 100;
+  --dk-fw-light: 300;
+  --dk-fw-regular: 400;
+  --dk-fw-book: 400;
+  --dk-fw-medium: 500;
+  --dk-fw-semibold: 600;
+  --dk-fw-bold: 700;
 }

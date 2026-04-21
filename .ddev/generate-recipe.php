@@ -758,8 +758,10 @@ function buildTwigTemplate(
       // Multi-value media: iterate numeric delta keys.
       $preamble[] = "{# Build {$propName} array — iterate numeric deltas of multi-value media field. #}";
       $preamble[] = "{%- set {$propName}_items = [] -%}";
-      $preamble[] = "{%- for delta, item in content.{$fn} if delta matches '/^\\\\d+$/' -%}";
-      $preamble[] = "  {%- set {$propName}_items = {$propName}_items|merge([{attributes: create_attribute(), content: item}]) -%}";
+      $preamble[] = "{%- for delta, item in content.{$fn} -%}";
+      $preamble[] = "  {%- if delta|slice(0, 1) != '#' -%}";
+      $preamble[] = "    {%- set {$propName}_items = {$propName}_items|merge([{attributes: {}, content: item|render}]) -%}";
+      $preamble[] = "  {%- endif -%}";
       $preamble[] = "{%- endfor -%}";
       $includeProps[] = "  {$propName}: {$propName}_items";
     }
@@ -793,6 +795,13 @@ function buildTwigTemplate(
   }
 
   // No conditional merges needed — pass props inline.
+  // Some components require hardcoded option defaults to work correctly.
+  $componentDefaults = [
+    'slideshow' => "  options: {\n    type: 'slide',\n    perPage: 1,\n    pagination: true,\n    autoplay: false,\n  }",
+  ];
+  if (isset($componentDefaults[$compName])) {
+    $propsStr .= ",\n" . $componentDefaults[$compName];
+  }
   $out .= "{{- include('{$themeName}:{$compName}', {\n{$propsStr}\n}) -}}\n";
 
   return $out;

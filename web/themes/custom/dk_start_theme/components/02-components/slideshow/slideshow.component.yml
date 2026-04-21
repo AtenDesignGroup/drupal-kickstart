@@ -7,14 +7,61 @@ libraryOverrides:
     - core/drupal
     - core/once
     - dk_start_theme/splide
+  js:
+    src/slideshow.js: {}
+  css:
+    component:
+      src/slideshow.scss: {}
 slots:
   slides_block: { title: 'Slides Block' }
 props:
   type: object
   properties:
-    title:
-      type: string
-      title: Title
-      description: Header for the slideshow
+    heading:
+      type: ['string', 'null']
+      title: Slideshow Heading
+      description: Visible (but visually-hidden) heading for the slideshow section.
       examples:
         - 'A slideshow of our latest products'
+    options:
+      type: object
+      title: Splide Options
+      description: Override default Splide carousel options. Merged on top of component defaults.
+      properties:
+        type:
+          type: string
+          title: Type
+          examples:
+            - loop
+            - slide
+        perPage:
+          type: integer
+          title: Per Page
+          examples:
+            - 1
+            - 3
+        drag:
+          type: boolean
+          title: Drag
+        keyboard:
+          type: boolean
+          title: Keyboard
+        pagination:
+          type: boolean
+          title: Pagination
+        autoplay:
+          type: boolean
+          title: Autoplay
+    slides:
+      type: ['array', 'null']
+      title: Slides
+      description: Fallback slide data when the slides_block slot is not filled.
+      items:
+        type: object
+        properties:
+          attributes:
+            type: object
+            title: Slide Attributes
+          content:
+            type: ['string', 'null']
+            title: Slide Content

@@ -1,10 +1,15 @@
 {# Link: extract raw values (requires twig_field_value module). #}
 {%- set _link_items = content.field_link|field_value -%}
 {%- set _link = _link_items is not empty ? _link_items|first : null -%}
+{#  ⚠ REVIEW: component uses 'text' for link text; field_link stores 'title'. #}
 
-{{- include('dk_start_theme:teaser', {
+{%- set _props = {
   title: content.field_title|render|striptags|trim,
   media: content.field_media,
-  link: _link ? {text: _link.title, url: _link.url.toString} : {},
   body: content.field_formatted_text
-}) -}}
+} -%}
+{%- if _link -%}
+  {%- set _props = _props|merge({link: {text: _link.title, url: _link.url.toString}}) -%}
+{%- endif -%}
+
+{{- include('dk_start_theme:teaser', _props) -}}

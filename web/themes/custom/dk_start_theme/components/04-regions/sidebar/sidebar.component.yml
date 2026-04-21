@@ -6,7 +6,11 @@ slots:
 props:
   type: object
   properties:
+    class:
+      type: string
+      title: CSS Class
+      description: Additional CSS class(es) applied to the aside element.
     sidebar_content:
-      type: object
+      type: string
       title: 'Sidebar Content'
-      description: 'The content for the sidebar.'
+      description: 'Rendered content for the sidebar region.'

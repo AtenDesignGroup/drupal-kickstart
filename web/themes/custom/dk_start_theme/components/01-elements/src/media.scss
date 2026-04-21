@@ -1,27 +1,69 @@
 //
-// Elements - Media
+//  @file
+//  Elements - Media
 //
-// - 01 - General
-//
 
+//  Imports
+@use 'partials' as *;
 
-//------------------------------------
-//  01 - General
-//------------------------------------
-
+//  Figure
 figure {
-  margin: 0;
+  margin-block: 40px 0;
+  margin-inline: 0;
+
+  &:first-child {
+    margin-block-start: 0;
+  }
 
   img {
     display: block;
   }
 }
 
+//  Image
 img {
-  max-width: 100%;
-  height: auto;
+  max-inline-size: 100%;
+  block-size: auto;
 }
 
+//  Figcaption
 figcaption {
-  margin: 16px 0;
+  margin-block: 12px 0;
+  margin-inline: 0;
+}
+
+//  Remote Video
+.media--remote-video {
+  inline-size: 100%;
+  
+  iframe {
+    aspect-ratio: 16 / 9;
+    block-size: auto;
+    inline-size: 100%;
+  }
+}
+
+//  Alignments
+.align-left,
+.align-right {
+  @include bp-max(tablet) {
+    float: none;
+  }
+
+  @include bp-min(tablet) {
+    margin-block-start: 8px;
+    max-inline-size: 40%;
+  }
+}
+
+.align-left {
+  @include bp-min(tablet) {
+    margin-inline-end: 32px;
+  }
+}
+
+.align-right {
+  @include bp-min(tablet) {
+    margin-inline-start: 32px;
+  }
 }

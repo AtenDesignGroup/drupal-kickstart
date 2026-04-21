@@ -116,20 +116,20 @@ $spacing-scale: (
 //  Example output:
 //
 //  :root {
-//    --dk_start_theme-space-0: 0px;
-//    --dk_start_theme-space-8: 4px;
-//    --dk_start_theme-space-20: 8px;
+//    --dk-space-0: 0px;
+//    --dk-space-8: 4px;
+//    --dk-space-20: 8px;
 //    ...
-//    --dk_start_theme-space-rem-10: 0.25rem;
-//    --dk_start_theme-space-rem-20: 0.5rem;
+//    --dk-space-rem-10: 0.25rem;
+//    --dk-space-rem-20: 0.5rem;
 //  }
 //  @media (min-width: 768px) {
 //    :root {
-//      --dk_start_theme-space-8: 8px;
-//      --dk_start_theme-space-20: 12px;
+//      --dk-space-8: 8px;
+//      --dk-space-20: 12px;
 //      ...
-//      --dk_start_theme-space-rem-8: 0.5rem;
-//      --dk_start_theme-space-rem-20: 0.75rem;
+//      --dk-space-rem-8: 0.5rem;
+//      --dk-space-rem-20: 0.75rem;
 //    }
 //  }
 //  ...
@@ -153,22 +153,22 @@ $spacing-scale: (
 //
 // Example output:
 // .u-gap-0 {
-//   gap: var(--dk_start_theme-space-0);
+//   gap: var(--dk-space-0);
 // }
 // .u-gap-8 {
-//   gap: var(--dk_start_theme-space-8);
+//   gap: var(--dk-space-8);
 // }
 // .u-column-gap-0 {
-//   column-gap: var(--dk_start_theme-space-0);
+//   column-gap: var(--dk-space-0);
 // }
 // .u-column-gap-8 {
-//   column-gap: var(--dk_start_theme-space-8);
+//   column-gap: var(--dk-space-8);
 // }
 // .u-row-gap-0 {
-//   row-gap: var(--dk_start_theme-space-0);
+//   row-gap: var(--dk-space-0);
 // }
 // .u-row-gap-8 {
-//   row-gap: var(--dk_start_theme-space-8);
+//   row-gap: var(--dk-space-8);
 // }
 
 // @include mixins-spacing.gap-utility-classes($spacing-scale);
@@ -177,18 +177,18 @@ $spacing-scale: (
 //
 // Example output:
 // .u-p-0 {
-//   padding: var(--dk_start_theme-space-0);
+//   padding: var(--dk-space-0);
 // }
 // .u-p-8 {
-//   padding: var(--dk_start_theme-space-8);
+//   padding: var(--dk-space-8);
 // }
 // ...
 //
 // .u-pt-0 {
-//   padding-top: var(--dk_start_theme-space-0);
+//   padding-top: var(--dk-space-0);
 // }
 // .u-pt-8 {
-//   padding-top: var(--dk_start_theme-space-8);
+//   padding-top: var(--dk-space-8);
 // }
 // ...
 
@@ -198,18 +198,18 @@ $spacing-scale: (
 //
 // Example output:
 // .u-m-0 {
-//   margin: var(--dk_start_theme-space-0);
+//   margin: var(--dk-space-0);
 // }
 // .u-m-8 {
-//   margin: var(--dk_start_theme-space-8);
+//   margin: var(--dk-space-8);
 // }
 // ...
 //
 // .u-mt-0 {
-//   margin-top: var(--dk_start_theme-space-0);
+//   margin-top: var(--dk-space-0);
 // }
 // .u-mt-8 {
-//   margin-top: var(--dk_start_theme-space-8);
+//   margin-top: var(--dk-space-8);
 // }
 // ...
 
