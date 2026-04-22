@@ -1,9 +1,9 @@
 name: '🦄 🌈  Formula: Slideshow'
-description: 'Provides a Slideshow paragraph type wired to the DK_THEME_NAME SDC slideshow component.'
+description: 'Provides a Slideshow paragraph type wired to SDC slideshow component.'
 type: 'Paragraphs'
 
 recipes:
-  - formula-paragraphs
+  - formula-slideshow
 
 config:
   strict: false
