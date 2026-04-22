@@ -122,13 +122,22 @@ function processComponent(
   $bundle    = str_replace('-', '_', $name);
   $recipeDir = "{$recipesDir}/formula-{$name}";
   $recipeYml = "{$recipeDir}/recipe.yml";
+  $twigOut   = "{$templateDir}/paragraph--{$bundle}.html.twig";
 
-  if (file_exists($recipeYml)) {
+  $recipeExists = file_exists($recipeYml);
+
+  // If both recipe and Twig template already exist, nothing left to do.
+  if ($recipeExists && file_exists($twigOut)) {
     echo "    – {$name}: " . GREEN . "exists" . RESET . " (formula-{$name})\n";
     return;
   }
 
-  hdr("Generating: {$name} → formula-{$name}");
+  if ($recipeExists) {
+    hdr("Twig template missing for: {$name} — generating");
+  }
+  else {
+    hdr("Generating: {$name} → formula-{$name}");
+  }
 
   // Parse component YAML.
   $component = Yaml::parseFile($ymlFile);
@@ -171,63 +180,66 @@ function processComponent(
 
   // Create directories.
   $cfgDir = "{$recipeDir}/config";
-  mkdir($cfgDir, 0755, true);
+  if (!$recipeExists) {
+    mkdir($cfgDir, 0755, true);
+  }
   if (!is_dir($templateDir)) {
     mkdir($templateDir, 0755, true);
   }
 
-  // ── recipe.yml ──────────────────────────────────────────────────────────────
-  file_put_contents($recipeYml, buildRecipeYml($label, $name, $themeName, $needsMedia));
-  ok("recipe.yml");
+  if (!$recipeExists) {
+    // ── recipe.yml ────────────────────────────────────────────────────────────
+    file_put_contents($recipeYml, buildRecipeYml($label, $name, $themeName, $needsMedia));
+    ok("recipe.yml");
 
-  // ── paragraphs type ─────────────────────────────────────────────────────────
-  file_put_contents(
-    "{$cfgDir}/paragraphs.paragraphs_type.{$bundle}.yml",
-    buildParagraphType($bundle, $label)
-  );
-  ok("paragraphs.paragraphs_type.{$bundle}.yml");
-
-  // ── new field storages ───────────────────────────────────────────────────────
-  foreach ($newStorages as $pn => $m) {
-    $fn = $m['field'];
+    // ── paragraphs type ───────────────────────────────────────────────────────
     file_put_contents(
-      "{$cfgDir}/field.storage.paragraph.{$fn}.yml",
-      buildFieldStorage($fn)
+      "{$cfgDir}/paragraphs.paragraphs_type.{$bundle}.yml",
+      buildParagraphType($bundle, $label)
     );
-    ok("field.storage.paragraph.{$fn}.yml  ← NEW STORAGE");
-    rev("'{$fn}': verify cardinality (-1) and target_type (media) match your use case");
-  }
+    ok("paragraphs.paragraphs_type.{$bundle}.yml");
 
-  // ── field instances ──────────────────────────────────────────────────────────
-  foreach ($fieldMappings as $pn => $m) {
-    if (empty($m['field'])) {
-      continue;
+    // ── new field storages ────────────────────────────────────────────────────
+    foreach ($newStorages as $pn => $m) {
+      $fn = $m['field'];
+      file_put_contents(
+        "{$cfgDir}/field.storage.paragraph.{$fn}.yml",
+        buildFieldStorage($fn)
+      );
+      ok("field.storage.paragraph.{$fn}.yml  ← NEW STORAGE");
+      rev("'{$fn}': verify cardinality (-1) and target_type (media) match your use case");
     }
-    $fn  = $m['field'];
-    $lbl = ucwords(str_replace('_', ' ', $pn));
+
+    // ── field instances ───────────────────────────────────────────────────────
+    foreach ($fieldMappings as $pn => $m) {
+      if (empty($m['field'])) {
+        continue;
+      }
+      $fn  = $m['field'];
+      $lbl = ucwords(str_replace('_', ' ', $pn));
+      file_put_contents(
+        "{$cfgDir}/field.field.paragraph.{$bundle}.{$fn}.yml",
+        buildFieldInstance($bundle, $fn, $lbl, $m)
+      );
+      ok("field.field.paragraph.{$bundle}.{$fn}.yml");
+    }
+
+    // ── form display ──────────────────────────────────────────────────────────
     file_put_contents(
-      "{$cfgDir}/field.field.paragraph.{$bundle}.{$fn}.yml",
-      buildFieldInstance($bundle, $fn, $lbl, $m)
+      "{$cfgDir}/core.entity_form_display.paragraph.{$bundle}.default.yml",
+      buildFormDisplay($bundle, $fieldMappings, $needsMedia, $needsLink, $needsText)
     );
-    ok("field.field.paragraph.{$bundle}.{$fn}.yml");
+    ok("core.entity_form_display.paragraph.{$bundle}.default.yml");
+
+    // ── view display ──────────────────────────────────────────────────────────
+    file_put_contents(
+      "{$cfgDir}/core.entity_view_display.paragraph.{$bundle}.default.yml",
+      buildViewDisplay($bundle, $fieldMappings, $needsMedia, $needsLink, $needsText, $newStorages)
+    );
+    ok("core.entity_view_display.paragraph.{$bundle}.default.yml");
   }
-
-  // ── form display ─────────────────────────────────────────────────────────────
-  file_put_contents(
-    "{$cfgDir}/core.entity_form_display.paragraph.{$bundle}.default.yml",
-    buildFormDisplay($bundle, $fieldMappings, $needsMedia, $needsLink, $needsText)
-  );
-  ok("core.entity_form_display.paragraph.{$bundle}.default.yml");
-
-  // ── view display ─────────────────────────────────────────────────────────────
-  file_put_contents(
-    "{$cfgDir}/core.entity_view_display.paragraph.{$bundle}.default.yml",
-    buildViewDisplay($bundle, $fieldMappings, $needsMedia, $needsLink, $needsText, $newStorages)
-  );
-  ok("core.entity_view_display.paragraph.{$bundle}.default.yml");
 
   // ── Twig bridge template ─────────────────────────────────────────────────────
-  $twigOut = "{$templateDir}/paragraph--{$bundle}.html.twig";
   if (file_exists($twigOut)) {
     warn("Twig template already exists — skipping: paragraph--{$bundle}.html.twig");
   }
@@ -250,6 +262,11 @@ function processComponent(
 // ─── Prop → field mapping ────────────────────────────────────────────────────
 function mapPropToField(string $name, array $def): array {
   $type = $def['type'] ?? 'string';
+  
+  // Handle Drupal 11 null-safe type unions: ['string', 'null'] → extract first element.
+  if (is_array($type)) {
+    $type = reset($type);
+  }
 
   // Skip theme-only / non-content props.
   static $skipProps = ['variant', 'id', 'icon', 'options', 'attributes', 'class', 'classes', 'type'];
@@ -706,8 +723,9 @@ function buildTwigTemplate(
   string $themeName,
   array  $fieldMappings
 ): string {
-  $preamble     = [];
-  $includeProps = [];
+  $preamble          = [];
+  $includeProps      = [];
+  $conditionalMerges = [];  // link props that must be omitted when empty
 
   foreach ($fieldMappings as $propName => $m) {
     if (empty($m['field'])) { continue; }
@@ -719,6 +737,9 @@ function buildTwigTemplate(
 
     if ($drupalType === 'link') {
       // Extract raw link values via twig_field_value.
+      // Use a conditional merge so the prop is omitted entirely when empty —
+      // passing {} would trigger SDC schema validation failures on the child
+      // string properties (title, url) when their values are null.
       $textKey  = $m['link_text_key'] ?? 'title';
       $urlKey   = $m['link_url_key']  ?? 'url';
       $preamble[] = "{# Link: extract raw values (requires twig_field_value module). #}";
@@ -727,18 +748,20 @@ function buildTwigTemplate(
       if ($textKey !== 'title') {
         // Component uses non-standard key (e.g. 'text' instead of 'title').
         $preamble[] = "{#  ⚠ REVIEW: component uses '{$textKey}' for link text; field_link stores 'title'. #}";
-        $includeProps[] = "  {$propName}: _{$propName} ? {{$textKey}: _{$propName}.title, {$urlKey}: _{$propName}.url.toString} : {}";
+        $conditionalMerges[] = "{%- if _{$propName} -%}\n  {%- set _props = _props|merge({{$propName}: {{$textKey}: _{$propName}.title, {$urlKey}: _{$propName}.url.toString}}) -%}\n{%- endif -%}";
       }
       else {
-        $includeProps[] = "  {$propName}: _{$propName} ? {title: _{$propName}.title, {$urlKey}: _{$propName}.url.toString} : {}";
+        $conditionalMerges[] = "{%- if _{$propName} -%}\n  {%- set _props = _props|merge({{$propName}: {title: _{$propName}.title, {$urlKey}: _{$propName}.url.toString}}) -%}\n{%- endif -%}";
       }
     }
     elseif ($isMulti) {
       // Multi-value media: iterate numeric delta keys.
       $preamble[] = "{# Build {$propName} array — iterate numeric deltas of multi-value media field. #}";
       $preamble[] = "{%- set {$propName}_items = [] -%}";
-      $preamble[] = "{%- for delta, item in content.{$fn} if delta matches '/^\\\\d+$/' -%}";
-      $preamble[] = "  {%- set {$propName}_items = {$propName}_items|merge([{attributes: create_attribute(), content: item}]) -%}";
+      $preamble[] = "{%- for delta, item in content.{$fn} -%}";
+      $preamble[] = "  {%- if delta|slice(0, 1) != '#' -%}";
+      $preamble[] = "    {%- set {$propName}_items = {$propName}_items|merge([{attributes: {}, content: item|render}]) -%}";
+      $preamble[] = "  {%- endif -%}";
       $preamble[] = "{%- endfor -%}";
       $includeProps[] = "  {$propName}: {$propName}_items";
     }
@@ -760,7 +783,25 @@ function buildTwigTemplate(
   if (!empty($preamble)) {
     $out .= implode("\n", $preamble) . "\n\n";
   }
+
   $propsStr = implode(",\n", $includeProps);
+
+  if (!empty($conditionalMerges)) {
+    // Build a _props variable first, then apply conditional link merges.
+    $out .= "{%- set _props = {\n{$propsStr}\n} -%}\n";
+    $out .= implode("\n", $conditionalMerges) . "\n\n";
+    $out .= "{{- include('{$themeName}:{$compName}', _props) -}}\n";
+    return $out;
+  }
+
+  // No conditional merges needed — pass props inline.
+  // Some components require hardcoded option defaults to work correctly.
+  $componentDefaults = [
+    'slideshow' => "  options: {\n    type: 'slide',\n    perPage: 1,\n    pagination: true,\n    autoplay: false,\n  }",
+  ];
+  if (isset($componentDefaults[$compName])) {
+    $propsStr .= ",\n" . $componentDefaults[$compName];
+  }
   $out .= "{{- include('{$themeName}:{$compName}', {\n{$propsStr}\n}) -}}\n";
 
   return $out;
