@@ -1,0 +1,12 @@
+uuid: 8d1363c4-c32a-43a9-9f9c-3def0d4c262b
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: k0PPbK_xVn1RzU78ExbMIvrOcfFyytRGqZLRACL47Us
+id: separator
+label: Separator
+icon_uuid: null
+icon_default: null
+description: 'Use a <em>separator</em> to break up long stretches of content.'
+behavior_plugins: {  }

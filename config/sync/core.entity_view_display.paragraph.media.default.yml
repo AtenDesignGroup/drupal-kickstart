@@ -1,0 +1,48 @@
+uuid: f0eaeddb-7bb3-4842-843d-a0a6ede4e56d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.media.field_caption
+    - field.field.paragraph.media.field_media
+    - image.style.full_size
+    - paragraphs.paragraphs_type.media
+  module:
+    - media
+    - nomarkup
+    - text
+_core:
+  default_config_hash: S6_H5Y69ZsJB_atQy9p-I8cAodoOZ5PHffzZmgNttqU
+id: paragraph.media.default
+targetEntityType: paragraph
+bundle: media
+mode: default
+content:
+  field_caption:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 1
+    region: content
+  field_media:
+    type: media_thumbnail
+    label: hidden
+    settings:
+      image_link: ''
+      image_style: full_size
+      image_loading:
+        attribute: lazy
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

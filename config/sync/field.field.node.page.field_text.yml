@@ -1,0 +1,26 @@
+uuid: f8fdc453-730f-46eb-ba5a-4fdb714d36da
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_text
+    - node.type.page
+  module:
+    - text
+_core:
+  default_config_hash: GTp8xiwsXiO2b0o4N2a1rIKERFrZQWFErgTfm8JTuDo
+id: node.page.field_text
+field_name: field_text
+entity_type: node
+bundle: page
+label: Text
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: false
+  required_summary: false
+  allowed_formats: {  }
+field_type: text_with_summary

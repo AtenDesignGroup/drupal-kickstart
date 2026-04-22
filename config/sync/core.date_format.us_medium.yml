@@ -1,0 +1,10 @@
+uuid: 41b0f29c-ada9-4cee-ab23-450a8d364882
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: qDMx8EJcNOejpsVDQNP6MvSXM9rjS5EUrTMypXCV_Vo
+id: us_medium
+label: 'US medium'
+locked: false
+pattern: 'F j, Y'

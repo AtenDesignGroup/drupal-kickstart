@@ -1,0 +1,12 @@
+uuid: 0fc5f218-cc7e-46fa-bb8b-49e713fe28fd
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: oFjHCL4nvy5JbZHYLDsCKvHPHnxlKvQ1pDggPCw4TJ0
+id: call_to_action
+label: 'Call to action'
+icon_uuid: null
+icon_default: null
+description: 'Use a <em>call to action</em> to encourage users to take an action.'
+behavior_plugins: {  }

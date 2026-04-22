@@ -1,0 +1,28 @@
+uuid: c759e18c-49cc-4e1a-a120-b1e48d80b8de
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_formatted_text
+    - filter.format.basic_html
+    - filter.format.full_html
+    - paragraphs.paragraphs_type.teaser
+  module:
+    - text
+_core:
+  default_config_hash: LgdQtZ-v-RClwcahKYOmneyn8e9Rk2mM3dTf0_O0u0o
+id: paragraph.teaser.field_formatted_text
+field_name: field_formatted_text
+entity_type: paragraph
+bundle: teaser
+label: Body
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats:
+    - basic_html
+    - full_html
+field_type: text_long

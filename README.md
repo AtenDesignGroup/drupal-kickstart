@@ -183,3 +183,46 @@ To compile your build files, stop watching and run:
 ```
 ddev theme-build
 ```
+
+---
+
+## Known Issues: `drupal/prototype` Starterkit
+
+Upstream bugs in `drupal/prototype` affecting Drupal 11. Patches in `composer.patches.json` apply automatically on `composer install`.
+
+### 1. SDC strict null validation breaks optional props
+
+**Problem/Motivation:** Drupal 11's `ComponentValidator` rejects `null` for bare types (`type: string`, `type: array`). Prototype component schemas use bare types for optional props, so leaving any optional field empty causes `InvalidComponentException: NULL value found, but a string is required` and breaks page rendering.
+
+**Steps to reproduce:**
+1. Create a paragraph of type CTA, Pullquote, Slideshow, Teaser, or Video.
+2. Leave at least one optional field (title, caption, link, etc.) blank.
+3. View the node — the page throws an `InvalidComponentException`.
+
+**Proposed resolution:** `patches/prototype-sdc-null-safety.patch` — converts bare types to `type: ['string', 'null']` and removes `required` arrays from optional props.
+
+---
+
+### 2. `slideshow.twig` — `'type': loop` resolves to null
+
+**Problem/Motivation:** The default Splide config in `slideshow.twig` uses the bare word `loop` as a value (`'type': loop`). Outside a `{% for %}` block, `loop` is undefined in Twig and evaluates to `null`, producing `data-splide='{"type":null}'`. Splide fails to initialize and the carousel does not function.
+
+**Steps to reproduce:**
+1. Add a Slideshow paragraph with at least one slide.
+2. Do not pass an explicit `options.type` from the bridge template.
+3. Inspect the rendered HTML — `data-splide` contains `"type":null` and the carousel is broken.
+
+**Proposed resolution:** `patches/prototype-sdc-null-safety.patch` — changes `'type': loop` to `'type': 'loop'`.
+
+---
+
+### 3. `Starterkit.php` — class name casing breaks theme generation on Linux
+
+**Problem/Motivation:** Drupal's `GenerateTheme` command looks for `Drupal\prototype\StarterKit` (capital K), but the file is named `Starterkit.php` (lowercase k). On Linux's case-sensitive filesystem (including inside DDEV), PSR-4 autoloading silently skips `postProcess()`, leaving the `tests/` directory in the generated theme. Template discovery then picks up test templates over the real bridge templates, breaking paragraph rendering.
+
+**Steps to reproduce:**
+1. Run `ddev exec php web/themes/contrib/prototype/generator.php -n my_theme -d "My Theme" -p web/themes/custom` — must run via `ddev exec` to use the Linux container filesystem where case-sensitivity applies.
+2. Inspect `web/themes/custom/my_theme/` — the `tests/` directory is present.
+3. Enable the theme, add a Slideshow paragraph to a node — the test template renders instead of the real bridge template.
+
+**Proposed resolution:** `patches/prototype-starterkit-class-name-change.patch` — renames `src/Starterkit.php` to `src/StarterKit.php`, updates the class declaration, and corrects the `.starterkit.yml` ignore patterns.

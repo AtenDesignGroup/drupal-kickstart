@@ -1,0 +1,43 @@
+uuid: 4635f198-7bfa-4c03-8ba6-692c0d2f1e7b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.pullquote.field_formatted_text
+    - field.field.paragraph.pullquote.field_title
+    - paragraphs.paragraphs_type.pullquote
+  module:
+    - nomarkup
+    - text
+_core:
+  default_config_hash: JclzZ-3CugkUphTuiUor_dbiSS8pZy95vRP0hpzWXVc
+id: paragraph.pullquote.default
+targetEntityType: paragraph
+bundle: pullquote
+mode: default
+content:
+  field_formatted_text:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 0
+    region: content
+  field_title:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 1
+    region: content
+hidden:
+  search_api_excerpt: true

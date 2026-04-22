@@ -1,0 +1,12 @@
+uuid: 29941f62-51f3-49aa-a1bf-0d6e5f51d44c
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: DIHbwU6mF4AuHUREYfXegOCPNLR2H2EXUrDtThVUbEs
+id: media
+label: Media
+icon_uuid: null
+icon_default: null
+description: 'Use <em>media</em> to place images into pages.'
+behavior_plugins: {  }

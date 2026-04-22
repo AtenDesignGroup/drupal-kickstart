@@ -1,0 +1,29 @@
+uuid: fc0ec220-6336-4264-8e7e-e740daa3da50
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.media.field_media_video_file
+    - media.type.video
+  module:
+    - file
+_core:
+  default_config_hash: p6YuMqf4hS95nE7u9N0_kObfqHZoR-zvISa3i4vIzy8
+id: media.video.field_media_video_file
+field_name: field_media_video_file
+entity_type: media
+bundle: video
+label: 'Video file'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_extensions: 'mp4 webm ogg'
+  file_directory: 'videos/[date:custom:Y]-[date:custom:m]'
+  max_filesize: ''
+  description_field: false
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file

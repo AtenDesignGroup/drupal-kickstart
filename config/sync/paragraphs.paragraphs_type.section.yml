@@ -1,0 +1,18 @@
+uuid: 9f5dc370-4c2a-43ef-ade9-f5ffe49f9366
+langcode: en
+status: true
+dependencies:
+  module:
+    - layout_paragraphs
+_core:
+  default_config_hash: hf0m8tPCy3Q1RXhrbUq9U3JNLnaReijbZuC_lL6INcA
+id: section
+label: Section
+icon_uuid: null
+icon_default: null
+description: 'Use <em>sections</em> to divide content into logical groupings.'
+behavior_plugins:
+  layout_paragraphs:
+    enabled: true
+    available_layouts:
+      layout_onecol: 'One column'

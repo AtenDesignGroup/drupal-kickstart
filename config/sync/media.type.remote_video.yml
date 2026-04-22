@@ -1,0 +1,19 @@
+uuid: 510dfc87-3a60-4c9a-b6da-fdab8bdaa870
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: AOV1zW6X2UlxshvB7XzA_29DQBuq_lxCxL3xxEAZXuE
+id: remote_video
+label: 'Remote video'
+description: 'Use remote video URLs for reusable media (YouTube, Vimeo, etc).'
+source: 'oembed:video'
+queue_thumbnail_downloads: false
+new_revision: false
+source_configuration:
+  source_field: field_media_oembed_video
+  thumbnails_directory: 'public://oembed_thumbnails/[date:custom:Y-m]'
+  providers: {  }
+field_map:
+  thumbnail: thumbnail
+  title: name
