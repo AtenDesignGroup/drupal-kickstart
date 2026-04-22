@@ -243,6 +243,55 @@ Drupal 11's ComponentValidator enforces these rules:
 
 ---
 
+## Additional Prototype Bugs
+
+### `slideshow.twig`: `'type': loop` resolves to null
+
+**File:** `web/themes/contrib/prototype/components/02-components/slideshow/slideshow.twig`
+
+**Bug:** The default Splide options object in `slideshow.twig` uses `loop` as an unquoted value:
+
+```twig
+{% set default_options = {
+  ...
+  'type': loop,   {# ✗ 'loop' is a Twig variable only defined inside {% for %} loops #}
+} %}
+```
+
+Outside of a `{% for %}` block, `loop` is undefined and resolves to `null`. This produces `data-splide="{"type":null}"` in the HTML, which causes Splide to fail initialization (visible as `splide--null` CSS class and disabled arrows).
+
+**Workaround:** Always pass `type` explicitly in the `options` prop from the paragraph bridge template:
+
+```twig
+{{- include('dk_start_theme:slideshow', {
+  slides: slides_items,
+  options: {
+    type: 'slide',
+    perPage: 1,
+  }
+}) -}}
+```
+
+**Upstream fix needed:** The `slideshow.twig` default should be `'type': 'loop'` (quoted string), not the bare word `loop`.
+
+---
+
+### `Starterkit.php`: Class name casing breaks `postProcess()` on Linux
+
+**File:** `web/themes/contrib/prototype/src/Starterkit.php`
+
+**Bug:** Drupal's `GenerateTheme` command looks for class `Drupal\prototype\StarterKit` (capital K). Prototype's file is named `Starterkit.php` (lowercase k). On Linux (case-sensitive filesystem, e.g. inside DDEV), PSR-4 autoloading cannot find the class, `postProcess()` is silently skipped, and the generated theme retains the `tests/` directory.
+
+**Consequence:** `tests/modules/prototype_slideshow_test/templates/paragraph--slideshow.html.twig` is left inside the generated theme directory. Drupal's `drupal_find_theme_templates()` recursively scans the entire theme directory and the test template shadows the real `templates/paragraph/paragraph--slideshow.html.twig` (test template sorts after templates/ alphabetically, so it wins).
+
+**Patch:** `patches/prototype-starterkit-class-name-change.patch`
+- Rename `src/Starterkit.php` → `src/StarterKit.php`
+- Update class declaration: `final class StarterKit implements StarterKitInterface`
+- Update `prototype.starterkit.yml` ignore entry: `/src/StarterKit.php`
+- Fix ignore pattern for tests directory: `/tests/**` (bare `/tests` matches no files via Symfony Finder's glob resolver)
+
+---
+
 ## Questions?
 
 If you encounter similar issues with other prototype components, apply:

@@ -1,0 +1,23 @@
+uuid: 3d5516f3-e6d7-4b84-bd9e-b1d2d5229516
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+_core:
+  default_config_hash: xCrQnghDAJTxQzeQygZ7tDfMWR8pyRIcF1wjYke-Tho
+id: media.field_media_oembed_video
+field_name: field_media_oembed_video
+entity_type: media
+type: string
+settings:
+  max_length: 2048
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -89,6 +89,7 @@ jobs:
             "recipes/"
             "assets/"
             "docs/"
+            "patches/"
             ".ddev/commands/"
             ".ddev/generate-recipe.php"
             "drupal-kickstart.sh"

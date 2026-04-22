@@ -69,7 +69,6 @@
         {% for key, item in items.pages %}
           {# Set aria and related classes #}
           {% set is_active = current == key ? 'is-active' : '' %}
-          {% set is_current = current == key ? 'aria-current="page"' : '' %}
 
           {# Now generate the actual pager piece. #}
           <li class='c-pager__item {{ is_active }}'>

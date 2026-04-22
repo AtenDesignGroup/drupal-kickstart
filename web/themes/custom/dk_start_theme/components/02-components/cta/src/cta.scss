@@ -21,7 +21,7 @@
 
 .c-cta__title {
   @include type-scale(heading, h2);
-  font-weight: var(--dk_start_theme-fw-medium);
+  font-weight: var(--dk-fw-medium);
   margin: 0 0 rem(12px) 0;
 
   @include bp-min(tablet) {

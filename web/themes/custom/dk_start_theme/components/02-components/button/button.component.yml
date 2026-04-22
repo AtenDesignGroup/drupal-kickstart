@@ -2,15 +2,16 @@ $schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc
 name: Button
 description: A basic button component
 status: stable
+slots:
+  icon_prefix:
+    title: Prefix Icon
+    description: Icon rendered before the link text.
+  icon_suffix:
+    title: Suffix Icon
+    description: Icon rendered after the link text.
 props:
   type: object
   properties:
-    icon:
-      type: string
-      title: Icon Type
-      examples:
-        - icon-arrow-right
-        - external-link
     link:
       title: Link
       type: object

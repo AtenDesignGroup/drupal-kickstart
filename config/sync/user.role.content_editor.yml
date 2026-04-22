@@ -1,0 +1,28 @@
+uuid: f246e279-0e9e-4bf8-b824-f853648f8da0
+langcode: en
+status: true
+dependencies:
+  module:
+    - contextual
+    - file
+    - node
+    - path
+    - system
+    - toolbar
+_core:
+  default_config_hash: 3FPEJEkdO1-NWJB6iFEjJwpdgkSpMyJPZX14nzvVfUo
+id: content_editor
+label: 'Content editor'
+weight: 2
+is_admin: false
+permissions:
+  - 'access administration pages'
+  - 'access content overview'
+  - 'access contextual links'
+  - 'access files overview'
+  - 'access toolbar'
+  - 'administer url aliases'
+  - 'create url aliases'
+  - 'delete own files'
+  - 'view own unpublished content'
+  - 'view the administration theme'

@@ -19,8 +19,8 @@
 
 body {
   @include type-scale(body, base);
-  color: var(--dk_start_theme-color-black);
-  font-family: var(--dk_start_theme-ff-base);
+  color: var(--dk-color-black);
+  font-family: var(--dk-ff-base);
 }
 
 //------------------------------------
@@ -29,7 +29,7 @@ body {
 
 strong,
 b {
-  font-weight: var(--dk_start_theme-fw-bold);
+  font-weight: var(--dk-fw-bold);
 }
 
 //------------------------------------

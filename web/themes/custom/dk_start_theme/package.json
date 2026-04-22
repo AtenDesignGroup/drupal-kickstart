@@ -45,6 +45,7 @@
         "stylelint:fix": "stylelint --ignore-path ./.stylelintignore ./**/*.scss --fix"
     },
     "dependencies": {
+        "@jldust/accessible-menu": "^1.1.0",
         "@splidejs/splide": "^4.1.4",
         "@stierpm/a11y-components": "^1.2.0",
         "cssnano": "^7.0.5",

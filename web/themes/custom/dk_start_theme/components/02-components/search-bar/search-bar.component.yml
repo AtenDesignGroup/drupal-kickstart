@@ -2,15 +2,20 @@ $schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.js
 name: Search bar
 status: experimental
 description: Search bar component for the global header.
+slots:
+  content:
+    title: Search Form Content
+    description: The rendered search form injected into the collapsible panel.
 props:
   type: object
   properties:
-    form_action:
-      title: Form Action
+    button_text:
       type: string
-    form_children:
-      title: Form Children
-      type: string
+      title: Toggle Button Text
+      description: Visually-hidden label for the search toggle button. Defaults to "Expand Search".
+      examples:
+        - 'Expand Search'
+        - 'Open Search'
 libraryOverrides:
   dependencies:
     - core/drupal

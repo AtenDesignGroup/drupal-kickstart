@@ -1,0 +1,23 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Alerts
+status: stable
+description: Site alerts and notifications.
+props:
+  type: object
+  required:
+    - type
+    - alerts
+  properties:
+    type:
+      type: string
+      title: Type
+      description: The alert level.
+    heading:
+      type: string
+      title: Heading
+      description: The headings for the alert.
+    alerts:
+      type: array
+      title: Alerts
+      description: The list of messages to display.
+      example: "['This is a message', 'This is another message']"

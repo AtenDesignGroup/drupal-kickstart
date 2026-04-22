@@ -4,34 +4,32 @@ status: 'experimental'
 description: A Teaser component
 props:
   type: object
-  required:
-    - title
   properties:
     variant:
-      type: string
+      type: ['string', 'null']
       title: Variant
       enum:
         - card
         - panel
     title:
-      type: 'string'
+      type: ['string', 'null']
       title: 'Title'
       examples:
         - 'A new exhibit opens at the Student Visitor Center'
     media:
-      type: array
+      type: ['string', 'null']
       title: Media
-      description: 'The url for the image'
+      description: 'Rendered media markup (image, video, etc.) displayed above the teaser content.'
     link:
       type: 'object'
       title: 'More Link'
       properties:
         text:
-          type: string
+          type: ['string', 'null']
         url:
-          type: string
+          type: ['string', 'null']
     body:
       title: Body
-      type: string
+      type: ['string', 'null']
       examples:
         - '<p>The human body is a marvel and does so amazing things for us everyday.</p>'

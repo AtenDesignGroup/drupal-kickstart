@@ -1,0 +1,12 @@
+uuid: b19b8229-88fc-4d62-bdce-028fbad056da
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: q8ucf8zQ69QEVU5TYi6B6Q3lccTKrkEAxxbwPv_SEV0
+id: slideshow
+label: Slideshow
+icon_uuid: null
+icon_default: null
+description: 'Use a <em>slideshow</em> to display a rotating set of images.'
+behavior_plugins: {  }

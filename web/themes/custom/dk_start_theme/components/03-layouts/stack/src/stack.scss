@@ -17,7 +17,7 @@
 //------------------------------------
 
 [class*='l-stack'] {
-  --stack-spacing: var(--dk_start_theme-space-36, 2rem);
+  --stack-spacing: var(--dk-space-36, 2rem);
 }
 
 [class*='l-stack'] > * {
@@ -42,21 +42,21 @@
 }
 
 .l-stack--small > * + * {
-  --stack-spacing: var(--dk_start_theme-space-20);
+  --stack-spacing: var(--dk-space-20);
 }
 
 .l-stack--medium > * + * {
-  --stack-spacing: var(--dk_start_theme-space-36);
+  --stack-spacing: var(--dk-space-36);
 }
 
 .l-stack--large > * + * {
-  --stack-spacing: var(--dk_start_theme-space-60);
+  --stack-spacing: var(--dk-space-60);
 }
 
 .l-stack--xlarge > * + * {
-  --stack-spacing: var(--dk_start_theme-space-96);
+  --stack-spacing: var(--dk-space-96);
 }
 
 .l-stack--xxlarge > * + * {
-  --stack-spacing: var(--dk_start_theme-space-120);
+  --stack-spacing: var(--dk-space-120);
 }

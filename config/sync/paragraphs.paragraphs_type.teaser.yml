@@ -1,0 +1,12 @@
+uuid: 80eb5c5c-95ca-40b2-8e96-5ace664319b8
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 6tRg_7Nz1K9qja4_dNxJz-U-FyfEZaTyUtnnc0r9C8M
+id: teaser
+label: Teaser
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

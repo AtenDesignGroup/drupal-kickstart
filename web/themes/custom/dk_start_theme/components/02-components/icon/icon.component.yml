@@ -1,0 +1,15 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Icon
+status: stable
+group: Components
+props:
+  type: object
+  required:
+    - id
+  properties:
+    attributes:
+      title: Attributes
+      type: string
+    id:
+      title: ID
+      type: string

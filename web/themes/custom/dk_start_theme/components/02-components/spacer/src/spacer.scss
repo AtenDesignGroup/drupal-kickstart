@@ -1,0 +1,45 @@
+//
+//  @file
+//  Base Theme - Spacer
+//
+:root {
+  --spacer-size: 0px;
+}
+
+.c-spacer {
+  padding-block: calc(#{var(--spacer-size)} / 2);
+}
+
+.c-spacer__divider {
+  background-color: var(--dk-color-gray-500);
+  margin: 0;
+  height: 1px;
+  width: 100%;
+}
+
+//
+//  Spacing
+//
+.c-spacer--none {
+  --spacer-size: var(--dk-space-0);
+}
+
+.c-spacer--xsmall {
+  --spacer-size: var(--dk-space-20);
+}
+
+.c-spacer--small {
+  --spacer-size: var(--dk-space-36);
+}
+
+.c-spacer--medium {
+  --spacer-size: var(--dk-space-60);
+}
+
+.c-spacer--large {
+  --spacer-size: var(--dk-space-96);
+}
+
+.c-spacer--xlarge {
+  --spacer-size: var(--dk-space-120);
+}

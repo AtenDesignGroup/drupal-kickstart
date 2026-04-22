@@ -1,0 +1,31 @@
+uuid: bfd01c83-c5eb-4f85-af55-a714826f391e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_slides
+    - media.type.image
+    - paragraphs.paragraphs_type.slideshow
+_core:
+  default_config_hash: 7fi_8dqEWfSL3oVOQ4FhtKjAJ_PNLFs3LRhpKi4usGY
+id: paragraph.slideshow.field_slides
+field_name: field_slides
+entity_type: paragraph
+bundle: slideshow
+label: Slides
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      image: image
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: image
+field_type: entity_reference

@@ -1,48 +1,39 @@
 //
-// Global - Forms
+//  @file
+//  Elements - Forms
 //
 
-//------------------------------------
-//  01 - Imports
-//------------------------------------
-
+//  Imports
 @use 'partials' as *;
 
-//------------------------------------
-//  02 - General
-//------------------------------------
-
+//  Base
 form {
   display: grid;
-  gap: var(--dk_start_theme-space-20, 1.25rem);
+  gap: var(--dk-space-20, 1.25rem);
   grid-template-columns: 1fr;
 }
 
-//------------------------------------
-//  03 - Labels
-//------------------------------------
-
+//  Labels
 label,
 legend,
 .form-item__label {
   @include type-scale(label, 16);
   display: block;
-  font-weight: var(--dk_start_theme-fw-bold);
+  font-weight: var(--dk-fw-bold);
 }
 
 legend {
   margin-block-end: 4px;
 }
 
-//------------------------------------
-// 04 - Fieldsets
-//------------------------------------
+//  Fieldsets
 fieldset {
   border: none;
   margin-inline: 0;
   padding: 0;
 }
 
+//  Inputs
 input[type='date'],
 input[type='datetime-local'],
 input[type='email'],
@@ -58,25 +49,23 @@ input[type='week'],
 select,
 textarea {
   @include type-scale(label, 16);
-  border: solid 1px var(--dk_start_theme-color-dark);
+  border: solid 1px var(--dk-color-dark);
   border-radius: 0;
-  color: var(--dk_start_theme-color-black);
+  color: var(--dk-color-black);
   display: block;
   inline-size: 100%;
   max-inline-size: 100%;
   padding: 12px;
 
   &::placeholder {
-    color: var(--dk_start_theme-color-gray-600);
+    color: var(--dk-color-gray-600);
   }
 }
 
-//------------------------------------
-// 05 - Select
-//------------------------------------
+//  Selects
 select {
   appearance: none;
-  background: var(--dk_start_theme-i-triangle-down) no-repeat calc(100% - 12px) center;
+  background: var(--dk-i-triangle-down) no-repeat calc(100% - 12px) center;
   background-size: 24px;
   block-size: 52px;
 }
@@ -86,9 +75,7 @@ select::-ms-expand {
   display: none;
 }
 
-//------------------------------------
-// 06 - Search
-//------------------------------------
+//  Search
 input[type='search']::-webkit-search-decoration,
 input[type='search']::-webkit-search-cancel-button,
 input[type='search']::-webkit-search-results-button,
@@ -97,34 +84,32 @@ input[type='search']::-webkit-search-results-decoration {
 }
 
 input[type='search'] {
-  background: var(--dk_start_theme-i-search) no-repeat 12px center;
+  background: var(--dk-i-search) no-repeat 12px center;
   background-size: 28px;
   padding-inline-start: 24px;
 }
 
-//------------------------------------
-// 07 - Checkboxes / Radios
-//------------------------------------
-
+//  Checkboxes / Radios
 input[type='radio'],
 input[type='checkbox'] {
   appearance: none;
   block-size: 100%;
+  color: var(--dk-color-black);
   cursor: pointer;
   inline-size: 100%;
   inset-block-start: 0;
   inset-inline-start: 0;
   margin: 0;
   position: absolute;
-  z-index: var(--dk_start_theme-zindex-default);
+  z-index: var(--dk-zindex-default);
 
   + label[for] {
     display: flex;
-    font-weight: var(--dk_start_theme-fw-regular);
+    font-weight: var(--dk-fw-regular);
     gap: 4px;
 
     &:before {
-      background-color: var(--dk_start_theme-color-black);
+      background-color: var(--dk-color-black);
       block-size: 28px;
       content: '';
       display: block;
@@ -143,54 +128,49 @@ input[type='checkbox'] {
 
 input[type='checkbox'] {
   + label:before {
-    mask: var(--dk_start_theme-i-rectangle-empty) no-repeat center;
+    mask: var(--dk-i-rectangle-empty) no-repeat center;
   }
 
   &:checked + label:before {
-    mask: var(--dk_start_theme-i-rectangle-checked) no-repeat center;
+    mask: var(--dk-i-rectangle-checked) no-repeat center;
   }
 }
 
 input[type='radio'] {
   + label:before {
-    mask: var(--dk_start_theme-i-circle-empty) no-repeat center;
+    mask: var(--dk-i-circle-empty) no-repeat center;
   }
 
   &:checked + label:before {
-    mask: var(--dk_start_theme-i-circle-filled) no-repeat center;
+    mask: var(--dk-i-circle-filled) no-repeat center;
   }
 }
 
-///------------------------------------
 //  Descriptions
-//------------------------------------
 .description,
 .form-item__description,
 .form-item__description p {
   @include type-scale(label, 14);
-  color: var(--dk_start_theme-color-dark);
+  color: var(--dk-color-dark);
 }
 
-//------------------------------------
-//  08 - Passwords
-//------------------------------------
-
+//  Passwords
 .password-strength__meter {
-  background-color: var(--dk_start_theme-color-gray-100);
+  background-color: var(--dk-color-gray-100);
 }
 
 .password-strength__indicator {
   &.is-fair {
-    background-color: var(--dk_start_theme-color-yellow);
+    background-color: var(--dk-color-yellow);
   }
   &.is-strong {
-    background-color: var(--dk_start_theme-color-green);
+    background-color: var(--dk-color-green);
   }
   &.is-good {
-    background-color: var(--dk_start_theme-color-green);
+    background-color: var(--dk-color-green);
   }
   &.is-weak {
-    background-color: var(--dk_start_theme-color-red);
+    background-color: var(--dk-color-red);
   }
 }
 
@@ -200,27 +180,27 @@ input[type='radio'] {
 }
 
 .password-strength__text {
-  font-weight: var(--dk_start_theme-fw-bold);
+  font-weight: var(--dk-fw-bold);
 }
 
 .password-confirm > span {
-  font-weight: var(--dk_start_theme-fw-bold);
+  font-weight: var(--dk-fw-bold);
 
   &.error {
-    color: var(--dk_start_theme-color-red);
+    color: var(--dk-color-red);
   }
 
   &.ok {
-    color: var(--dk_start_theme-color-green);
+    color: var(--dk-color-green);
   }
 }
 
 .password-suggestions {
   @include type-scale(label, 14);
-  font-weight: var(--dk_start_theme-fw-bold);
+  font-weight: var(--dk-fw-bold);
 
   > ul {
-    font-weight: var(--dk_start_theme-fw-regular);
+    font-weight: var(--dk-fw-regular);
   }
 }
 
@@ -237,14 +217,12 @@ input[type='radio'] {
   }
 }
 
-//------------------------------------
-// 09 - Errors
-//------------------------------------
+//  Errors
 .form-error {
-  color: var(--dk_start_theme-color-danger);
+  color: var(--dk-color-danger);
 
   p {
-    color: var(--dk_start_theme-color-danger);
+    color: var(--dk-color-danger);
   }
 
   input[type='date'],
@@ -261,22 +239,20 @@ input[type='radio'] {
   input[type='week'],
   select,
   textarea {
-    border: solid 1px var(--dk_start_theme-color-danger);
+    border: solid 1px var(--dk-color-danger);
   }
 }
 
-//------------------------------------
-// 10 - Disabled
-//------------------------------------
+//  Disabled
 .form-item--disabled {
-  color: var(--dk_start_theme-color-gray-600);
+  color: var(--dk-color-gray-600);
 
   p {
-    color: var(--dk_start_theme-color-gray-600);
+    color: var(--dk-color-gray-600);
   }
 
   label:before {
-    background-color: var(--dk_start_theme-color-gray-600);
+    background-color: var(--dk-color-gray-600);
   }
 
   input {
@@ -297,27 +273,25 @@ input[type='radio'] {
   input[type='week']
   select,
   textarea {
-    border: solid 1px var(--dk_start_theme-color-gray-600);
-    color: var(--dk_start_theme-color-gray-600);
+    border: solid 1px var(--dk-color-gray-600);
+    color: var(--dk-color-gray-600);
 
     &::placeholder {
-      color: var(--dk_start_theme-color-gray-600);
+      color: var(--dk-color-gray-600);
     }
   }
 }
 
-//------------------------------------
-// 11 - Actions
-//------------------------------------
+//  Actions
 input[type='button'],
 input[type='submit'],
 input[type='reset'] {
   @include type-scale(body, 18);
   appearance: none;
-  background-color: var(--dk_start_theme-color-black);
+  background-color: var(--dk-color-black);
   border: none;
   box-shadow: none;
-  color: var(--dk_start_theme-color-white);
+  color: var(--dk-color-white);
   cursor: pointer;
   padding-block: 8px;
   padding-inline: 12px;
@@ -327,14 +301,14 @@ input[type='reset'] {
 
   &:hover,
   &:focus {
-    color: var(--dk_start_theme-color-white);
+    color: var(--dk-color-white);
     text-decoration: underline currentColor;
   }
 }
 
 input[value='reset'] {
-  background: var(--dk_start_theme-i-close) no-repeat left center;
-  color: var(--dk_start_theme-color-black);
+  background: var(--dk-i-close) no-repeat left center;
+  color: var(--dk-color-black);
   background-size: 28px;
   padding-inline-start: 32px;
 }
@@ -342,21 +316,19 @@ input[value='reset'] {
 .form-actions {
   align-self: flex-start;
   display: flex;
-  gap: var(--dk_start_theme-space-20, 1.25rem);
+  gap: var(--dk-space-20, 1.25rem);
 
   @include bp-min(tablet) {
     align-self: auto;
   }
 }
 
-//------------------------------------
-// 12 - Exposed Filters
-//------------------------------------
+//  Exposed Filters
 .form--exposed-filters {
   align-items: flex-end;
   display: flex;
   flex-flow: nowrap column;
-  gap: var(--dk_start_theme-space-20, 1.25rem);
+  gap: var(--dk-space-20, 1.25rem);
 
   @include bp-min(tablet) {
     flex-flow: nowrap row;

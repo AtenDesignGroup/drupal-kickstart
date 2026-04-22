@@ -19,19 +19,19 @@ nav.c-breadcrumb ol {
 }
 
 nav.c-breadcrumb li {
-  color: var(--dk_start_theme-color-black);
+  color: var(--dk-color-black);
   display: inline-block;
   margin: 0;
 
   a {
-    color: var(--dk_start_theme-color-black);
+    color: var(--dk-color-black);
 
     &:hover {
       text-decoration: none;
     }
 
     &[aria-current="page"] {
-      color: var(--dk_start_theme-color-black);
+      color: var(--dk-color-black);
       text-decoration: none;
 
       &:hover {

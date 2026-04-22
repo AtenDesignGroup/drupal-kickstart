@@ -1,0 +1,28 @@
+uuid: e6c14d87-762a-42b5-80af-205f1becc11d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_formatted_text
+    - filter.format.basic_html
+    - filter.format.full_html
+    - paragraphs.paragraphs_type.rich_text
+  module:
+    - text
+_core:
+  default_config_hash: VTGvzhyEmjQjHQbLw1rIIzNFcuRy6BH33Z4g1CDEp3o
+id: paragraph.rich_text.field_formatted_text
+field_name: field_formatted_text
+entity_type: paragraph
+bundle: rich_text
+label: 'Formatted Text'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats:
+    - basic_html
+    - full_html
+field_type: text_long

@@ -18,12 +18,12 @@
 //------------------------------------
 
 a {
-  color: var(--dk_start_theme-color-primary);
+  color: var(--dk-color-primary);
   text-decoration: underline;
 
   &:hover,
   &:focus {
-    color: var(--dk_start_theme-color-secondary);
+    color: var(--dk-color-secondary);
     text-decoration: none;
   }
 }

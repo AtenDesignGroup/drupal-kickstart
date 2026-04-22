@@ -1,5 +1,3 @@
-{% import "dk_start_theme:icons" as icons %}
-
 {% set attributes = create_attribute(attributes) %}
 
 {% set classes = [
@@ -10,7 +8,7 @@
   {{ link.title }}
   {% if icon %}
     <span class='c-link__icon'>
-      {{ icons.inline(icon) }}
+      {{ include('dk_start_theme:icon', {id: icon|default('arrow-right')}, with_context = false) }}
     </span>
   {% endif %}
 </a>

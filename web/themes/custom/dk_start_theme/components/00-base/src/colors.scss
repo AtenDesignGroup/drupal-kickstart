@@ -12,16 +12,16 @@
 //------------------------------------
 
 :root {
-  --dk_start_theme-color-blue: #0d6efd;
-  --dk_start_theme-color-indigo: #6610f2;
-  --dk_start_theme-color-purple: #6f42c1;
-  --dk_start_theme-color-pink: #d63384;
-  --dk_start_theme-color-red: #dc3545;
-  --dk_start_theme-color-orange: #fd7e14;
-  --dk_start_theme-color-yellow: #ffc107;
-  --dk_start_theme-color-green: #198754;
-  --dk_start_theme-color-teal: #20c997;
-  --dk_start_theme-color-cyan: #0dcaf0;
+  --dk-color-blue: #0d6efd;
+  --dk-color-indigo: #6610f2;
+  --dk-color-purple: #6f42c1;
+  --dk-color-pink: #d63384;
+  --dk-color-red: #dc3545;
+  --dk-color-orange: #fd7e14;
+  --dk-color-yellow: #ffc107;
+  --dk-color-green: #198754;
+  --dk-color-teal: #20c997;
+  --dk-color-cyan: #0dcaf0;
 }
 
 
@@ -30,17 +30,17 @@
 //------------------------------------
 
 :root {
-  --dk_start_theme-color-white: #ffffff;
-  --dk_start_theme-color-gray-100: #f8f9fa;
-  --dk_start_theme-color-gray-200: #e9ecef;
-  --dk_start_theme-color-gray-300: #dee2e6;
-  --dk_start_theme-color-gray-400: #ced4da;
-  --dk_start_theme-color-gray-500: #adb5bd;
-  --dk_start_theme-color-gray-600: #6c757d;
-  --dk_start_theme-color-gray-700: #495057;
-  --dk_start_theme-color-gray-800: #343a40;
-  --dk_start_theme-color-gray-900: #212529;
-  --dk_start_theme-color-black: #000000;
+  --dk-color-white: #ffffff;
+  --dk-color-gray-100: #f8f9fa;
+  --dk-color-gray-200: #e9ecef;
+  --dk-color-gray-300: #dee2e6;
+  --dk-color-gray-400: #ced4da;
+  --dk-color-gray-500: #adb5bd;
+  --dk-color-gray-600: #6c757d;
+  --dk-color-gray-700: #495057;
+  --dk-color-gray-800: #343a40;
+  --dk-color-gray-900: #212529;
+  --dk-color-black: #000000;
 }
 
 
@@ -49,12 +49,12 @@
 //------------------------------------
 
 :root {
-  --dk_start_theme-color-primary: var(--dk_start_theme-color-blue);
-  --dk_start_theme-color-secondary: var(--dk_start_theme-color-gray-900);
-  --dk_start_theme-color-success: var(--dk_start_theme-color-green);
-  --dk_start_theme-color-info: var(--dk_start_theme-color-cyan);
-  --dk_start_theme-color-warning: var(--dk_start_theme-color-yellow);
-  --dk_start_theme-color-danger: var(--dk_start_theme-color-red);
-  --dk_start_theme-color-light: var(--dk_start_theme-color-gray-100);
-  --dk_start_theme-color-dark: var(--dk_start_theme-color-gray-900);
+  --dk-color-primary: var(--dk-color-blue);
+  --dk-color-secondary: var(--dk-color-gray-900);
+  --dk-color-success: var(--dk-color-green);
+  --dk-color-info: var(--dk-color-cyan);
+  --dk-color-warning: var(--dk-color-yellow);
+  --dk-color-danger: var(--dk-color-red);
+  --dk-color-light: var(--dk-color-gray-100);
+  --dk-color-dark: var(--dk-color-gray-900);
 }

@@ -1,0 +1,12 @@
+uuid: 1685453e-8a88-4bac-acf2-0793855032c8
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: GGVXe6wGIodobfOo0Gw-7NEKS2azdEKJMMHTy0no5jw
+id: rich_text
+label: 'Rich text'
+icon_uuid: null
+icon_default: null
+description: 'Use <em>rich text</em> for running text.'
+behavior_plugins: {  }

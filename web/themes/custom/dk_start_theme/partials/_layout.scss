@@ -1,23 +1,16 @@
-//
 // Mixins - Layout
 // Use these mixins when needing to easily define layout styles, such as widths and grids.
-//
 // - 01 - Imports
 // - 02 - Full Width
-//
 
-//------------------------------------
 //  01 - Imports
-//------------------------------------
 
 @use './calculations' as functions-calculations;
 
-//------------------------------------
 //  02 - Full Width
 //  When needing to make a nested element, within an already defined container, span outside and full width on a page,
 //  use this mixin.
 //  - @example = @include full-width();
-//------------------------------------
 
 @mixin full-width() {
   margin-left: -50vw;
@@ -28,7 +21,6 @@
   width: 100vw;
 }
 
-//------------------------------------
 //  03 - Flex Grid
 //  When needing to make a list of elements into a flex grid, use this mixin along with defining amount of columns,
 //  the child selector for the list wrapper and gutter sizes.
@@ -37,7 +29,6 @@
 //  - @param $column-gutter: Value of space between each item in a row
 //  - @param $bottom-gutter: Value of space under each item in a column.
 //  - @example = @include flex-grid(3, 'li', 40px, 40px);
-//------------------------------------
 
 @mixin flex-grid($columns, $selector, $column-gutter, $bottom-gutter) {
   display: flex;

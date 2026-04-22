@@ -1,0 +1,122 @@
+diff --git a/generator.php b/generator.php
+index 49dbc84..6544338 100644
+--- a/generator.php
++++ b/generator.php
+@@ -12,7 +12,7 @@
+  * @package Prototype
+  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+  * @link https://www.drupal.org/docs/core-modules-and-themes/core-themes/starterkit-theme
+- * @see Drupal Core Starterkit: https://www.drupal.org/about/core/blog/new-starterkit-will-change-how-you-create-themes-in-drupal-10
++ * @see Drupal Core StarterKit: https://www.drupal.org/about/core/blog/new-starterkit-will-change-how-you-create-themes-in-drupal-10
+  * @since File available since Release 4.0.0-alpha
+  */
+ 
+diff --git a/prototype.starterkit.yml b/prototype.starterkit.yml
+index 9fbb5a9..89ae980 100644
+--- a/prototype.starterkit.yml
++++ b/prototype.starterkit.yml
+@@ -3,11 +3,11 @@ ignore:
+   - '/.git'
+   - '/.tugboat'
+   - '/.gitlab-ci.yml'
+-  - '/tests'
++  - '/tests/**'
+   - '/composer.json'
+   - '/generator.php'
+   - '/prototype.starterkit.yml'
+-  - '/src/Starterkit.php'
++  - '/src/StarterKit.php'
+   - '/CHANGELOG.md'
+   - '/README.md'
+ 
+diff --git a/src/Starterkit.php b/src/Starterkit.php
+deleted file mode 100644
+index 0c893e0..0000000
+--- a/src/Starterkit.php
++++ /dev/null
+@@ -1,85 +0,0 @@
+-<?php
+-
+-namespace Drupal\prototype;
+-
+-use Drupal\Core\Theme\StarterKitInterface;
+-
+-/**
+- * Defines a starter kit handler for the Prototype theme.
+- *
+- * This class implements post-processing logic that runs after a new theme
+- * is generated from the Prototype starter kit. It handles cleanup tasks such
+- * as removing test directories, updating configuration files, and preparing
+- * the new theme for development.
+- */
+-final class Starterkit implements StarterKitInterface {
+-
+-  /**
+-   * Helper function to remove a directory and its contents.
+-   *
+-   * @param string $dir
+-   *   Path to the directory to remove.
+-   */
+-  private static function removeDirectory(string $dir): void {
+-    if (!is_dir($dir)) {
+-      return;
+-    }
+-    $items = new \RecursiveIteratorIterator(
+-      new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+-      \RecursiveIteratorIterator::CHILD_FIRST
+-    );
+-    foreach ($items as $item) {
+-      $path = $item->getPathname();
+-      if ($item->isDir() && !$item->isLink()) {
+-        rmdir($path);
+-      }
+-      else {
+-        unlink($path);
+-      }
+-    }
+-    rmdir($dir);
+-  }
+-
+-  /**
+-   * {@inheritdoc}
+-   */
+-  public static function postProcess(string $working_dir, string $machine_name, string $theme_name): void {
+-    // Path to new theme info file.
+-    $info_file = "$working_dir/$machine_name.info.yml";
+-
+-    try {
+-      $file_contents = file_get_contents($info_file);
+-      // Remove 'starterkit: true' line.
+-      $file_contents = str_replace('starterkit: true' . "\n", '', $file_contents);
+-      $file_contents = str_replace('enforce_sdc_schemas: true' . "\n", '', $file_contents);
+-      // Replace 'generator: $theme_name' with 'generator: prototype'.
+-      $file_contents = preg_replace("/(generator: )$theme_name/", '$1prototype', $file_contents);
+-      file_put_contents($info_file, $file_contents);
+-
+-      // Remove the tests & node_modules folders if it exists since ignoring it
+-      // doesn't seem to work as expected.
+-      $directories_to_remove = [
+-        "$working_dir/tests",
+-        // If we don't delete node_modules, it will be copied to the new theme
+-        // and all instances of the native JS 'prototype' keyword will get
+-        // replaced with the theme name which is very much not a good thing.
+-        "$working_dir/node_modules",
+-      ];
+-      foreach ($directories_to_remove as $folder) {
+-        if (is_dir($folder)) {
+-          self::removeDirectory($folder);
+-        }
+-      }
+-
+-      // Rename the STARTERKIT.md file to README.md.
+-      $readme_file = "$working_dir/README_STARTERKIT.md";
+-      $readme_file_new = "$working_dir/README.md";
+-      if (file_exists($readme_file)) {
+-        rename($readme_file, $readme_file_new);
+-      }
+-    }
+-    catch (\Throwable $th) {
+-    }
+-  }
+-
+-}

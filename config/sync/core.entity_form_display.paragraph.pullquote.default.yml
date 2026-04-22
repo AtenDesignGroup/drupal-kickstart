@@ -1,0 +1,36 @@
+uuid: 9df19cef-3a05-482b-ae6f-5cf888c7e391
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.pullquote.field_formatted_text
+    - field.field.paragraph.pullquote.field_title
+    - paragraphs.paragraphs_type.pullquote
+  module:
+    - text
+_core:
+  default_config_hash: bqc-MKbqYIvkw6YJ6aimNLGB8ehsaQ2-ziQmu4SZDbI
+id: paragraph.pullquote.default
+targetEntityType: paragraph
+bundle: pullquote
+mode: default
+content:
+  field_formatted_text:
+    type: text_textarea
+    weight: 0
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_title:
+    type: string_textfield
+    weight: 1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

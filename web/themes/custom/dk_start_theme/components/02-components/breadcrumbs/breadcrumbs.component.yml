@@ -3,10 +3,14 @@ name: Breadcrumbs
 description: Breadcrumbs component
 status: 'stable'
 slots:
-  breadcrumbs_block: { title: Breadcrumbs Block }
+  items_block: { title: Breadcrumbs Items Block }
 props:
   type: object
   properties:
+    id:
+      type: string
+      title: Accessible Nav ID
+      description: HTML id shared between the nav aria-labelledby and its visually-hidden heading.
     items:
       type: array
       title: Items

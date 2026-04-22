@@ -1,6 +1,6 @@
 $schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
 name: Accordion
-status: experimental
+status: stable
 group: Components
 props:
   type: object
@@ -16,7 +16,6 @@ slots:
     title: Trigger
   content:
     title: Content
-
 libraryOverrides:
   dependencies:
     - core/drupal

@@ -7,17 +7,15 @@ slots:
   citation: { title: Pullquote Citation }
 props:
   type: object
-  required:
-    - text
   properties:
     text:
-      type: string
+      type: ['string', 'null']
       title: Quote
       description: The quote paragraph
       examples:
         - 'Example quote paragraph. Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed.'
     credit:
-      type: string
+      type: ['string', 'null']
       title: Quote Credit
       description: The optional second quote credit.
       examples:

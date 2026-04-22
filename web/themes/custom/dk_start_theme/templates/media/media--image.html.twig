@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override to display an Image Media item.
+ *
+ * Available variables:
+ * - No additional variables are available for this Media entity.
+ *
+ * @see template_preprocess_media()
+ * @ingroup themeable
+ */
+#}
+
+{% extends 'media.html.twig' %}
+
+{% set rendered_content = content|without(
+  'field_media_image',
+) %}
+
+{% block content %}
+  {{ content.field_media_image|field_value }}
+  {{ rendered_content }}
+{% endblock %}

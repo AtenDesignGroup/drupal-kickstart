@@ -1,0 +1,12 @@
+{% set attributes = create_attribute(attributes) %}
+{% set classes = [
+  'c-spacer',
+  spacer_size ? 'c-spacer--' ~ spacer_size
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  {% if spacer_divider %}
+    {# We have to use a div instead of an hr as hr will not display within a flex box #}
+    <div class="c-spacer__divider"></div>
+  {% endif %}
+</div>

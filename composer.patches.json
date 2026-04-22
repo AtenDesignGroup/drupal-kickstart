@@ -1,7 +1,4 @@
 {
     "patches": {
-        "drupal/prototype": {
-            "Strict Prop validations fix for d11": "patches/prototype-sdc-null-safety.patch"
-        }
     }
 }
