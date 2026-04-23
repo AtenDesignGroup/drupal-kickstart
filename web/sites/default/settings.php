@@ -71,6 +71,16 @@
  */
 include __DIR__ . "/settings.pantheon.php";
 
+/**
+ * Config sync directory.
+ *
+ * Set explicitly here so all environments (Pantheon, DDEV, CI) use the same
+ * location. This overrides any path that settings.pantheon.php may have set
+ * and prevents the "import is empty" error caused by Pantheon pointing to the
+ * parent config/ directory instead of config/sync/.
+ */
+$settings['config_sync_directory'] = DRUPAL_ROOT . '/../config/sync';
+
 
 /**
  * Database settings:
