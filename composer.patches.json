@@ -3,7 +3,7 @@
         "drupal/prototype": {
             "Strict Prop validations fix for d11": "https://git.drupalcode.org/project/prototype/-/merge_requests/231/diffs.patch",
             "Fix class name spelling for StarterKit.php": "https://git.drupalcode.org/project/prototype/-/merge_requests/230.patch",
-            "patches/accordion-expanded-class.patch": "patches/accordion-expanded-class.patch"
+            "Add expandedClass for accordion and tab-content ": "https://git.drupalcode.org/project/prototype/-/merge_requests/232.patch"
         }
     }
 }
