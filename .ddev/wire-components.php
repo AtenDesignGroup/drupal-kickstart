@@ -797,9 +797,38 @@ function mapPropToField(string $name, array $def): array {
   }
 
   // Skip theme-only / non-content props.
-  static $skipProps = ['variant', 'id', 'icon', 'options', 'attributes', 'class', 'classes', 'type'];
+  static $skipProps = ['id', 'icon', 'options', 'attributes', 'class', 'classes'];
   if (in_array($name, $skipProps, true)) {
     return ['skip' => true];
+  }
+
+  // 'variant' and 'type' with an enum → list_string field (editorial choice).
+  // Without an enum they are theme-only presentational strings — skip them.
+  if (in_array($name, ['variant', 'type'], true)) {
+    $enum = $def['enum'] ?? [];
+    if (empty($enum)) {
+      return ['skip' => true];
+    }
+    $fn = 'field_' . $name;
+    $allowedValues = [];
+    foreach ($enum as $v) {
+      $allowedValues[] = "    - value: {$v}\n      label: " . ucfirst($v);
+    }
+    return [
+      'skip'               => false,
+      'field'              => $fn,
+      'new_storage'        => true,
+      'drupal_type'        => 'list_string',
+      'plain'              => true,
+      'nomarkup'           => false,
+      'formatter'          => 'list_default',
+      'formatter_settings' => [],
+      'widget'             => 'options_select',
+      'widget_settings'    => [],
+      'module_deps'        => ['options'],
+      'allowed_values'     => $allowedValues,
+      'review'             => "list_string field with enum values — defaults to first value if empty.",
+    ];
   }
 
   // Title / heading family → field_title (string).
@@ -1272,18 +1301,10 @@ function buildTwigTemplate(
     $isSingle   = empty($m['new_storage']) && !empty($m['is_media']);
 
     if ($drupalType === 'link') {
-      $textKey  = $m['link_text_key'] ?? 'title';
-      $urlKey   = $m['link_url_key']  ?? 'url';
-      $preamble[] = "{# Link: extract raw values (requires twig_field_value module). #}";
-      $preamble[] = "{%- set _{$propName}_items = content.{$fn}|field_value -%}";
-      $preamble[] = "{%- set _{$propName} = _{$propName}_items is not empty ? _{$propName}_items|first : null -%}";
-      if ($textKey !== 'title') {
-        $preamble[] = "{#  ⚠ REVIEW: component uses '{$textKey}' for link text; field_link stores 'title'. #}";
-        $conditionalMerges[] = "{%- if _{$propName} -%}\n  {%- set _props = _props|merge({{$propName}: {{$textKey}: _{$propName}.title, {$urlKey}: _{$propName}.url.toString}}) -%}\n{%- endif -%}";
-      }
-      else {
-        $conditionalMerges[] = "{%- if _{$propName} -%}\n  {%- set _props = _props|merge({{$propName}: {title: _{$propName}.title, {$urlKey}: _{$propName}.url.toString}}) -%}\n{%- endif -%}";
-      }
+      $preamble[] = "{# Link: read directly from entity field API. #}";
+      $preamble[] = "{%- set _{$propName}_field = paragraph.{$fn} -%}";
+      $preamble[] = "{%- set _{$propName} = (not _{$propName}_field.isEmpty) ? {text: _{$propName}_field.title, url: paragraph.{$fn}.0.url.toString()} : null -%}";
+      $conditionalMerges[] = "{%- if _{$propName} -%}\n  {%- set _props = _props|merge({{$propName}: _{$propName}}) -%}\n{%- endif -%}";
     }
     elseif ($isMulti) {
       $preamble[] = "{# Build {$propName} array — iterate numeric deltas of multi-value media field. #}";

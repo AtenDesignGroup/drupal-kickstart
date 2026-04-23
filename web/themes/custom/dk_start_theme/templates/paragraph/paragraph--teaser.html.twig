@@ -1,15 +1,15 @@
-{# Link: extract raw values (requires twig_field_value module). #}
-{%- set _link_items = content.field_link|field_value -%}
-{%- set _link = _link_items is not empty ? _link_items|first : null -%}
-{#  ⚠ REVIEW: component uses 'text' for link text; field_link stores 'title'. #}
+{# Link: read directly from entity field API. #}
+{%- set _link_field = paragraph.field_link -%}
+{%- set _link = (not _link_field.isEmpty) ? {text: _link_field.title, url: paragraph.field_link.0.url.toString()} : null -%}
 
 {%- set _props = {
+  variant: paragraph.field_variant.value|default('card'),
   title: content.field_title|render|striptags|trim,
   media: content.field_media,
   body: content.field_formatted_text
 } -%}
 {%- if _link -%}
-  {%- set _props = _props|merge({link: {text: _link.title, url: _link.url.toString}}) -%}
+  {%- set _props = _props|merge({link: _link}) -%}
 {%- endif -%}
 
 {{- include('dk_start_theme:teaser', _props) -}}

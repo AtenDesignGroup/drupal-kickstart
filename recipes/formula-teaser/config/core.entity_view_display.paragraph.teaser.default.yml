@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.paragraph.teaser.field_variant
     - field.field.paragraph.teaser.field_title
     - field.field.paragraph.teaser.field_media
     - field.field.paragraph.teaser.field_link
@@ -10,6 +11,7 @@ dependencies:
     - paragraphs.paragraphs_type.teaser
   module:
     - nomarkup
+    - options
     - text
     - link
     - media
@@ -18,6 +20,13 @@ targetEntityType: paragraph
 bundle: teaser
 mode: default
 content:
+  field_variant:
+    type: list_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
   field_title:
     type: string
     label: hidden
