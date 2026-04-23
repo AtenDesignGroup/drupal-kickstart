@@ -1,0 +1,9 @@
+name: '🦄 🌈  Formula: Accordion Item'
+description: 'Child paragraph for the accordion component. Rendered via embed of the DK_THEME_NAME SDC accordion component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+
+config:
+  strict: false

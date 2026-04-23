@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Tabs Content'
+description: 'Provides a Tabs Content paragraph type (container + tabs_content_item child) wired to the DK_THEME_NAME SDC tabs-content component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+  - formula-tabs-content-item  # must be applied first to create the tabs_content_item bundle
+
+config:
+  strict: false
