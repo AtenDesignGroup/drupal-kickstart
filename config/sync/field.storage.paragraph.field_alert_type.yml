@@ -1,0 +1,32 @@
+uuid: f30ed72f-30ab-4dec-8a3e-37170521f60a
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - paragraphs
+_core:
+  default_config_hash: TfgYMBHtHBAaf2PmpjLh1jieu9z4XhLExUiS_gx-zWA
+id: paragraph.field_alert_type
+field_name: field_alert_type
+entity_type: paragraph
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: status
+      label: Status
+    -
+      value: warning
+      label: Warning
+    -
+      value: error
+      label: Error
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

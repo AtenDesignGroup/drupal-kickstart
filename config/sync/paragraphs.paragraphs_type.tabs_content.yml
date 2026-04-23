@@ -1,0 +1,12 @@
+uuid: d76b5cc5-65d1-41f9-839f-7295eb38e854
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: KMgcedrSEqTbHtKZz5tzYirFEavPEQxJB5YqNEqpAf0
+id: tabs_content
+label: 'Tabs Content'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

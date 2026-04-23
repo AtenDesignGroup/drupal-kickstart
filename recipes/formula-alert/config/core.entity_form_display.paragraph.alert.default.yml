@@ -1,0 +1,41 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.alert.field_alert_type
+    - field.field.paragraph.alert.field_title
+    - field.field.paragraph.alert.field_alerts
+    - paragraphs.paragraphs_type.alert
+  module:
+    - options
+    - text
+id: paragraph.alert.default
+targetEntityType: paragraph
+bundle: alert
+mode: default
+content:
+  field_alert_type:
+    type: options_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_title:
+    type: string_textfield
+    weight: 1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_alerts:
+    type: text_textarea
+    weight: 2
+    region: content
+    settings:
+      rows: 3
+      placeholder: 'Enter one alert message'
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

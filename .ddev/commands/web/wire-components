@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+## Description: Wire prototype SDC components to Drupal paragraph recipe scaffolds and Twig bridge templates.
+## Usage: wire-components <component-name|all> [--theme-name=NAME]
+## Example: "ddev wire-components cta"
+## Example: "ddev wire-components all"
+## Example: "ddev wire-components accordion --theme-name=my_theme"
+
+set -euo pipefail
+
+exec php /var/www/html/.ddev/wire-components.php "$@"

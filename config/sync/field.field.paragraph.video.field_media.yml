@@ -1,3 +1,4 @@
+uuid: 11c89907-faf2-49c4-9044-0cca702f4da3
 langcode: en
 status: true
 dependencies:
@@ -5,14 +6,13 @@ dependencies:
     - field.storage.paragraph.field_media
     - media.type.remote_video
     - paragraphs.paragraphs_type.video
-  module:
-    - media
-    - media_library
+_core:
+  default_config_hash: gQ1Xga59PMJXqju_XTDKVI0XW-E7BxsjHsnsTg5t-RQ
 id: paragraph.video.field_media
 field_name: field_media
 entity_type: paragraph
 bundle: video
-label: 'Media'
+label: Media
 description: ''
 required: false
 translatable: false

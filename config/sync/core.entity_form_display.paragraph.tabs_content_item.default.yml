@@ -1,0 +1,36 @@
+uuid: bf685afa-824b-436f-a74e-be83c4591e8b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.tabs_content_item.field_formatted_text
+    - field.field.paragraph.tabs_content_item.field_title
+    - paragraphs.paragraphs_type.tabs_content_item
+  module:
+    - text
+_core:
+  default_config_hash: w-iXaJNi-x6AvGgZ52JNhzNAtobrF2PRWrdLFd-0eqo
+id: paragraph.tabs_content_item.default
+targetEntityType: paragraph
+bundle: tabs_content_item
+mode: default
+content:
+  field_formatted_text:
+    type: text_textarea
+    weight: 1
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

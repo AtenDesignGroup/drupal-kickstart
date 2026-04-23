@@ -41,7 +41,7 @@
         "drupal/focal_point": "^2.1",
         "drupal/gin": "^5.0",
         "drupal/google_tag": "^2.0",
-        "drupal/layout_paragraphs": "^2.1",
+        "drupal/layout_paragraphs": "^2.0",
         "drupal/linkit": "^7.0",
         "drupal/markerio": "^1.0",
         "drupal/metatag": "*",

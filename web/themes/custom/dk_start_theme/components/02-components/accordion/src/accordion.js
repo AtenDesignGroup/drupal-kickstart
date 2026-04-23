@@ -19,6 +19,7 @@ import { A11yAccordion } from '@stierpm/a11y-components';
         new A11yAccordion(accordion, {
           triggerSelector: '.c-accordion__trigger[aria-controls]',
           contentSelector: '.c-accordion__content',
+          expandedClass: 'is-open',
         });
       });
     },

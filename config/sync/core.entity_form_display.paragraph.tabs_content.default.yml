@@ -1,0 +1,31 @@
+uuid: 1f58f61d-6195-4ed3-b89d-0ff48feae6c5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.tabs_content.field_tab_items
+    - paragraphs.paragraphs_type.tabs_content
+  module:
+    - paragraphs
+_core:
+  default_config_hash: iGbQSav5dBILiaWPBuIHtTBe9eY0v2WLcxmJUJZ39kM
+id: paragraph.tabs_content.default
+targetEntityType: paragraph
+bundle: tabs_content
+mode: default
+content:
+  field_tab_items:
+    type: paragraphs
+    weight: 0
+    region: content
+    settings:
+      title: 'Tabs Content Item'
+      title_plural: 'Tabs Content Items'
+      edit_mode: open
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: tabs_content_item
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

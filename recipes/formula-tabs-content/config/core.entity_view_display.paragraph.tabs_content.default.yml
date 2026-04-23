@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.tabs_content.field_tab_items
+    - paragraphs.paragraphs_type.tabs_content
+  module:
+    - entity_reference_revisions
+    - paragraphs
+id: paragraph.tabs_content.default
+targetEntityType: paragraph
+bundle: tabs_content
+mode: default
+content:
+  field_tab_items:
+    type: entity_reference_revisions_entity_view
+    label: hidden
+    settings:
+      view_mode: default
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

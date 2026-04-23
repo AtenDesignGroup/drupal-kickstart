@@ -3,12 +3,11 @@ status: true
 dependencies:
   config:
     - field.field.paragraph.video.field_title
-    - field.field.paragraph.video.field_media
+    - field.field.paragraph.video.field_formatted_text
     - field.field.paragraph.video.field_caption
     - paragraphs.paragraphs_type.video
   module:
     - text
-    - media
 id: paragraph.video.default
 targetEntityType: paragraph
 bundle: video
@@ -22,12 +21,13 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  field_media:
-    type: media_library_widget
+  field_formatted_text:
+    type: text_textarea
     weight: 1
     region: content
     settings:
-      media_types: {  }
+      rows: 3
+      placeholder: 'https://player.vimeo.com/video/... or https://youtu.be/...'
     third_party_settings: {  }
   field_caption:
     type: text_textarea

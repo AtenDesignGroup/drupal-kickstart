@@ -14,10 +14,11 @@ import { A11yTabContent } from '@stierpm/a11y-components';
       );
 
       tabs.forEach((tab) => {
-        A11yTabContent(tab, {
+        new A11yTabContent(tab, {
           navigationSelector: '.c-tabs-content__navigation',
           groupSelector: '.c-tabs-content__group',
           triggerSelector: '.c-tabs-content__trigger',
+          expandedClass: 'expanded',
           breakpoint: 768,
         });
       });

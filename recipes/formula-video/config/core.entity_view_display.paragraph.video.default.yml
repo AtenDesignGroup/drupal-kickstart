@@ -3,13 +3,12 @@ status: true
 dependencies:
   config:
     - field.field.paragraph.video.field_caption
-    - field.field.paragraph.video.field_media
+    - field.field.paragraph.video.field_formatted_text
     - field.field.paragraph.video.field_title
     - paragraphs.paragraphs_type.video
   module:
     - nomarkup
     - text
-    - media
 id: paragraph.video.default
 targetEntityType: paragraph
 bundle: video
@@ -27,13 +26,15 @@ content:
         referenced_entity: ''
     weight: 0
     region: content
-  field_media:
-    type: entity_reference_entity_view
+  field_formatted_text:
+    type: text_default
     label: hidden
-    settings:
-      view_mode: default
-      link: false
-    third_party_settings: {  }
+    settings: {  }
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
     weight: 1
     region: content
   field_caption:
