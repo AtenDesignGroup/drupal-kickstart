@@ -1,4 +1,4 @@
-uuid: 28fb53b3-2a7a-47bf-9a27-4bb483e089d3
+uuid: 8ebfe162-b704-44ee-8897-920e03feb7df
 langcode: en
 status: true
 dependencies:
@@ -7,15 +7,17 @@ dependencies:
     - field.field.paragraph.teaser.field_link
     - field.field.paragraph.teaser.field_media
     - field.field.paragraph.teaser.field_title
+    - field.field.paragraph.teaser.field_variant
     - image.style.full_size
     - paragraphs.paragraphs_type.teaser
   module:
     - link
     - media
     - nomarkup
+    - options
     - text
 _core:
-  default_config_hash: RMID3zJqhFR-0pK5YwHyV88AlFMbFqKpL0LHgPe8ZGU
+  default_config_hash: QdaAHzVNHWd_0jPOtdJypxk2thr8fatFHr80RbfZ6bM
 id: paragraph.teaser.default
 targetEntityType: paragraph
 bundle: teaser
@@ -67,6 +69,13 @@ content:
         enabled: true
         separator: '|'
         referenced_entity: ''
+    weight: 0
+    region: content
+  field_variant:
+    type: list_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
     weight: 0
     region: content
 hidden:

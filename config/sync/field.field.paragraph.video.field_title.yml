@@ -1,16 +1,16 @@
-uuid: 484536a9-5f5e-4525-8de0-54ee44ae0bab
+uuid: 8f184ada-deb6-47b2-a8ff-d301fa49c32e
 langcode: en
 status: true
 dependencies:
   config:
     - field.storage.paragraph.field_title
-    - paragraphs.paragraphs_type.teaser
+    - paragraphs.paragraphs_type.video
 _core:
-  default_config_hash: Y6hiPd6_73DD1Gco0aDuToiBnzAlhEPolO6IYYV9KdY
-id: paragraph.teaser.field_title
+  default_config_hash: ESCp3Fg0nYBfWXuSOqFds6OZR22bKvL3udHE9IzjU4Q
+id: paragraph.video.field_title
 field_name: field_title
 entity_type: paragraph
-bundle: teaser
+bundle: video
 label: Title
 description: ''
 required: false

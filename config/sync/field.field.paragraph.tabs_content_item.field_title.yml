@@ -1,17 +1,17 @@
-uuid: 484536a9-5f5e-4525-8de0-54ee44ae0bab
+uuid: c2936ee1-a025-4f80-a527-3687e65d7260
 langcode: en
 status: true
 dependencies:
   config:
     - field.storage.paragraph.field_title
-    - paragraphs.paragraphs_type.teaser
+    - paragraphs.paragraphs_type.tabs_content_item
 _core:
-  default_config_hash: Y6hiPd6_73DD1Gco0aDuToiBnzAlhEPolO6IYYV9KdY
-id: paragraph.teaser.field_title
+  default_config_hash: I8psbi9E83s5HFckLbVm1VLGDVnT5zVH63V6syGW16k
+id: paragraph.tabs_content_item.field_title
 field_name: field_title
 entity_type: paragraph
-bundle: teaser
-label: Title
+bundle: tabs_content_item
+label: 'Tab Title'
 description: ''
 required: false
 translatable: false

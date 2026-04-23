@@ -1,4 +1,4 @@
-uuid: 25ec9499-5e41-4ff6-b75c-955cbdb06894
+uuid: 5fefa04c-07f4-41c6-8446-fa3e955311d0
 langcode: en
 status: true
 dependencies:
@@ -6,16 +6,16 @@ dependencies:
     - field.storage.paragraph.field_formatted_text
     - filter.format.basic_html
     - filter.format.full_html
-    - paragraphs.paragraphs_type.teaser
+    - paragraphs.paragraphs_type.tabs_content_item
   module:
     - text
 _core:
-  default_config_hash: LgdQtZ-v-RClwcahKYOmneyn8e9Rk2mM3dTf0_O0u0o
-id: paragraph.teaser.field_formatted_text
+  default_config_hash: F5kgif2H56m00z99KMDL8J1Ay2d8KeaamJx_58iY7Ms
+id: paragraph.tabs_content_item.field_formatted_text
 field_name: field_formatted_text
 entity_type: paragraph
-bundle: teaser
-label: Body
+bundle: tabs_content_item
+label: 'Tab Content'
 description: ''
 required: false
 translatable: false

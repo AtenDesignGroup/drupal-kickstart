@@ -924,6 +924,7 @@ function mapPropToField(string $name, array $def): array {
         'new_storage'        => false,
         'drupal_type'        => 'text_long',
         'plain'              => false,
+        'raw_value'          => true,  // URL string — use paragraph.field.value not content.field
         'nomarkup'           => true,
         'formatter'          => 'text_default',
         'formatter_settings' => [],
@@ -1299,6 +1300,7 @@ function buildTwigTemplate(
     $drupalType = $m['drupal_type'] ?? 'string';
     $isMulti    = !empty($m['new_storage']) && !empty($m['is_media']);
     $isSingle   = empty($m['new_storage']) && !empty($m['is_media']);
+    $isRawValue = !empty($m['raw_value']);
 
     if ($drupalType === 'link') {
       $preamble[] = "{# Link: read directly from entity field API. #}";
@@ -1318,6 +1320,9 @@ function buildTwigTemplate(
     }
     elseif ($isSingle) {
       $includeProps[] = "  {$propName}: content.{$fn}";
+    }
+    elseif ($isRawValue) {
+      $includeProps[] = "  {$propName}: paragraph.{$fn}.value";
     }
     elseif ($isPlain) {
       $includeProps[] = "  {$propName}: content.{$fn}|render|striptags|trim";
