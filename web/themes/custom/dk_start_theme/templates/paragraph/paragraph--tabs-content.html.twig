@@ -1,12 +1,11 @@
 {%- set items = [] -%}
-{%- for delta, child in content.field_tab_items -%}
-  {%- if delta|slice(0, 1) != '#' -%}
-    {%- set items = items|merge([{
-      id:      child.paragraph.id(),
-      title:   child.content.field_title|render|striptags|trim,
-      content: child.content.field_formatted_text|render,
-    }]) -%}
-  {%- endif -%}
+{%- for item in paragraph.field_tab_items -%}
+  {%- set child = item.entity -%}
+  {%- set items = items|merge([{
+    id:      'tab-' ~ paragraph.id() ~ '-' ~ loop.index0,
+    title:   child.field_title.value,
+    content: child.field_formatted_text.processed,
+  }]) -%}
 {%- endfor -%}
 
 {{- include('dk_start_theme:tabs-content', {

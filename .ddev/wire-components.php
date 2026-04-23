@@ -740,14 +740,13 @@ function processCompanionItem(
       $parentField = $companion['parent_field'];
       $twigContent = <<<TWIG
       {%- set {$itemsProp} = [] -%}
-      {%- for delta, child in content.{$parentField} -%}
-        {%- if delta|slice(0, 1) != '#' -%}
-          {%- set {$itemsProp} = {$itemsProp}|merge([{
-            id:      child.paragraph.id(),
-            title:   child.content.field_title|render|striptags|trim,
-            content: child.content.field_formatted_text|render,
-          }]) -%}
-        {%- endif -%}
+      {%- for item in paragraph.{$parentField} -%}
+        {%- set child = item.entity -%}
+        {%- set {$itemsProp} = {$itemsProp}|merge([{
+          id:      'tab-' ~ paragraph.id() ~ '-' ~ loop.index0,
+          title:   child.field_title.value,
+          content: child.field_formatted_text.processed,
+        }]) -%}
       {%- endfor -%}
 
       {{- include('{$themeName}:{$compName}', {
@@ -921,8 +920,29 @@ function mapPropToField(string $name, array $def): array {
     ];
   }
 
-  // Multi-value / slides → new entity_reference storage (cardinality -1).
-  if ($type === 'array' || preg_match('/^(slides|items|gallery|images|cards|entries|alerts)$/', $name)) {
+  // Plain-string array props (e.g. alerts, messages) → text_long, cardinality -1.
+  // These carry string content, not media entities.
+  if (preg_match('/^(alerts|messages)$/', $name)) {
+    $fn = 'field_' . preg_replace('/[^a-z0-9_]/', '_', $name);
+    return [
+      'skip'               => false,
+      'field'              => $fn,
+      'new_storage'        => true,
+      'drupal_type'        => 'text_long',
+      'plain'              => false,
+      'nomarkup'           => true,
+      'cardinality'        => -1,
+      'formatter'          => 'text_default',
+      'formatter_settings' => [],
+      'widget'             => 'text_textarea',
+      'widget_settings'    => ['rows' => 3, 'placeholder' => ''],
+      'module_deps'        => ['text'],
+      'review'             => "Multi-value text_long field — one entry per message. Verify cardinality and allowed formats.",
+    ];
+  }
+
+  // Multi-value media/visual arrays → new entity_reference storage (cardinality -1).
+  if ($type === 'array' || preg_match('/^(slides|items|gallery|images|cards|entries)$/', $name)) {
     $fn = 'field_' . preg_replace('/[^a-z0-9_]/', '_', $name);
     return [
       'skip'               => false,

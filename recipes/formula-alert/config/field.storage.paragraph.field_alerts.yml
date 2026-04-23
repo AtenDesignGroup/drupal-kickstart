@@ -2,18 +2,19 @@ langcode: en
 status: true
 dependencies:
   module:
-    - media
     - paragraphs
+    - text
 id: paragraph.field_alerts
 field_name: field_alerts
 entity_type: paragraph
-type: entity_reference
+type: text_long
 settings:
-  target_type: media
-module: core
+  allowed_formats:
+    - plain_text
+module: text
 locked: false
 cardinality: -1
-translatable: true
+translatable: false
 indexes: {  }
 persist_with_no_fields: false
 custom_storage: false

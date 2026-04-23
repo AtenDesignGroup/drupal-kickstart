@@ -4,7 +4,6 @@ type: 'Paragraphs'
 
 recipes:
   - formula-paragraphs
-  - formula-media        # provides image media type
 
 config:
   strict: false
