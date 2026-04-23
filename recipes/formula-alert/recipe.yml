@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Alerts'
+description: 'Provides a Alerts paragraph type wired to the dk_start_theme SDC alert component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+  - formula-media        # provides image media type
+
+config:
+  strict: false

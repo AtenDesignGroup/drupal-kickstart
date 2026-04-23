@@ -1,0 +1,9 @@
+{%- embed 'dk_start_theme:accordion' with {
+  id: paragraph.id(),
+  heading: content.field_title|render|striptags|trim,
+  _content: content.field_formatted_text,
+} only -%}
+  {%- block content -%}
+    {{- _content -}}
+  {%- endblock -%}
+{%- endembed -%}

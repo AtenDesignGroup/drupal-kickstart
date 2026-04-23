@@ -1,0 +1,15 @@
+{%- set items = [] -%}
+{%- for delta, child in content.field_tab_items -%}
+  {%- if delta|slice(0, 1) != '#' -%}
+    {%- set items = items|merge([{
+      id:      child.paragraph.id(),
+      title:   child.content.field_title|render|striptags|trim,
+      content: child.content.field_formatted_text|render,
+    }]) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{{- include('dk_start_theme:tabs-content', {
+  items: items,
+  'data-tabs-breakpoint': 768,
+}) -}}

@@ -1,0 +1,12 @@
+{# Build alerts array — iterate numeric deltas of multi-value media field. #}
+{%- set alerts_items = [] -%}
+{%- for delta, item in content.field_alerts -%}
+  {%- if delta|slice(0, 1) != '#' -%}
+    {%- set alerts_items = alerts_items|merge([{attributes: {}, content: item|render}]) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{{- include('dk_start_theme:alert', {
+  heading: content.field_title|render|striptags|trim,
+  alerts: alerts_items
+}) -}}
