@@ -29,8 +29,8 @@
         {% if link.url %}
           {{ include('dk_start_theme:link', {
             classes: ['c-cta__link'],
-            link_link: { url: link.url, title: link.title },
-            link_icon: icon,
+            link: { url: link.url, title: link.title },
+            icon: icon,
             attr: create_attribute(),
           }, with_context = false) }}
         {% endif %}
