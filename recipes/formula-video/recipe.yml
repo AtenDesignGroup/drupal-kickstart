@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: Video'
-description: 'Provides a Video paragraph type wired to the DK_THEME_NAME SDC video component.'
+description: 'Provides a Video paragraph type.'
 type: 'Paragraphs'
 
 recipes:
