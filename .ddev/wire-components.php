@@ -1303,10 +1303,10 @@ function buildTwigTemplate(
     $isRawValue = !empty($m['raw_value']);
 
     if ($drupalType === 'link') {
-      $preamble[] = "{# Link: read directly from entity field API. #}";
-      $preamble[] = "{%- set _{$propName}_field = paragraph.{$fn} -%}";
-      $preamble[] = "{%- set _{$propName} = (not _{$propName}_field.isEmpty) ? {text: _{$propName}_field.title, url: paragraph.{$fn}.0.url.toString()} : null -%}";
-      $conditionalMerges[] = "{%- if _{$propName} -%}\n  {%- set _props = _props|merge({{$propName}: _{$propName}}) -%}\n{%- endif -%}";
+      $textKey = $m['link_text_key'] ?? 'title';
+      $preamble[] = "{# Link: read directly from render array. #}";
+      $preamble[] = "{%- set _{$propName} = content.{$fn}[0] is defined ? content.{$fn}[0] : null -%}";
+      $conditionalMerges[] = "{%- if _{$propName} -%}\n  {%- set _props = _props|merge({{$propName}: {{$textKey}: _{$propName}['#title'], url: _{$propName}['#url'].toString()}}) -%}\n{%- endif -%}";
     }
     elseif ($isMulti) {
       $preamble[] = "{# Build {$propName} array — iterate numeric deltas of multi-value media field. #}";

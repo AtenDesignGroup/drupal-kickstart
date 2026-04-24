@@ -5,7 +5,7 @@ props:
   type: object
   properties:
     icon:
-      type: string
+      type: ['string', 'null']
       title: Icon Type
       examples:
         - icon-arrow-right
