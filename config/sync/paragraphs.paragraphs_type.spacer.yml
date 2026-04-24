@@ -1,0 +1,12 @@
+uuid: 3f622f55-02b2-498f-97be-99f33ab29dfc
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: 8TkbOPQGRxWG2kVvlWlLRb1tynTUCoMSxpXoCn0YcPc
+id: spacer
+label: Spacer
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

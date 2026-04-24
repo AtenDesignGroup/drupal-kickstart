@@ -1,0 +1,23 @@
+uuid: ff06ef3c-f198-46fb-b233-1f1d71fa6b39
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_spacer_divider
+    - paragraphs.paragraphs_type.spacer
+_core:
+  default_config_hash: K3VLXMVzor-BfMO2syWAzQTj63p1AmVBDhB6NDlZtBg
+id: paragraph.spacer.field_spacer_divider
+field_name: field_spacer_divider
+entity_type: paragraph
+bundle: spacer
+label: 'Spacer Divider'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

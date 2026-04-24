@@ -1,0 +1,23 @@
+uuid: ca9f0d8e-c4f8-456f-8f47-8644fb1bc4a2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_spacer_size
+    - paragraphs.paragraphs_type.spacer
+  module:
+    - options
+_core:
+  default_config_hash: JAuWoVXGSLFCjcy-frnvwN8z4hE-EhqEnx0lzFm9PPQ
+id: paragraph.spacer.field_spacer_size
+field_name: field_spacer_size
+entity_type: paragraph
+bundle: spacer
+label: 'Spacer Size'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

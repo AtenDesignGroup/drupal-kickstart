@@ -1,0 +1,31 @@
+uuid: 2bbdeea5-c80c-43e5-8cd2-3df7139a6bd2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.spacer.field_spacer_divider
+    - field.field.paragraph.spacer.field_spacer_size
+    - paragraphs.paragraphs_type.spacer
+_core:
+  default_config_hash: pOS7dTmExDd3iBaIUOp2uJdUSDesgmX4aAknb_5b6_I
+id: paragraph.spacer.default
+targetEntityType: paragraph
+bundle: spacer
+mode: default
+content:
+  field_spacer_divider:
+    type: boolean_checkbox
+    weight: 0
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_spacer_size:
+    type: options_select
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

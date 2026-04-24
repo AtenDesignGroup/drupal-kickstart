@@ -5,10 +5,8 @@ dependencies:
   config:
     - field.field.paragraph.media.field_caption
     - field.field.paragraph.media.field_media
-    - image.style.full_size
     - paragraphs.paragraphs_type.media
   module:
-    - media
     - nomarkup
     - text
 _core:
@@ -30,18 +28,16 @@ content:
     weight: 1
     region: content
   field_media:
-    type: media_thumbnail
+    type: entity_reference_entity_view
     label: hidden
     settings:
-      image_link: ''
-      image_style: full_size
-      image_loading:
-        attribute: lazy
+      view_mode: default
+      link: false
     third_party_settings:
       nomarkup:
         enabled: true
         separator: '|'
-        referenced_entity: ''
+        referenced_entity: '0'
     weight: 0
     region: content
 hidden:
