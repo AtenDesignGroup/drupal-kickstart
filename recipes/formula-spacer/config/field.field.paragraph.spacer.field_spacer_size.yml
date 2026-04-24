@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_spacer_size
+    - paragraphs.paragraphs_type.spacer
+id: paragraph.spacer.field_spacer_size
+field_name: field_spacer_size
+entity_type: paragraph
+bundle: spacer
+label: 'Spacer Size'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_values_function: ''
+field_type: list_string
