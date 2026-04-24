@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Remote Video'
+description: 'Provides the Remote Video media type for YouTube, Vimeo, and other oEmbed sources.'
+type: 'Site'
+
+install:
+  - media
+  - media_library
+
+config:
+  strict: false

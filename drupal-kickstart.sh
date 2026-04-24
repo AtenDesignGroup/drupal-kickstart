@@ -145,6 +145,8 @@ if [[ "$RESUME" == "yes" ]]; then
   DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
   DK_THEME_DESC="${DK_THEME_DESC:-${DK_THEME_NAME}}"
   DK_THEME_ABBREVIATED="${DK_THEME_ABBREVIATED:-}"
+  # Default no on resume: old .kickstart.env files predate this prompt.
+  DK_WIRE_COMPONENTS="${DK_WIRE_COMPONENTS:-no}"
   header "Resuming with saved configuration"
 else
   header "Project Configuration"
@@ -196,6 +198,10 @@ else
   # Node version
   DEFAULT_NODE="${DK_NODE_VERSION:-22}"
   prompt DK_NODE_VERSION "Node version" "$DEFAULT_NODE"
+
+  # Wire prototype components (one-time, like theme generation)
+  DEFAULT_WIRE="${DK_WIRE_COMPONENTS:-yes}"
+  prompt_yn DK_WIRE_COMPONENTS "Wire prototype components (paragraph recipes + Twig templates)?" "$DEFAULT_WIRE"
 fi
 
 # =============================================================================
@@ -214,6 +220,7 @@ DK_USES_SOLR="${DK_USES_SOLR}"
 DK_COMMIT_PREFIX="${DK_COMMIT_PREFIX}"
 DK_PHP_VERSION="${DK_PHP_VERSION}"
 DK_NODE_VERSION="${DK_NODE_VERSION}"
+DK_WIRE_COMPONENTS="${DK_WIRE_COMPONENTS}"
 EOF
 
   add_to_gitignore ".kickstart.env"
@@ -251,6 +258,7 @@ fi
 echo -e "    ${BOLD}Theme path      :${RESET} ${DK_THEME_PATH}"
 echo -e "    ${BOLD}PHP version     :${RESET} ${DK_PHP_VERSION}"
 echo -e "    ${BOLD}Node version    :${RESET} ${DK_NODE_VERSION}"
+echo -e "    ${BOLD}Wire components :${RESET} ${DK_WIRE_COMPONENTS}"
 echo -e "    ${BOLD}Pantheon        :${RESET} ${DK_USES_PANTHEON}"
 echo -e "    ${BOLD}SOLR            :${RESET} ${DK_USES_SOLR}"
 if [[ -n "$DK_COMMIT_PREFIX" ]]; then
@@ -439,11 +447,23 @@ header "Generating Custom Theme"
 # by the foundational recipe before drush theme:install runs.
 PROTOTYPE_ARGS=(--theme-name="${DK_THEME_NAME}" --theme-desc="${DK_THEME_DESC}")
 [[ -n "${DK_THEME_ABBREVIATED}" ]] && PROTOTYPE_ARGS+=(--theme-abbreviated="${DK_THEME_ABBREVIATED}")
-PROTOTYPE_ARGS+=(--generate-only --generate-recipes)
+PROTOTYPE_ARGS+=(--generate-only)
 ddev setup-prototype "${PROTOTYPE_ARGS[@]}"
 
 # =============================================================================
-# 15. DRUPAL BASE RECIPE
+# 15. WIRE PROTOTYPE COMPONENTS (one-time)
+# Runs after prototype contrib theme is installed (component YMLs are readable)
+# and before the interactive 'ddev recipe' prompt so generated recipes are
+# immediately available to apply.
+# =============================================================================
+if [[ "$DK_WIRE_COMPONENTS" == "yes" ]]; then
+  header "Wiring Prototype Components"
+  ddev wire-components all
+  info "Paragraph recipes and Twig bridge templates generated"
+fi
+
+# =============================================================================
+# 16. DRUPAL BASE RECIPE
 # =============================================================================
 header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
@@ -455,7 +475,7 @@ if [[ "${CI:-}" != "true" ]]; then
 fi
 
 # =============================================================================
-# 16. SOLR POST-INSTALL (optional)
+# 17. SOLR POST-INSTALL (optional)
 # Must run after Drupal is installed and modules are available.
 # =============================================================================
 if [[ "$DK_USES_SOLR" == "yes" ]]; then
@@ -468,7 +488,7 @@ if [[ "$DK_USES_SOLR" == "yes" ]]; then
 fi
 
 # =============================================================================
-# 17. PANTHEON (optional) -- Eventually abstract Redis.
+# 18. PANTHEON (optional) -- Eventually abstract Redis.
 # =============================================================================
 if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
   header "Installing Redis DDEV Addon"
@@ -484,7 +504,7 @@ if [[ "$DK_USES_PANTHEON" == "yes" ]]; then
 fi
 
 # =============================================================================
-# 18. DONE
+# 19. DONE
 # =============================================================================
 echo
 echo -e "${GREEN}${BOLD}============================================================${RESET}"

@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: Paragraphs'
-description: 'Provides a set of standard Paragraph types and related configuration.'
+description: 'Installs the Paragraphs module stack with foundational types: section, separator, and rich_text. Individual paragraph types (e.g. formula-cta) depend on this recipe.'
 type: 'Paragraphs'
 
 install:

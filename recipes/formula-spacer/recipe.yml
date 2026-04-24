@@ -1,0 +1,9 @@
+name: '🦄 🌈  Formula: spacer'
+description: 'Provides a spacer paragraph type wired to the DK_THEME_NAME SDC spacer component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+
+config:
+  strict: false
