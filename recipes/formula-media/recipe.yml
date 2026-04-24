@@ -2,6 +2,13 @@ name: '🦄 🌈  Formula: Media'
 description: 'Recipe to build media functionality in Drupal.'
 type: 'Site'
 
+recipes:
+  - formula-media-image
+  - formula-media-icon
+  - formula-media-document
+  - formula-media-remote-video
+  - formula-media-video
+
 install:
   - file
   - focal_point

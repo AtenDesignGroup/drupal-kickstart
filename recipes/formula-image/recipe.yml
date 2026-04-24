@@ -1,0 +1,12 @@
+name: '🦄 🌈  Formula: Image'
+description: 'Provides the Image media type and related image styles.'
+type: 'Site'
+
+install:
+  - focal_point
+  - image
+  - media
+  - media_library
+
+config:
+  strict: false

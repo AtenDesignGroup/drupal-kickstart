@@ -1,0 +1,11 @@
+name: '🦄 🌈  Formula: Media Video'
+description: 'Provides the Video media type for local mp4, webm, and ogg files.'
+type: 'Site'
+
+install:
+  - file
+  - media
+  - media_library
+
+config:
+  strict: false

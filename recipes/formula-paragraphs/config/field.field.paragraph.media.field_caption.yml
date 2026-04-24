@@ -10,7 +10,7 @@ id: paragraph.media.field_caption
 field_name: field_caption
 entity_type: paragraph
 bundle: media
-label: field_caption
+label: 'Caption'
 description: ''
 required: false
 translatable: false
