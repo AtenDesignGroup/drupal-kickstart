@@ -1,0 +1,11 @@
+name: '🦄 🌈  Formula: Document'
+description: 'Provides the Document media type for PDFs, spreadsheets, and other files.'
+type: 'Site'
+
+install:
+  - file
+  - media
+  - media_library
+
+config:
+  strict: false

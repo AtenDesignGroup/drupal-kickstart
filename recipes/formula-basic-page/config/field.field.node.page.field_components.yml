@@ -27,7 +27,7 @@ settings:
         enabled: false
       media:
         weight: 7
-        enabled: false
+        enabled: true
       rich_text:
         weight: 8
         enabled: false

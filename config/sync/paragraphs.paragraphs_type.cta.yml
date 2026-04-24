@@ -5,8 +5,8 @@ dependencies: {  }
 _core:
   default_config_hash: tMUmT8uJKX48gejk3KWVHQFGDSl0XVGqrdrX7rowcuw
 id: cta
-label: CTA
+label: 'Call to action'
 icon_uuid: null
 icon_default: null
-description: ''
+description: 'Call to Action item including button link and description.'
 behavior_plugins: {  }

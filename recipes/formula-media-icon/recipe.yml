@@ -1,0 +1,9 @@
+name: '🦄 🌈  Formula: Icon'
+description: 'Provides the Icon media type for icons and SVG assets.'
+type: 'Site'
+
+recipes:
+  - formula-media-image
+
+config:
+  strict: false

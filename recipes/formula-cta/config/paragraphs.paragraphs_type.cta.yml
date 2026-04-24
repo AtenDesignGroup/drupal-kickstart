@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies: {  }
 id: cta
-label: 'CTA'
+label: 'Call to action'
 icon_uuid: null
 icon_default: null
-description: ''
+description: 'Call to Action item including button link and description.'
 behavior_plugins: {  }
