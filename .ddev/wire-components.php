@@ -81,7 +81,6 @@ $skipList = [
   'page-title'   => 'Drupal-generated page title block',
   'pager'        => 'Drupal-generated pager',
   'search-bar'   => 'Functional search form',
-  'spacer'       => 'Layout utility, no content props',
 ];
 
 // ─── Component-specific review notes ────────────────────────────────────────
@@ -492,10 +491,10 @@ function processComponent(
       $fn = $m['field'];
       file_put_contents(
         "{$cfgDir}/field.storage.paragraph.{$fn}.yml",
-        buildFieldStorage($fn)
+        buildFieldStorage($fn, $m['drupal_type'] ?? 'entity_reference')
       );
       ok("field.storage.paragraph.{$fn}.yml  ← NEW STORAGE");
-      rev("'{$fn}': verify cardinality (-1) and target_type (media) match your use case");
+      rev("'{$fn}': verify cardinality and storage type match your use case");
     }
 
     // ── field instances ───────────────────────────────────────────────────────
@@ -882,6 +881,43 @@ function mapPropToField(string $name, array $def): array {
     ];
   }
 
+  // Size/spacing strings → plain string field (CSS modifier value).
+  if ($type === 'string' && preg_match('/(^|_)(size|spacing|height|width)$/', $name)) {
+    $fn = 'field_' . $name;
+    return [
+      'skip'            => false,
+      'field'           => $fn,
+      'new_storage'     => true,
+      'drupal_type'     => 'string',
+      'plain'           => false,
+      'raw_value'       => true,
+      'nomarkup'        => false,
+      'formatter'       => 'string',
+      'widget'          => 'string_textfield',
+      'widget_settings' => ['size' => 60, 'placeholder' => ''],
+      'module_deps'     => [],
+      'review'          => "Consider replacing {$fn} with a list_string field with predefined CSS modifier values (e.g. sm, md, lg, xl).",
+    ];
+  }
+
+  // Boolean → checkbox field.
+  if ($type === 'boolean') {
+    $fn = 'field_' . preg_replace('/[^a-z0-9_]/', '_', $name);
+    return [
+      'skip'            => false,
+      'field'           => $fn,
+      'new_storage'     => true,
+      'drupal_type'     => 'boolean',
+      'plain'           => false,
+      'raw_value'       => true,
+      'nomarkup'        => false,
+      'formatter'       => 'boolean',
+      'widget'          => 'boolean_checkbox',
+      'widget_settings' => ['display_label' => true],
+      'module_deps'     => [],
+    ];
+  }
+
   // Link → field_link.
   if ($type === 'object' && preg_match('/^(link|cta)$/', $name)) {
     $subkeys = array_keys($def['properties'] ?? []);
@@ -1035,28 +1071,78 @@ function buildParagraphType(string $bundle, string $label): string {
   YML . "\n";
 }
 
-function buildFieldStorage(string $fieldName): string {
+function buildFieldStorage(string $fieldName, string $drupalType = 'entity_reference'): string {
+  if ($drupalType === 'boolean') {
+    return <<<YML
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+id: paragraph.{$fieldName}
+field_name: {$fieldName}
+entity_type: paragraph
+type: boolean
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+YML . "\n";
+  }
+
+  if ($drupalType === 'string') {
+    return <<<YML
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+id: paragraph.{$fieldName}
+field_name: {$fieldName}
+entity_type: paragraph
+type: string
+settings:
+  max_length: 255
+  case_sensitive: false
+  is_ascii: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+YML . "\n";
+  }
+
+  // Default: entity_reference (media).
   return <<<YML
-  langcode: en
-  status: true
-  dependencies:
-    module:
-      - media
-      - paragraphs
-  id: paragraph.{$fieldName}
-  field_name: {$fieldName}
-  entity_type: paragraph
-  type: entity_reference
-  settings:
-    target_type: media
-  module: core
-  locked: false
-  cardinality: -1
-  translatable: true
-  indexes: {  }
-  persist_with_no_fields: false
-  custom_storage: false
-  YML . "\n";
+langcode: en
+status: true
+dependencies:
+  module:
+    - media
+    - paragraphs
+id: paragraph.{$fieldName}
+field_name: {$fieldName}
+entity_type: paragraph
+type: entity_reference
+settings:
+  target_type: media
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+YML . "\n";
 }
 
 function buildFieldInstance(string $bundle, string $fieldName, string $label, array $m): string {
@@ -1098,6 +1184,10 @@ function buildFieldInstance(string $bundle, string $fieldName, string $label, ar
   if ($drupalType === 'string') {
     $lines[] = 'settings: {  }';
     $lines[] = 'field_type: string';
+  }
+  elseif ($drupalType === 'boolean') {
+    $lines[] = 'settings: {  }';
+    $lines[] = 'field_type: boolean';
   }
   elseif ($drupalType === 'text_long') {
     $lines[] = 'settings:';
@@ -1302,7 +1392,10 @@ function buildTwigTemplate(
     $isSingle   = empty($m['new_storage']) && !empty($m['is_media']);
     $isRawValue = !empty($m['raw_value']);
 
-    if ($drupalType === 'link') {
+    if ($drupalType === 'boolean') {
+      $includeProps[] = "  {$propName}: paragraph.{$fn}.value == 1";
+    }
+    elseif ($drupalType === 'link') {
       $textKey = $m['link_text_key'] ?? 'title';
       $preamble[] = "{# Link: read directly from render array. #}";
       $preamble[] = "{%- set _{$propName} = content.{$fn}[0] is defined ? content.{$fn}[0] : null -%}";

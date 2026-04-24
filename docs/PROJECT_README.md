@@ -137,6 +137,13 @@ ddev theme-build
 
 ## Component Wiring (wire-components)
 
+> **Kickstart projects**: `wire-components all` runs automatically during
+> `./drupal-kickstart.sh` when you answer **yes** to the
+> *"Wire prototype components?"* prompt. This is a one-time step — just like
+> theme generation — that scaffolds every eligible component before the
+> interactive recipe prompt. You can re-run it individually at any time when
+> a new component is added.
+
 ### What It Does
 
 `wire-components` is a DDEV scaffold tool that converts Prototype SDC components

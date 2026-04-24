@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+id: paragraph.field_spacer_divider
+field_name: field_spacer_divider
+entity_type: paragraph
+type: boolean
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
