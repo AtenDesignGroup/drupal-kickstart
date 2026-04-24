@@ -134,3 +134,112 @@ To compile your build files, stop watching and run:
 ```
 ddev theme-build
 ```
+
+## Component Wiring (wire-components)
+
+### What It Does
+
+`wire-components` is a DDEV scaffold tool that converts Prototype SDC components
+into Drupal paragraph types. For each eligible component it generates:
+
+- A **Drupal Recipe** (`recipes/formula-<component>/`) containing the paragraph
+  bundle definition, field storages, field instances, and form/view display config
+- A **Twig bridge template**
+  (`web/themes/custom/THEME_NAME/templates/paragraph/paragraph--<component>.html.twig`)
+  that passes Drupal field values into the SDC component via `include()` or
+  `embed()`
+
+The result is a fully wired paragraph type that editors can add to a page and
+that renders through the Prototype SDC component without any manual config.
+
+### When to Use It
+
+Run `wire-components` when:
+
+- A new Prototype component has been added and you need a matching paragraph type
+- You are setting up a new project from scratch and want to scaffold all
+  paragraph types at once
+- A Twig bridge template is missing for an existing recipe
+
+### Usage
+
+```bash
+# Wire all eligible components at once
+ddev wire-components all
+
+# Wire a single component
+ddev wire-components cta
+ddev wire-components teaser
+ddev wire-components accordion
+
+# Override the custom theme name (defaults to DK_THEME_NAME in .kickstart.env,
+# then falls back to dk_start_theme)
+ddev wire-components all --theme-name=my_theme
+```
+
+After running, apply any newly generated recipes:
+
+```bash
+ddev exec drush recipe recipes/formula-<component-name>
+ddev exec drush cr
+```
+
+### Which Components Are Wired — and Why
+
+`wire-components` iterates every directory inside
+`web/themes/contrib/prototype/components/02-components/` and applies three
+filters:
+
+**1. Hard skip list** — Components that should never become paragraph types are
+excluded unconditionally:
+
+| Component | Reason |
+|-----------|--------|
+| `button`, `icon`, `icon-label`, `link` | Atomic UI elements — sub-parts of other components |
+| `breadcrumbs`, `menu`, `menu-tabs`, `page-title`, `pager` | Drupal core generates these automatically |
+| `back-to-top`, `spacer`, `search-bar` | Layout/utility — no editorial content |
+
+**2. Prop filtering** — Each component's `.component.yml` props are inspected.
+Props named `id`, `icon`, `options`, `attributes`, `class`, or `classes` are
+always skipped as theme-only. If `variant` or `type` props lack an `enum`, they
+are also skipped. If every prop of a component is filtered out, the entire
+component is skipped with a warning.
+
+**3. Companion-item detection** — Components whose Twig uses `{% block %}` /
+`embed` patterns (currently `accordion` and `tabs-content`) cannot be wired with
+a single `include()`. These are scaffolded as a **parent + child paragraph pair**:
+the parent holds an `entity_reference_revisions` field pointing to child items,
+and the child item template does the actual `embed` into the Prototype component.
+
+### Prop-to-Field Mapping
+
+The script maps each component prop to a shared Drupal field storage using these
+rules:
+
+| Prop name pattern | Mapped Drupal field | Field type |
+|---|---|---|
+| `title`, `heading`, `label`, `subtitle` | `field_title` | `string` |
+| `text`, `body`, `content`, `description` | `field_formatted_text` | `text_long` |
+| `caption` | `field_caption` | `text_long` |
+| `link`, `cta` (object) | `field_link` | `link` |
+| `media`, `image`, `photo`, `thumbnail` | `field_media` | `entity_reference` → media |
+| `variant`/`type` with enum values | `field_variant` / `field_type` | `list_string` |
+| `alerts`, `messages` (array of strings) | `field_alerts` / `field_messages` | `text_long` (multi-value) |
+| `slides`, `items`, `gallery` (arrays) | `field_<propname>` | `entity_reference` → media (multi) |
+
+When two props from the same component map to the same shared field, the first
+one wins and a warning is emitted. All mappings that need manual review are
+printed with a `REVIEW` marker at the end of the run.
+
+### Idempotency
+
+The script is safe to re-run. If both the recipe directory and the Twig template
+already exist for a component, it prints `exists` and moves on. If only one is
+missing, it generates the missing piece.
+
+### REVIEW Markers
+
+After scaffolding, the tool prints `REVIEW` notices for anything that needs
+human attention — for example, `list_string` enum fields, multi-value media arrays,
+or embed-URL props mapped to `field_formatted_text`. Address these before
+applying the recipe.

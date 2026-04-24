@@ -52,8 +52,6 @@ if [[ -z "$HASH_SALT" ]]; then
 fi
 
 mkdir -p "$SITES_DEFAULT"
-mkdir -p "${SITES_DEFAULT}/files"
-chmod 775 "${SITES_DEFAULT}/files"
 
 # drush site:install locks sites/default (555) and settings.php (444).
 # Temporarily unlock so we can write, then restore after.

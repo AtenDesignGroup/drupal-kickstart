@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_formatted_text
+    - paragraphs.paragraphs_type.tabs_content_item
+  module:
+    - text
+id: paragraph.tabs_content_item.field_formatted_text
+field_name: field_formatted_text
+entity_type: paragraph
+bundle: tabs_content_item
+label: 'Tab Content'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats:
+    - basic_html
+    - full_html
+field_type: text_long
