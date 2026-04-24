@@ -91,7 +91,7 @@ jobs:
             "docs/"
             "patches/"
             ".ddev/commands/"
-            ".ddev/generate-recipe.php"
+            ".ddev/wire-components.php"
             "drupal-kickstart.sh"
             "composer.custom.json"
             "composer.patches.json"
