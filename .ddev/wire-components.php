@@ -5,10 +5,7 @@
  *
  * Converts ALL content-worthy prototype SDC components into Drupal paragraph
  * recipe scaffolds and Twig bridge templates, including complex components
- * (accordion, alert, tabs-content) that generate-recipe.php intentionally skips.
- *
- * Use generate-recipe for quick per-component scaffolding of simple components.
- * Use wire-components to fully componentize a custom theme against prototype.
+ * (accordion, alert, tabs-content).
  *
  * Usage: ddev wire-components <component-name|all> [--theme-name=NAME]
  */

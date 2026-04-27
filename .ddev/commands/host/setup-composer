@@ -102,6 +102,19 @@ else
 fi
 
 # =============================================================================
+# PATCHES PLUGIN
+# Must be installed before any other package (especially drupal/prototype) so
+# that the patches in composer.patches.json are applied at require-time rather
+# than being silently skipped.
+# =============================================================================
+header "Installing composer-patches plugin"
+
+ddev composer require \
+  "cweagans/composer-patches:^1.7" \
+  --no-interaction
+info "cweagans/composer-patches installed"
+
+# =============================================================================
 # DRUPAL TOOLING DEPENDENCIES
 # =============================================================================
 header "Installing tooling dependencies"
