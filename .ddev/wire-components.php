@@ -45,11 +45,19 @@ function warn(string $msg): void { echo "    " . YELLOW . "⚠" . RESET . "  {$m
 function rev(string $msg): void  { echo "    " . YELLOW . BOLD . "REVIEW" . RESET . "  {$msg}\n"; }
 
 // ─── Parse arguments ─────────────────────────────────────────────────────────
-$componentArg = null;
-$cliThemeName = null;
+$componentArg  = null;
+$cliThemeName  = null;
+$onlyTheme     = false;
+$onlyParagraph = false;
 foreach (array_slice($argv, 1) as $a) {
   if (str_starts_with($a, '--theme-name=')) {
     $cliThemeName = substr($a, 13);
+  }
+  elseif ($a === '--only-theme') {
+    $onlyTheme = true;
+  }
+  elseif ($a === '--only-paragraphs') {
+    $onlyParagraph = true;
   }
   elseif (!str_starts_with($a, '--')) {
     $componentArg = $a;
@@ -57,8 +65,14 @@ foreach (array_slice($argv, 1) as $a) {
 }
 
 if (!$componentArg) {
-  echo RED . "Usage: ddev wire-components <component-name|all> [--theme-name=NAME]\n" . RESET;
-  echo "Examples:\n  ddev wire-components all\n  ddev wire-components accordion\n  ddev wire-components page-title\n  ddev wire-components back-to-top\n";
+  echo RED . "Usage: ddev wire-components <component-name|all> [--theme-name=NAME] [--only-theme] [--only-paragraphs]\n" . RESET;
+  echo "Examples:\n";
+  echo "  ddev wire-components all                   # paragraphs + theme templates\n";
+  echo "  ddev wire-components all --only-paragraphs # paragraph recipes + Twig bridges only\n";
+  echo "  ddev wire-components all --only-theme      # theme-level templates only\n";
+  echo "  ddev wire-components accordion             # single paragraph component\n";
+  echo "  ddev wire-components page-title            # single theme-level template\n";
+  echo "  ddev wire-components back-to-top           # inject into page.html.twig\n";
   exit(1);
 }
 
@@ -225,23 +239,19 @@ $themeTemplateMap = [
   // ── Generate if missing ─────────────────────────────────────────────────────
 
   'back-to-top' => [
-    'strategy'    => 'include_static',
-    'twig_dir'    => 'block',
-    'twig_file'   => 'block--{theme}-back-to-top',
-    'props'       => [
-      'text' => "'Back to top'|t",
-    ],
-    'review_note' => "Created block--{theme}-back-to-top.html.twig. This template activates when a "
-      . "block with ID '{theme}_back_to_top' exists and is placed in a region. "
-      . "Alternatively, include the component directly in page.html.twig.",
+    'strategy'    => 'page_include',
+    'twig_dir'    => 'page',
+    'twig_file'   => 'page',
+    'note'        => 'back-to-top has no Drupal block plugin. It is included directly in page.html.twig after the footer block.',
   ],
 
   'page-title' => [
     'strategy'  => 'include_rendered',
-    'twig_dir'  => 'block',
-    'twig_file' => 'block--page-title-block',
+    'twig_dir'  => 'page',
+    'twig_file' => 'page-title',
     'props'     => [
-      'title' => 'content|render|striptags|trim',
+      'title'      => 'title',
+      'attributes' => 'attributes',
     ],
   ],
 
@@ -249,26 +259,30 @@ $themeTemplateMap = [
 
 // ─── Dispatch ────────────────────────────────────────────────────────────────
 if ($componentArg === 'all') {
-  $dirs  = glob("{$compBaseDir}/*", GLOB_ONLYDIR);
-  $count = 0;
-  foreach ($dirs as $dir) {
-    processComponent(
-      basename($dir),
-      $compBaseDir,
-      $recipesDir,
-      $templateDir,
-      $themeName,
-      $skipList,
-      $companionItems,
-      $componentReviews
-    );
-    $count++;
+  if (!$onlyTheme) {
+    $dirs  = glob("{$compBaseDir}/*", GLOB_ONLYDIR);
+    $count = 0;
+    foreach ($dirs as $dir) {
+      processComponent(
+        basename($dir),
+        $compBaseDir,
+        $recipesDir,
+        $templateDir,
+        $themeName,
+        $skipList,
+        $companionItems,
+        $componentReviews
+      );
+      $count++;
+    }
+    hdr("Done — processed {$count} paragraph components.");
   }
-  hdr("Done — processed {$count} paragraph components.");
 
-  hdr("Wiring theme-level templates...");
-  foreach ($themeTemplateMap as $name => $config) {
-    processThemeTemplate($name, $config, $themeTemplateRoot, $themeName);
+  if (!$onlyParagraph) {
+    hdr("Wiring theme-level templates...");
+    foreach ($themeTemplateMap as $name => $config) {
+      processThemeTemplate($name, $config, $themeTemplateRoot, $themeName);
+    }
   }
 }
 else {
@@ -941,6 +955,48 @@ function processThemeTemplate(
     else {
       rev("{$name}: {$relPath} exists but {$themeName}:{$name} wiring not detected — verify manually.");
     }
+    return;
+  }
+
+  // page_include — back-to-top lives directly in page.html.twig, not a block
+  // template. Requires both the component include AND an id="top" anchor at
+  // the top of the layout container so the link target resolves correctly.
+  if ($strategy === 'page_include') {
+    if (!file_exists($twigPath)) {
+      warn("{$name}: {$relPath} not found — cannot inject.");
+      return;
+    }
+    $content    = (string) file_get_contents($twigPath);
+    $hasInclude = str_contains($content, "{$themeName}:{$name}");
+    $hasAnchor  = str_contains($content, 'id="top"');
+
+    if ($hasInclude && $hasAnchor) {
+      echo "    – {$name}: " . GREEN . "exists + wired" . RESET . " ({$relPath})\n";
+      return;
+    }
+    if ($hasInclude && !$hasAnchor) {
+      rev("{$name}: {$relPath} includes {$themeName}:{$name} but is missing the id=\"top\" anchor — add <div id=\"top\" tabindex=\"-1\"></div> as the first child of the layout container.");
+      return;
+    }
+
+    // Neither present — inject both into page.html.twig.
+    // 1. id="top" anchor as first child of the layout container div.
+    $content = preg_replace(
+      '/(<div\b[^>]*\blayout-container\b[^>]*>)/',
+      "$1\n  <div id=\"top\" tabindex=\"-1\"></div>",
+      $content,
+      1
+    );
+
+    // 2. back-to-top include before the final closing </div> of the file.
+    $include     = "\n  {{- include('{$themeName}:{$name}', {\n    text: 'Back to top'|t,\n  }, with_context=false) -}}\n";
+    $lastDivPos  = strrpos($content, '</div>');
+    if ($lastDivPos !== false) {
+      $content = substr($content, 0, $lastDivPos) . $include . substr($content, $lastDivPos);
+    }
+
+    file_put_contents($twigPath, $content);
+    ok("{$relPath}  (injected {$themeName}:{$name} include + id=\"top\" anchor)");
     return;
   }
 
