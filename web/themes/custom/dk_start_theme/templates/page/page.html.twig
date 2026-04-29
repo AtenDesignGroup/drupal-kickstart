@@ -1,4 +1,5 @@
 <div class="layout-container l-stack">
+  <div id="top" tabindex="-1"></div>
   {% if alert %}
     <div class="l-container">
       {{ page.alert }}
@@ -51,5 +52,9 @@
   {% endblock %}
   {# /footer #}
 
+
+  {{- include('dk_start_theme:back-to-top', {
+    text: 'Back to top'|t,
+  }, with_context=false) -}}
 </div>
 {# /.layout-container #}

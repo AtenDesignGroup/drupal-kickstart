@@ -3,14 +3,21 @@
 /**
  * Drupal Kickstart — component wiring tool.
  *
- * Converts ALL content-worthy prototype SDC components into Drupal paragraph
- * recipe scaffolds and Twig bridge templates, including complex components
- * (accordion, alert, tabs-content) that generate-recipe.php intentionally skips.
- *
- * Use generate-recipe for quick per-component scaffolding of simple components.
- * Use wire-components to fully componentize a custom theme against prototype.
+ * Converts ALL prototype SDC components into either:
+ *   1. Drupal paragraph recipe scaffolds + Twig bridge templates (content
+ *      components: accordion, alert, cta, pullquote, slideshow, spacer,
+ *      tabs-content, teaser, video), or
+ *   2. Themed Twig template overrides wiring Drupal core templates (block,
+ *      navigation, menu) to their prototype SDC equivalents (back-to-top,
+ *      breadcrumbs, menu, menu-tabs, page-title, pager, search-bar).
  *
  * Usage: ddev wire-components <component-name|all> [--theme-name=NAME]
+ *
+ * Examples:
+ *   ddev wire-components all
+ *   ddev wire-components accordion
+ *   ddev wire-components page-title
+ *   ddev wire-components back-to-top
  */
 
 declare(strict_types=1);
@@ -38,11 +45,19 @@ function warn(string $msg): void { echo "    " . YELLOW . "⚠" . RESET . "  {$m
 function rev(string $msg): void  { echo "    " . YELLOW . BOLD . "REVIEW" . RESET . "  {$msg}\n"; }
 
 // ─── Parse arguments ─────────────────────────────────────────────────────────
-$componentArg = null;
-$cliThemeName = null;
+$componentArg  = null;
+$cliThemeName  = null;
+$onlyTheme     = false;
+$onlyParagraph = false;
 foreach (array_slice($argv, 1) as $a) {
   if (str_starts_with($a, '--theme-name=')) {
     $cliThemeName = substr($a, 13);
+  }
+  elseif ($a === '--only-theme') {
+    $onlyTheme = true;
+  }
+  elseif ($a === '--only-paragraphs') {
+    $onlyParagraph = true;
   }
   elseif (!str_starts_with($a, '--')) {
     $componentArg = $a;
@@ -50,8 +65,14 @@ foreach (array_slice($argv, 1) as $a) {
 }
 
 if (!$componentArg) {
-  echo RED . "Usage: ddev wire-components <component-name|all> [--theme-name=NAME]\n" . RESET;
-  echo "Examples:\n  ddev wire-components all\n  ddev wire-components accordion\n";
+  echo RED . "Usage: ddev wire-components <component-name|all> [--theme-name=NAME] [--only-theme] [--only-paragraphs]\n" . RESET;
+  echo "Examples:\n";
+  echo "  ddev wire-components all                   # paragraphs + theme templates\n";
+  echo "  ddev wire-components all --only-paragraphs # paragraph recipes + Twig bridges only\n";
+  echo "  ddev wire-components all --only-theme      # theme-level templates only\n";
+  echo "  ddev wire-components accordion             # single paragraph component\n";
+  echo "  ddev wire-components page-title            # single theme-level template\n";
+  echo "  ddev wire-components back-to-top           # inject into page.html.twig\n";
   exit(1);
 }
 
@@ -60,14 +81,17 @@ $root        = '/var/www/html';
 $envFile     = "{$root}/.kickstart.env";
 $envVars     = file_exists($envFile) ? (parse_ini_file($envFile) ?: []) : [];
 $themeName   = $cliThemeName ?? $envVars['DK_THEME_NAME'] ?? 'dk_start_theme';
-$compBaseDir = "{$root}/web/themes/contrib/prototype/components/02-components";
-$recipesDir  = "{$root}/recipes";
-$templateDir = "{$root}/web/themes/custom/{$themeName}/templates/paragraph";
+$compBaseDir       = "{$root}/web/themes/contrib/prototype/components/02-components";
+$recipesDir        = "{$root}/recipes";
+$templateDir       = "{$root}/web/themes/custom/{$themeName}/templates/paragraph";
+$themeTemplateRoot = "{$root}/web/themes/custom/{$themeName}/templates";
 
 // ─── Skip list ───────────────────────────────────────────────────────────────
-// Only atomic/Drupal-generated/layout-utility components are skipped here.
-// Complex content components (accordion, alert, tabs-content) are intentionally
-// included with best-effort scaffolding and REVIEW markers.
+// Skips components from paragraph recipe generation only.
+// Components listed here that Drupal renders via core theme hooks (block,
+// navigation, menu) are wired instead via $themeTemplateMap below.
+// Purely atomic elements (button, icon, link) have no standalone Drupal
+// template hook and are excluded from all wiring.
 $skipList = [
   'back-to-top'  => 'Theme-only utility, no content props',
   'breadcrumbs'  => 'Drupal-generated block — no recipe needed',
@@ -145,13 +169,134 @@ $companionItems = [
   ],
 ];
 
+// ─── Theme-level template map ────────────────────────────────────────────────
+// Maps non-paragraph components to Drupal theme template files.
+// These produce NO paragraph recipes — they wire Drupal's theme layer
+// (block, navigation, menu) directly to prototype SDC components.
+//
+// strategies:
+//   detect_existing  — file managed manually; report wiring state only.
+//   review_existing  — file exists but needs manual intervention; emit REVIEW.
+//   include_static   — generate with static props (no Drupal context needed).
+//   include_rendered — generate with content-driven props (Drupal vars used).
+//
+// 'twig_dir'    — subdirectory under templates/
+// 'twig_file'   — filename without .html.twig; use {theme} as placeholder.
+// 'props'       — prop name → Twig expression (include_* strategies only).
+// 'note'        — informational note printed for detect_existing.
+// 'review_note' — reason text printed as REVIEW for review_existing/generated.
+$themeTemplateMap = [
+
+  // ── Already wired — detect and report ──────────────────────────────────────
+
+  'alert' => [
+    'strategy'  => 'detect_existing',
+    'twig_dir'  => 'messages',
+    'twig_file' => 'status-messages',
+    'note'      => 'Wired to {theme}:alert in messages/status-messages.html.twig.',
+  ],
+
+  'breadcrumbs' => [
+    'strategy'  => 'detect_existing',
+    'twig_dir'  => 'navigation',
+    'twig_file' => 'breadcrumb',
+    'note'      => 'Wired to {theme}:breadcrumbs in navigation/breadcrumb.html.twig.',
+  ],
+
+  'menu-tabs' => [
+    'strategy'  => 'detect_existing',
+    'twig_dir'  => 'block',
+    'twig_file' => 'block--local-tasks-block',
+    'note'      => 'Wired to {theme}:menu-tabs in block/block--local-tasks-block.html.twig.',
+  ],
+
+  'pager' => [
+    'strategy'  => 'detect_existing',
+    'twig_dir'  => 'navigation',
+    'twig_file' => 'pager',
+    'note'      => 'Wired to {theme}:pager in navigation/pager.html.twig.',
+  ],
+
+  'search-bar' => [
+    'strategy'  => 'detect_existing',
+    'twig_dir'  => 'block',
+    'twig_file' => 'block--{theme}-search',
+    'note'      => 'Wired to {theme}:search-bar in block/block--{theme}-search.html.twig.',
+  ],
+
+  // ── Exists but needs developer review before auto-wiring ───────────────────
+
+  'menu' => [
+    'strategy'    => 'review_existing',
+    'twig_dir'    => 'menu',
+    'twig_file'   => 'menu',
+    'review_note' => "menu/menu.html.twig uses a Drupal self-import macro — a valid fallback for all menus. "
+      . "To wire all menus through the SDC instead, replace content with: "
+      . "{{ include('{theme}:menu') }}  (the prototype:menu SDC manages its own recursion). "
+      . "Verify it handles all menu depths and active trails before switching.",
+  ],
+
+  // ── Generate if missing ─────────────────────────────────────────────────────
+
+  'back-to-top' => [
+    'strategy'    => 'page_include',
+    'twig_dir'    => 'page',
+    'twig_file'   => 'page',
+    'note'        => 'back-to-top has no Drupal block plugin. It is included directly in page.html.twig after the footer block.',
+  ],
+
+  'page-title' => [
+    'strategy'  => 'include_rendered',
+    'twig_dir'  => 'page',
+    'twig_file' => 'page-title',
+    'props'     => [
+      'title'      => 'title',
+      'attributes' => 'attributes',
+    ],
+  ],
+
+];
+
 // ─── Dispatch ────────────────────────────────────────────────────────────────
 if ($componentArg === 'all') {
-  $dirs  = glob("{$compBaseDir}/*", GLOB_ONLYDIR);
-  $count = 0;
-  foreach ($dirs as $dir) {
+  if (!$onlyTheme) {
+    $dirs  = glob("{$compBaseDir}/*", GLOB_ONLYDIR);
+    $count = 0;
+    foreach ($dirs as $dir) {
+      processComponent(
+        basename($dir),
+        $compBaseDir,
+        $recipesDir,
+        $templateDir,
+        $themeName,
+        $skipList,
+        $companionItems,
+        $componentReviews
+      );
+      $count++;
+    }
+    hdr("Done — processed {$count} paragraph components.");
+  }
+
+  if (!$onlyParagraph) {
+    hdr("Wiring theme-level templates...");
+    foreach ($themeTemplateMap as $name => $config) {
+      processThemeTemplate($name, $config, $themeTemplateRoot, $themeName);
+    }
+  }
+}
+else {
+  if (isset($themeTemplateMap[$componentArg])) {
+    processThemeTemplate(
+      $componentArg,
+      $themeTemplateMap[$componentArg],
+      $themeTemplateRoot,
+      $themeName
+    );
+  }
+  else {
     processComponent(
-      basename($dir),
+      $componentArg,
       $compBaseDir,
       $recipesDir,
       $templateDir,
@@ -160,21 +305,7 @@ if ($componentArg === 'all') {
       $companionItems,
       $componentReviews
     );
-    $count++;
   }
-  hdr("Done — processed {$count} components.");
-}
-else {
-  processComponent(
-    $componentArg,
-    $compBaseDir,
-    $recipesDir,
-    $templateDir,
-    $themeName,
-    $skipList,
-    $companionItems,
-    $componentReviews
-  );
 }
 
 // =============================================================================
@@ -783,6 +914,129 @@ function processCompanionItem(
       TWIG . "\n");
       ok("templates/paragraph/paragraph--{$itemSlug}.html.twig  (embed → {$themeName}:{$parentCompName})");
     }
+  }
+}
+
+// ─── Theme-level template wiring ─────────────────────────────────────────────
+// Wires non-paragraph Drupal theme templates (block, navigation, menu) to
+// their prototype SDC counterparts. Unlike processComponent(), this never
+// creates paragraph recipes — it only manages theme template files.
+function processThemeTemplate(
+  string $name,
+  array  $config,
+  string $themeTemplateRoot,
+  string $themeName
+): void {
+  $strategy         = $config['strategy'];
+  // Block template file names follow Drupal's convention: ALL underscores
+  // in theme hook suggestions are converted to hyphens. The {theme} placeholder
+  // in twig_file is always expanded to the hyphenated form (dk-test-theme),
+  // while the SDC namespace reference inside Twig files keeps underscores
+  // (dk_test_theme:component-name).
+  $themeNameHyphen  = str_replace('_', '-', $themeName);
+  $twigFile         = str_replace('{theme}', $themeNameHyphen, $config['twig_file']);
+  $twigPath         = "{$themeTemplateRoot}/{$config['twig_dir']}/{$twigFile}.html.twig";
+  $relPath          = "{$config['twig_dir']}/{$twigFile}.html.twig";
+
+  // Helper: check whether the file already wires this component.
+  $isWired = static function (string $path, string $theme, string $comp): bool {
+    return file_exists($path)
+      && str_contains((string) file_get_contents($path), "{$theme}:{$comp}");
+  };
+
+  if ($strategy === 'detect_existing') {
+    if (!file_exists($twigPath)) {
+      warn("{$name}: {$relPath} not found — create manually.");
+      return;
+    }
+    if ($isWired($twigPath, $themeName, $name)) {
+      echo "    – {$name}: " . GREEN . "exists + wired" . RESET . " ({$relPath})\n";
+    }
+    else {
+      rev("{$name}: {$relPath} exists but {$themeName}:{$name} wiring not detected — verify manually.");
+    }
+    return;
+  }
+
+  // page_include — back-to-top lives directly in page.html.twig, not a block
+  // template. Requires both the component include AND an id="top" anchor at
+  // the top of the layout container so the link target resolves correctly.
+  if ($strategy === 'page_include') {
+    if (!file_exists($twigPath)) {
+      warn("{$name}: {$relPath} not found — cannot inject.");
+      return;
+    }
+    $content    = (string) file_get_contents($twigPath);
+    $hasInclude = str_contains($content, "{$themeName}:{$name}");
+    $hasAnchor  = str_contains($content, 'id="top"');
+
+    if ($hasInclude && $hasAnchor) {
+      echo "    – {$name}: " . GREEN . "exists + wired" . RESET . " ({$relPath})\n";
+      return;
+    }
+    if ($hasInclude && !$hasAnchor) {
+      rev("{$name}: {$relPath} includes {$themeName}:{$name} but is missing the id=\"top\" anchor — add <div id=\"top\" tabindex=\"-1\"></div> as the first child of the layout container.");
+      return;
+    }
+
+    // Neither present — inject both into page.html.twig.
+    // 1. id="top" anchor as first child of the layout container div.
+    $content = preg_replace(
+      '/(<div\b[^>]*\blayout-container\b[^>]*>)/',
+      "$1\n  <div id=\"top\" tabindex=\"-1\"></div>",
+      $content,
+      1
+    );
+
+    // 2. back-to-top include before the final closing </div> of the file.
+    $include     = "\n  {{- include('{$themeName}:{$name}', {\n    text: 'Back to top'|t,\n  }, with_context=false) -}}\n";
+    $lastDivPos  = strrpos($content, '</div>');
+    if ($lastDivPos !== false) {
+      $content = substr($content, 0, $lastDivPos) . $include . substr($content, $lastDivPos);
+    }
+
+    file_put_contents($twigPath, $content);
+    ok("{$relPath}  (injected {$themeName}:{$name} include + id=\"top\" anchor)");
+    return;
+  }
+
+  if ($strategy === 'review_existing') {
+    if (!file_exists($twigPath)) {
+      warn("{$name}: {$relPath} not found.");
+      return;
+    }
+    if ($isWired($twigPath, $themeName, $name)) {
+      echo "    – {$name}: " . GREEN . "exists + wired" . RESET . " ({$relPath})\n";
+    }
+    else {
+      $note = str_replace(['{theme}', '{theme_hyphen}'], [$themeName, $themeNameHyphen], $config['review_note'] ?? "{$relPath} exists but NOT wired to {$themeName}:{$name}.");
+      rev("{$name}: {$note}");
+    }
+    return;
+  }
+
+  // include_static, include_rendered — generate the template if missing.
+  if (file_exists($twigPath)) {
+    if ($isWired($twigPath, $themeName, $name)) {
+      echo "    – {$name}: " . GREEN . "exists + wired" . RESET . " ({$relPath})\n";
+    }
+    else {
+      warn("{$name}: {$relPath} exists but NOT wired to {$themeName}:{$name} — skipping to avoid overwrite.");
+    }
+    return;
+  }
+
+  $dir = dirname($twigPath);
+  if (!is_dir($dir)) {
+    mkdir($dir, 0755, true);
+  }
+
+  file_put_contents($twigPath, buildThemeTwig($name, $strategy, $config, $themeName));
+  ok("{$relPath}");
+
+  if (!empty($config['review_note'])) {
+    $resolvedNote = str_replace(['{theme}', '{theme_hyphen}'], [$themeName, $themeNameHyphen], $config['review_note']);
+    rev("{$name}: {$resolvedNote}");
   }
 }
 
@@ -1448,6 +1702,33 @@ function buildTwigTemplate(
   }
 
   return $out;
+}
+
+// ─── Theme-level Twig template builder ───────────────────────────────────────
+// Generates content for theme template files created by processThemeTemplate().
+function buildThemeTwig(
+  string $name,
+  string $strategy,
+  array  $config,
+  string $themeName
+): string {
+  $props = $config['props'] ?? [];
+
+  if (in_array($strategy, ['include_static', 'include_rendered'], true)) {
+    $propLines = [];
+    foreach ($props as $propName => $propExpr) {
+      $propLines[] = "  {$propName}: {$propExpr}";
+    }
+    $propsStr    = !empty($propLines) ? "\n" . implode(",\n", $propLines) . ",\n" : '';
+    $withContext = ($strategy === 'include_static') ? ', with_context=false' : '';
+    return "{{- include('{$themeName}:{$name}', {{$propsStr}}{$withContext}) -}}\n";
+  }
+
+  if ($strategy === 'include_passthrough') {
+    return "{{- include('{$themeName}:{$name}') -}}\n";
+  }
+
+  return "{# TODO: wire to {$themeName}:{$name} #}\n";
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

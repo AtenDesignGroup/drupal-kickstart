@@ -428,6 +428,14 @@ ADMIN_PASS="${DK_DRUPAL_ADMIN_PASSWORD:-admin}"
 mkdir -p config/sync
 info "Config sync directory ensured (config/sync)"
 
+# Ensure the public files directory exists — composer create-project does not
+# always create it, and drush site:install will abort if it is missing.
+# web/sites/default/ is scaffolded as 555, so we must relax it first.
+chmod u+w web/sites/default
+mkdir -p web/sites/default/files
+chmod 755 web/sites/default/files
+info "Public files directory ensured (web/sites/default/files)"
+
 SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install minimal
 info "Drupal installed via ddev site-install (minimal profile)"
 
