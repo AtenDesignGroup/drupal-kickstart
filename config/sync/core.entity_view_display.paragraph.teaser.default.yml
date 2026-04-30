@@ -41,8 +41,8 @@ content:
       trim_length: 80
       url_only: false
       url_plain: false
-      rel: 0
-      target: 0
+      rel: '0'
+      target: '0'
     third_party_settings:
       nomarkup:
         enabled: true
@@ -54,8 +54,8 @@ content:
     type: media_thumbnail
     label: hidden
     settings:
-      image_style: full_size
       image_link: ''
+      image_style: full_size
     third_party_settings: {  }
     weight: 1
     region: content

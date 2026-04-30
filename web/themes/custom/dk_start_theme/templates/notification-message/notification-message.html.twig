@@ -1,0 +1,51 @@
+{#
+/**
+ * @file
+ * Theme override for a single notification_message entity.
+ *
+ * Wires the entity to the dk_start_theme:alert SDC component.
+ * The outer .message wrapper is kept so the module's dismiss JS can locate
+ * data-message-id and the .message__close button via $(this).parent().
+ *
+ * Available variables:
+ * - message: The notification_message entity.
+ * - bundle: The notification message type (e.g. 'global', 'warning', 'error').
+ * - content: Rendered entity fields, keyed by field name.
+ *   - content.message: The rendered body/message text_long field.
+ * - notification_dismiss: Settings object from the bundle entity type.
+ *   - notification_dismiss.show: Whether to show the dismiss button.
+ *   - notification_dismiss.button_text: Label for the close button.
+ * - is_message_entity: TRUE when viewing the entity's canonical page.
+ * - view_mode: The current view mode.
+ *
+ * Type mapping: 'global' → 'status'; all other bundle names pass through
+ * directly so admins can create bundles named 'warning' or 'error' and
+ * automatically receive the matching alert style (c-alert--warning, etc.).
+ *
+ * @see \Drupal\notification_message\Entity\NotificationMessage
+ * @see components/02-components/alert/alert.twig
+ */
+#}
+
+{%- set alert_type = bundle == 'global' ? 'status' : bundle|clean_class -%}
+
+<div class="message message--type-{{ bundle|clean_class }}" data-message-id="{{ message.id() }}">
+  {{- include('dk_start_theme:alert', {
+    type: alert_type,
+    heading: message.label(),
+    alerts: [content.message],
+  }, with_context = false) -}}
+
+  {% if notification_dismiss.show and not is_message_entity %}
+    <a
+      href="#"
+      class="message__close"
+      aria-label="Close {{ message.label() }} notification"
+    >
+      <svg width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M4.968 4.968 17.01 17.01M17.032 4.968 4.99 17.01" stroke="#030D10" stroke-width="2"/>
+      </svg>
+      <span>{{ notification_dismiss.button_text|default('Close') }}</span>
+    </a>
+  {% endif %}
+</div>

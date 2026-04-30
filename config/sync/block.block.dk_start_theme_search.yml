@@ -1,0 +1,23 @@
+uuid: 9ad9a787-c7dd-4004-97f0-014ddf432bc5
+langcode: en
+status: true
+dependencies:
+  module:
+    - search
+  theme:
+    - dk_start_theme
+_core:
+  default_config_hash: 8aL1w0ySDKpohbNyyF-ymmH4atTZJd8fb88SLAxPgeE
+id: dk_start_theme_search
+theme: dk_start_theme
+region: navigation
+weight: 0
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: Search
+  label_display: '0'
+  provider: search
+  page_id: null
+visibility: {  }

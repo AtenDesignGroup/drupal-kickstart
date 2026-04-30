@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.storage.paragraph.field_media
     - media.type.document
+    - media.type.icon
     - media.type.image
     - media.type.remote_video
     - paragraphs.paragraphs_type.media
@@ -34,6 +35,7 @@ settings:
   handler_settings:
     target_bundles:
       document: document
+      icon: icon
       image: image
       remote_video: remote_video
     sort:

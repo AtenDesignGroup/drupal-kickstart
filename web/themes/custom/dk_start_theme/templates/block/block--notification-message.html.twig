@@ -1,0 +1,21 @@
+{#
+/**
+ * @file
+ * Theme override for the Notification Messages block.
+ *
+ * Suppresses the block label and passes content straight through to the
+ * notification_messages / notification_message entity templates which wire
+ * each message to the dk_start_theme:alert SDC component.
+ *
+ * Available variables:
+ * - content: The rendered notification_messages element.
+ * - attributes: HTML attributes for the block wrapper.
+ * - title_prefix / title_suffix: Contextual-links scaffolding.
+ *
+ * @see \Drupal\notification_message\Plugin\Block\NotificationMessageBlock
+ * @see templates/notification-message/notification-message.html.twig
+ */
+#}
+{{ title_prefix }}
+{{ title_suffix }}
+{{ content }}

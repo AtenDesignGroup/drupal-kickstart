@@ -1,0 +1,24 @@
+uuid: 71870bb5-2a5b-4fcf-968b-798c97078ee9
+langcode: en
+status: true
+dependencies:
+  module:
+    - notification_message
+  theme:
+    - dk_start_theme
+id: dk_start_theme_notificationmessages
+theme: dk_start_theme
+region: highlighted
+weight: 0
+provider: null
+plugin: notification_message
+settings:
+  id: notification_message
+  label: 'Notification messages'
+  label_display: visible
+  provider: notification_message
+  notification_message:
+    type:
+      global: global
+    display_mode: default
+visibility: {  }
