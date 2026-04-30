@@ -51,7 +51,7 @@
         "drupal/pantheon_secrets": "^1.0",
         "drupal/paragraphs": "^1.18",
         "drupal/pathauto": "*",
-        "drupal/prototype": "^5.3",
+        "drupal/prototype": "5.x-dev@dev",
         "drupal/rabbit_hole": "^2.0@beta",
         "drupal/redirect": "^1.9",
         "drupal/redis": "^1.11",
