@@ -25,9 +25,9 @@ settings:
   handler_settings:
     target_bundles:
       tabs_content_item: tabs_content_item
+    negate: 0
     target_bundles_drag_drop:
       tabs_content_item:
-        enabled: true
         weight: 0
-    negate: 0
+        enabled: true
 field_type: entity_reference_revisions

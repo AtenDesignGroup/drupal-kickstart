@@ -1,0 +1,18 @@
+uuid: d6aeea95-85bb-4ab3-96f6-f52ffb4f4d6c
+langcode: en
+status: true
+dependencies:
+  theme:
+    - gin
+id: gin_local_actions
+theme: gin
+region: pre_content
+weight: -10
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Local actions'
+  label_display: '0'
+  provider: core
+visibility: {  }

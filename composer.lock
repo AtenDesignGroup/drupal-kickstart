@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b79359c7bb69fb7ce7130068ff6e3572",
+    "content-hash": "2771951faf2a7b22e1af7d1628b42c16",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2928,6 +2928,113 @@
             }
         },
         {
+            "name": "drupal/notification_message",
+            "version": "2.0.0-rc2",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/notification_message.git",
+                "reference": "2.0.0-rc2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/notification_message-2.0.0-rc2.zip",
+                "reference": "2.0.0-rc2",
+                "shasum": "d154f427e767a596e8c6a96efda56c13ab55219c"
+            },
+            "require": {
+                "drupal/core": "^10 || ^11"
+            },
+            "require-dev": {
+                "brianium/paratest": "^7.8",
+                "composer/installers": "^1 || ^2",
+                "cweagans/composer-patches": "~1.0",
+                "drupal/admin_toolbar": "^3.6",
+                "drupal/core-composer-scaffold": "^10 || ^11",
+                "drupal/core-dev": "^10 || ^11",
+                "drupal/core-recommended": "^10 || ^11",
+                "drush/drush": "^13.6",
+                "mglaman/phpstan-drupal": "^2.0",
+                "php-parallel-lint/php-parallel-lint": "^1.2",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "symplify/easy-coding-standard": "^13.0"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "2.0.0-rc2",
+                    "datestamp": "1766426918",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Project has not opted into security advisory coverage!"
+                    }
+                },
+                "installer-paths": {
+                    "web/core": [
+                        "type:drupal-core"
+                    ],
+                    "web/libraries/{$name}": [
+                        "type:drupal-library"
+                    ],
+                    "web/modules/contrib/{$name}": [
+                        "type:drupal-module"
+                    ],
+                    "web/profiles/contrib/{$name}": [
+                        "type:drupal-profile"
+                    ],
+                    "web/themes/contrib/{$name}": [
+                        "type:drupal-theme"
+                    ],
+                    "drush/{$name}": [
+                        "type:drupal-drush"
+                    ]
+                },
+                "drupal-scaffold": {
+                    "locations": {
+                        "web-root": "web/"
+                    }
+                },
+                "drush": {
+                    "services": {
+                        "drush.services.yml": "^9 || ^10 || ^11"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "scripts": {
+                "test": [
+                    "vendor/bin/paratest"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ],
+                "format": [
+                    "vendor/bin/ecs --fix",
+                    "vendor/bin/phpcbf -s --report-full --report-summary --report-source $DDEV_DOCROOT/$DRUPAL_PROJECTS_PATH \"$@\" || [ $? -eq 1 ]"
+                ]
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Travis Tomka",
+                    "homepage": "https://www.drupal.org/u/droath",
+                    "email": "underoathosx@gmail.com"
+                },
+                {
+                    "name": "justin2pin",
+                    "homepage": "https://www.drupal.org/user/278450"
+                }
+            ],
+            "description": "Allow site admins to construct and broadcast notification messages.",
+            "homepage": "https://www.drupal.org/project/notification_message",
+            "support": {
+                "source": "https://git.drupalcode.org/project/notification_message"
+            }
+        },
+        {
             "name": "drupal/nouislider_js",
             "version": "15.8.1",
             "source": {
@@ -3310,17 +3417,11 @@
         },
         {
             "name": "drupal/prototype",
-            "version": "5.5.0",
+            "version": "dev-5.x",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/prototype.git",
-                "reference": "5.5.0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/prototype-5.5.0.zip",
-                "reference": "5.5.0",
-                "shasum": "5adc02bfcfcd100a2b00887f59841a9ea9fb6ab5"
+                "reference": "2410404364674e75c04886dcd82c32357ebd0b2f"
             },
             "require": {
                 "drupal/core": "^10.3 || ^11",
@@ -3335,12 +3436,15 @@
             },
             "type": "drupal-theme",
             "extra": {
+                "branch-alias": {
+                    "dev-5.x": "5.x-dev"
+                },
                 "drupal": {
-                    "version": "5.5.0",
-                    "datestamp": "1776189302",
+                    "version": "5.5.0+4-dev",
+                    "datestamp": "1777410551",
                     "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
+                        "status": "not-covered",
+                        "message": "Dev releases are not covered by Drupal security advisories."
                     }
                 }
             },
@@ -16037,6 +16141,8 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "drupal/entity_usage": 10,
+        "drupal/notification_message": 5,
+        "drupal/prototype": 20,
         "drupal/rabbit_hole": 10,
         "drupal/ultimate_cron": 10
     },
