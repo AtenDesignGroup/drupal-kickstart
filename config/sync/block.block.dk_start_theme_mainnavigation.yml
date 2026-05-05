@@ -11,7 +11,7 @@ dependencies:
 id: dk_start_theme_mainnavigation
 theme: dk_start_theme
 region: navigation
-weight: 0
+weight: -2
 provider: null
 plugin: 'system_menu_block:main'
 settings:

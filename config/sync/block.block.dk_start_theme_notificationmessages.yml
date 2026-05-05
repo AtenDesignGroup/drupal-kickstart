@@ -8,8 +8,8 @@ dependencies:
     - dk_start_theme
 id: dk_start_theme_notificationmessages
 theme: dk_start_theme
-region: highlighted
-weight: 0
+region: alert
+weight: -2
 provider: null
 plugin: notification_message
 settings:
