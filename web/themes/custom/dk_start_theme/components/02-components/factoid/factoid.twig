@@ -1,0 +1,29 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-factoid'
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  {% if data or data_prefix or data_suffix %}
+    <div class="c-factoid__stat">
+      {% if data_prefix %}
+        <span class="c-factoid__prefix">{{ data_prefix }}</span>
+      {% endif %}
+      {% if data %}
+        <span class="c-factoid__data">{{ data }}</span>
+      {% endif %}
+      {% if data_suffix %}
+        <span class="c-factoid__suffix">{{ data_suffix }}</span>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if title %}
+    <div class="c-factoid__title">{{ title }}</div>
+  {% endif %}
+
+  {% if description %}
+    <div class="c-factoid__description">{{ description }}</div>
+  {% endif %}
+</div>

@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_data_prefix
+    - paragraphs.paragraphs_type.factoid
+id: paragraph.factoid.field_data_prefix
+field_name: field_data_prefix
+entity_type: paragraph
+bundle: factoid
+label: Prefix
+description: 'Optional text displayed before the statistic (e.g. "$", "~").'
+required: false
+translatable: false
+default_value: {}
+default_value_callback: ''
+settings: {}
+field_type: string

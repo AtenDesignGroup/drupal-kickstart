@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_data
+    - paragraphs.paragraphs_type.factoid
+id: paragraph.factoid.field_data
+field_name: field_data
+entity_type: paragraph
+bundle: factoid
+label: Statistic
+description: 'The primary numeric value displayed in the callout.'
+required: false
+translatable: false
+default_value: {}
+default_value_callback: ''
+settings: {}
+field_type: integer

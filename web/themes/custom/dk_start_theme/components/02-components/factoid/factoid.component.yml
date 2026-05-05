@@ -1,0 +1,40 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Factoid
+status: stable
+description: 'A data callout displaying a statistic with optional prefix, suffix, label, and description.'
+group: Components
+props:
+  type: object
+  properties:
+    data_prefix:
+      type: ['string', 'null']
+      title: Prefix
+      description: 'Optional text before the number (e.g. "$", "~").'
+      examples:
+        - '$'
+        - '~'
+    data:
+      type: ['integer', 'string', 'null']
+      title: Statistic
+      description: 'The primary numeric value.'
+      examples:
+        - 42
+        - 1000
+    data_suffix:
+      type: ['string', 'null']
+      title: Suffix
+      description: 'Optional text after the number (e.g. "%", "+").'
+      examples:
+        - '%'
+        - '+'
+    title:
+      type: ['string', 'null']
+      title: Title
+      description: 'Short label for the statistic.'
+      examples:
+        - 'Student enrollment'
+        - 'Years of research'
+    description:
+      type: ['string', 'null']
+      title: Description
+      description: 'Supporting body text rendered below the statistic and title.'

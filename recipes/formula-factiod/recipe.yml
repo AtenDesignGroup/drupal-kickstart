@@ -1,0 +1,9 @@
+name: '🦄 🌈  Formula: Factiod'
+description: 'Provides a Factoid paragraph type wired to the dk_start_theme SDC factoid component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+
+config:
+  strict: false
