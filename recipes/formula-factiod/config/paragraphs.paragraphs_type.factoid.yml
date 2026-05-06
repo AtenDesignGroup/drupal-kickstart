@@ -1,9 +1,0 @@
-langcode: en
-status: true
-dependencies: {}
-id: factoid
-label: Factoid
-icon_uuid: null
-icon_default: null
-description: 'A concise data callout: large statistic with optional prefix, suffix, label, and description.'
-behavior_plugins: {}

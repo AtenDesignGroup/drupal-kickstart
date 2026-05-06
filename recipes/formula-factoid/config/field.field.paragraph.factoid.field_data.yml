@@ -8,11 +8,11 @@ id: paragraph.factoid.field_data
 field_name: field_data
 entity_type: paragraph
 bundle: factoid
-label: Statistic
-description: 'The primary numeric value displayed in the callout.'
+label: 'Data'
+description: ''
 required: false
 translatable: false
-default_value: {}
+default_value: {  }
 default_value_callback: ''
-settings: {}
+settings: {  }
 field_type: integer

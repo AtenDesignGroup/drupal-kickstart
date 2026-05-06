@@ -8,11 +8,11 @@ id: paragraph.factoid.field_data_suffix
 field_name: field_data_suffix
 entity_type: paragraph
 bundle: factoid
-label: Suffix
-description: 'Optional text displayed after the statistic (e.g. "%", "+").'
+label: 'Data Suffix'
+description: ''
 required: false
 translatable: false
-default_value: {}
+default_value: {  }
 default_value_callback: ''
-settings: {}
+settings: {  }
 field_type: string

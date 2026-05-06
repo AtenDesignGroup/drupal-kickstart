@@ -1,7 +1,7 @@
 {{- include('dk_start_theme:factoid', {
-  data_prefix: content.field_data_prefix|render|striptags|trim ?: null,
+  data_prefix: content.field_data_prefix|render|striptags|trim,
   data: paragraph.field_data.value,
-  data_suffix: content.field_data_suffix|render|striptags|trim ?: null,
-  title: content.field_title|render|striptags|trim ?: null,
-  description: content.field_description
+  data_suffix: content.field_data_suffix|render|striptags|trim,
+  title: content.field_title|render|striptags|trim,
+  description: content.field_formatted_text
 }) -}}

@@ -2,59 +2,58 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.paragraph.factoid.field_title
     - field.field.paragraph.factoid.field_data_prefix
     - field.field.paragraph.factoid.field_data
     - field.field.paragraph.factoid.field_data_suffix
-    - field.field.paragraph.factoid.field_description
+    - field.field.paragraph.factoid.field_title
+    - field.field.paragraph.factoid.field_formatted_text
     - paragraphs.paragraphs_type.factoid
   module:
-    - paragraphs
     - text
 id: paragraph.factoid.default
 targetEntityType: paragraph
 bundle: factoid
 mode: default
 content:
-  field_title:
+  field_data_prefix:
     type: string_textfield
     weight: 0
     region: content
     settings:
       size: 60
       placeholder: ''
-    third_party_settings: {}
-  field_data_prefix:
-    type: string_textfield
+    third_party_settings: {  }
+  field_data:
+    type: number
     weight: 1
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_data_suffix:
+    type: string_textfield
+    weight: 2
     region: content
     settings:
       size: 60
       placeholder: ''
-    third_party_settings: {}
-  field_data:
-    type: number
-    weight: 2
-    region: content
-    settings:
-      placeholder: ''
-    third_party_settings: {}
-  field_data_suffix:
+    third_party_settings: {  }
+  field_title:
     type: string_textfield
     weight: 3
     region: content
     settings:
       size: 60
       placeholder: ''
-    third_party_settings: {}
-  field_description:
+    third_party_settings: {  }
+  field_formatted_text:
     type: text_textarea
     weight: 4
     region: content
     settings:
       rows: 5
       placeholder: ''
-    third_party_settings: {}
+    third_party_settings: {  }
 hidden:
   created: true
   status: true
