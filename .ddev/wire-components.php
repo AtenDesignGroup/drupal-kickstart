@@ -143,9 +143,10 @@ $companionItems = [
     'embed_props'  => [
       'id'      => 'paragraph.id()',
       'heading' => "content.field_title|render|striptags|trim",
+      'body'    => 'content.field_formatted_text',
     ],
     'embed_blocks' => [
-      'content' => 'content.field_formatted_text',
+      'content' => 'body',
     ],
   ],
   'tabs-content' => [
@@ -895,16 +896,40 @@ function processCompanionItem(
     }
     else {
       // embed-based item template.
-      $embedProps = [];
-      foreach ($companion['embed_props'] as $prop => $expr) {
-        $embedProps[] = "  {$prop}: {$expr},";
-      }
-      $embedPropsStr = implode("\n", $embedProps);
+      $embedPropsMap = $companion['embed_props'];
 
       $embedBlocks = '';
       foreach ($companion['embed_blocks'] as $blockName => $contentExpr) {
-        $embedBlocks .= "  {%- block {$blockName} -%}\n    {{- {$contentExpr} -}}\n  {%- endblock -%}\n";
+        $blockExpr = trim((string) $contentExpr);
+
+        // `embed ... only` drops parent scope. If a block expression reads from
+        // content.*, auto-pass it through the embed `with` context.
+        if (str_starts_with($blockExpr, 'content.')) {
+          $existingProp = array_search($blockExpr, $embedPropsMap, true);
+          if ($existingProp !== false) {
+            $blockExpr = (string) $existingProp;
+          }
+          else {
+            $safeBlock  = preg_replace('/[^a-z0-9_]/', '_', strtolower($blockName));
+            $propName   = "_slot_{$safeBlock}";
+            $suffix     = 1;
+            while (array_key_exists($propName, $embedPropsMap)) {
+              $propName = "_slot_{$safeBlock}_{$suffix}";
+              $suffix++;
+            }
+            $embedPropsMap[$propName] = $blockExpr;
+            $blockExpr = $propName;
+          }
+        }
+
+        $embedBlocks .= "  {%- block {$blockName} -%}\n    {{- {$blockExpr} -}}\n  {%- endblock -%}\n";
       }
+
+      $embedProps = [];
+      foreach ($embedPropsMap as $prop => $expr) {
+        $embedProps[] = "  {$prop}: {$expr},";
+      }
+      $embedPropsStr = implode("\n", $embedProps);
 
       file_put_contents($twigOut, <<<TWIG
       {%- embed '{$themeName}:{$parentCompName}' with {
@@ -1154,45 +1179,6 @@ function mapPropToField(string $name, array $def): array {
     ];
   }
 
-  // Prefix/suffix decorators → new string field storage.
-  // Matches prop names ending in _prefix, _suffix, _unit, or _symbol.
-  if ($type === 'string' && preg_match('/(^|_)(prefix|suffix|unit|symbol)$/', $name)) {
-    $fn = 'field_' . preg_replace('/[^a-z0-9_]/', '_', $name);
-    return [
-      'skip'               => false,
-      'field'              => $fn,
-      'new_storage'        => true,
-      'drupal_type'        => 'string',
-      'plain'              => true,
-      'nomarkup'           => true,
-      'formatter'          => 'string',
-      'formatter_settings' => ['link_to_entity' => false],
-      'widget'             => 'string_textfield',
-      'widget_settings'    => ['size' => 60, 'placeholder' => ''],
-      'module_deps'        => [],
-    ];
-  }
-
-  // Integer / numeric value → new integer field storage.
-  // Matches type 'integer' or 'number' (extracted from null-safe unions).
-  if ($type === 'integer' || $type === 'number') {
-    $fn = 'field_' . preg_replace('/[^a-z0-9_]/', '_', $name);
-    return [
-      'skip'               => false,
-      'field'              => $fn,
-      'new_storage'        => true,
-      'drupal_type'        => 'integer',
-      'plain'              => false,
-      'raw_value'          => true,
-      'nomarkup'           => false,
-      'formatter'          => 'number_integer',
-      'formatter_settings' => [],
-      'widget'             => 'number',
-      'widget_settings'    => ['placeholder' => ''],
-      'module_deps'        => [],
-    ];
-  }
-
   // Boolean → checkbox field.
   if ($type === 'boolean') {
     $fn = 'field_' . preg_replace('/[^a-z0-9_]/', '_', $name);
@@ -1365,30 +1351,6 @@ function buildParagraphType(string $bundle, string $label): string {
 }
 
 function buildFieldStorage(string $fieldName, string $drupalType = 'entity_reference'): string {
-  if ($drupalType === 'integer') {
-    return <<<YML
-langcode: en
-status: true
-dependencies:
-  module:
-    - paragraphs
-id: paragraph.{$fieldName}
-field_name: {$fieldName}
-entity_type: paragraph
-type: integer
-settings:
-  unsigned: false
-  size: normal
-module: core
-locked: false
-cardinality: 1
-translatable: true
-indexes: {  }
-persist_with_no_fields: false
-custom_storage: false
-YML . "\n";
-  }
-
   if ($drupalType === 'boolean') {
     return <<<YML
 langcode: en
@@ -1501,10 +1463,6 @@ function buildFieldInstance(string $bundle, string $fieldName, string $label, ar
   if ($drupalType === 'string') {
     $lines[] = 'settings: {  }';
     $lines[] = 'field_type: string';
-  }
-  elseif ($drupalType === 'integer') {
-    $lines[] = 'settings: {  }';
-    $lines[] = 'field_type: integer';
   }
   elseif ($drupalType === 'boolean') {
     $lines[] = 'settings: {  }';

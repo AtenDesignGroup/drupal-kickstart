@@ -1,0 +1,31 @@
+uuid: 7bf7972f-919c-4fd1-9334-ab583a4770ea
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_media
+    - media.type.icon
+    - paragraphs.paragraphs_type.factoid
+_core:
+  default_config_hash: wI2oNjKcfK64kYRVsHPlemK1VuHjRwYBeHph4Q5nGNo
+id: paragraph.factoid.field_media
+field_name: field_media
+entity_type: paragraph
+bundle: factoid
+label: 'Fact Icon'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:media'
+  handler_settings:
+    target_bundles:
+      icon: icon
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: icon
+field_type: entity_reference

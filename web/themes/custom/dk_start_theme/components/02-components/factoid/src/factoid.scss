@@ -1,0 +1,22 @@
+@use 'partials' as *;
+
+.c-factoid__icon {
+  margin: 0 0 rem(8px) 0;
+}
+
+.c-factoid__icon img {
+  width: rem(40px);
+  height: rem(40px);
+  object-fit: contain;
+}
+
+.c-factoid__fact {
+  @include type-scale(heading, h1);
+  font-weight: var(--prototype-fw-bold);
+}
+
+.c-factoid__label {
+  @include type-scale(heading, h4);
+  font-weight: var(--prototype-fw-regular);
+  margin: rem(8px) 0 0 0;
+}

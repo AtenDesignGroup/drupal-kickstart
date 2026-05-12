@@ -1,8 +1,11 @@
+uuid: 6e7af3ea-10a2-4039-8298-259c3cac6eec
 langcode: en
 status: true
 dependencies: {  }
+_core:
+  default_config_hash: jQl-Xpk1QUDQBy815qODzlEB8atbCM_lhQ6CF7w3hAE
 id: factoid
-label: 'Factoid'
+label: Factoid
 icon_uuid: null
 icon_default: null
 description: 'A fact callout with optional icon, fact text, and fact label.'

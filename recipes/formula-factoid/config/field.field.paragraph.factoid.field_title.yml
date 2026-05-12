@@ -8,7 +8,7 @@ id: paragraph.factoid.field_title
 field_name: field_title
 entity_type: paragraph
 bundle: factoid
-label: 'Title'
+label: 'Fact Label'
 description: ''
 required: false
 translatable: false
