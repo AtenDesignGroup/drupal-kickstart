@@ -1,0 +1,9 @@
+name: '🦄 🌈  Formula: Notification Message'
+description: 'Installs the Notification Message module for broadcasting sitewide alert messages.'
+type: 'Content'
+
+install:
+  - notification_message
+
+config:
+  strict: false
