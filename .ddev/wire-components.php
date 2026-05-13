@@ -143,9 +143,10 @@ $companionItems = [
     'embed_props'  => [
       'id'      => 'paragraph.id()',
       'heading' => "content.field_title|render|striptags|trim",
+      'body'    => 'content.field_formatted_text',
     ],
     'embed_blocks' => [
-      'content' => 'content.field_formatted_text',
+      'content' => 'body',
     ],
   ],
   'tabs-content' => [
@@ -895,16 +896,40 @@ function processCompanionItem(
     }
     else {
       // embed-based item template.
-      $embedProps = [];
-      foreach ($companion['embed_props'] as $prop => $expr) {
-        $embedProps[] = "  {$prop}: {$expr},";
-      }
-      $embedPropsStr = implode("\n", $embedProps);
+      $embedPropsMap = $companion['embed_props'];
 
       $embedBlocks = '';
       foreach ($companion['embed_blocks'] as $blockName => $contentExpr) {
-        $embedBlocks .= "  {%- block {$blockName} -%}\n    {{- {$contentExpr} -}}\n  {%- endblock -%}\n";
+        $blockExpr = trim((string) $contentExpr);
+
+        // `embed ... only` drops parent scope. If a block expression reads from
+        // content.*, auto-pass it through the embed `with` context.
+        if (str_starts_with($blockExpr, 'content.')) {
+          $existingProp = array_search($blockExpr, $embedPropsMap, true);
+          if ($existingProp !== false) {
+            $blockExpr = (string) $existingProp;
+          }
+          else {
+            $safeBlock  = preg_replace('/[^a-z0-9_]/', '_', strtolower($blockName));
+            $propName   = "_slot_{$safeBlock}";
+            $suffix     = 1;
+            while (array_key_exists($propName, $embedPropsMap)) {
+              $propName = "_slot_{$safeBlock}_{$suffix}";
+              $suffix++;
+            }
+            $embedPropsMap[$propName] = $blockExpr;
+            $blockExpr = $propName;
+          }
+        }
+
+        $embedBlocks .= "  {%- block {$blockName} -%}\n    {{- {$blockExpr} -}}\n  {%- endblock -%}\n";
       }
+
+      $embedProps = [];
+      foreach ($embedPropsMap as $prop => $expr) {
+        $embedProps[] = "  {$prop}: {$expr},";
+      }
+      $embedPropsStr = implode("\n", $embedProps);
 
       file_put_contents($twigOut, <<<TWIG
       {%- embed '{$themeName}:{$parentCompName}' with {
