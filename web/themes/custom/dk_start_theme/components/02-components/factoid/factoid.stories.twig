@@ -1,0 +1,42 @@
+{% set props = {
+  fact: '$1.98B',
+  fact_label: 'Sponsored Research',
+} %}
+
+{% stories factoid with {
+  title: 'Components/Factoid',
+} %}
+  {% story default with {
+    name: 'Default',
+    args: props,
+  } %}
+    <div style="max-width: 400px;">
+      {{ include('dk_start_theme:factoid') }}
+    </div>
+  {% endstory %}
+
+  {% story icon_optional with {
+    name: 'With icon',
+    args: {
+      fact_icon: '🎓',
+      fact: '30+',
+      fact_label: 'Shared Instrumentation Facilities',
+    },
+  } %}
+    <div style="max-width: 400px;">
+      {{ include('dk_start_theme:factoid') }}
+    </div>
+  {% endstory %}
+
+  {% story compact with {
+    name: 'Compact',
+    args: {
+      fact: '84%',
+      fact_label: 'Graduate Employment Rate',
+    },
+  } %}
+    <div style="max-width: 400px;">
+      {{ include('dk_start_theme:factoid') }}
+    </div>
+  {% endstory %}
+{% endstories %}

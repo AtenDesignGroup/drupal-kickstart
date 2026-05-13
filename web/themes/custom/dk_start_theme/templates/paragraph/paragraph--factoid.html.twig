@@ -1,0 +1,5 @@
+{{- include('dk_start_theme:factoid', {
+  fact_icon: content.field_media,
+  fact: paragraph.field_fact.value,
+  fact_label: content.field_title|render|striptags|trim
+}) -}}

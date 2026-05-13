@@ -1,0 +1,19 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-factoid'
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  {% if fact_icon %}
+    <div class="c-factoid__icon">{{ fact_icon }}</div>
+  {% endif %}
+
+  {% if fact %}
+    <div class="c-factoid__fact">{{ fact }}</div>
+  {% endif %}
+
+  {% if fact_label %}
+    <div class="c-factoid__label">{{ fact_label }}</div>
+  {% endif %}
+</div>

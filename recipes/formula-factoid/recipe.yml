@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Factoid'
+description: 'Provides a Factoid paragraph type with optional icon, fact, and label fields wired to the dk_start_theme SDC factoid component.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+  - formula-media-icon
+
+config:
+  strict: false
