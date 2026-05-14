@@ -335,6 +335,12 @@ function processComponent(
     return;
   }
 
+  // ── Custom component recipes (manual field model / slot-aware bridges) ──
+  if ($name === 'byline') {
+    processBylineComponent($recipesDir, $templateDir, $themeName);
+    return;
+  }
+
   // ── Companion-item components (embed-based, 2-part paragraph) ───────────
   // These use {% block %} in their Twig and cannot be wired via include().
   // The parent paragraph is a plain wrapper; the child item does the embed.
@@ -683,6 +689,429 @@ function processComponent(
   // Report component-level review items.
   foreach ($componentReviews[$name] ?? [] as $note) {
     rev($note);
+  }
+}
+
+// ─── Byline scaffold ────────────────────────────────────────────────────────
+// Byline intentionally uses a custom recipe because the generic prop mapping
+// is not expressive enough for:
+// - manual datetime fields for created/updated metadata, and
+// - author references that target Profile nodes rather than media.
+//
+// The generated paragraph bridge also uses embed blocks so Drupal field
+// formatter output can be inserted into the component's slots.
+function processBylineComponent(
+  string $recipesDir,
+  string $templateDir,
+  string $themeName
+): void {
+  $recipeDir = "{$recipesDir}/formula-byline";
+  $cfgDir    = "{$recipeDir}/config";
+  $recipeYml = "{$recipeDir}/recipe.yml";
+  $twigOut   = "{$templateDir}/paragraph--byline.html.twig";
+
+  $files = [
+    $recipeYml,
+    "{$cfgDir}/paragraphs.paragraphs_type.byline.yml",
+    "{$cfgDir}/field.storage.paragraph.field_authors.yml",
+    "{$cfgDir}/field.storage.paragraph.field_created_date.yml",
+    "{$cfgDir}/field.storage.paragraph.field_updated_date.yml",
+    "{$cfgDir}/field.field.paragraph.byline.field_authors.yml",
+    "{$cfgDir}/field.field.paragraph.byline.field_created_date.yml",
+    "{$cfgDir}/field.field.paragraph.byline.field_updated_date.yml",
+    "{$cfgDir}/core.entity_form_display.paragraph.byline.default.yml",
+    "{$cfgDir}/core.entity_view_display.paragraph.byline.default.yml",
+    $twigOut,
+  ];
+
+  $allExist = true;
+  foreach ($files as $file) {
+    if (!file_exists($file)) {
+      $allExist = false;
+      break;
+    }
+  }
+
+  if ($allExist) {
+    echo "    – byline: " . GREEN . "exists" . RESET . " (formula-byline)\n";
+    return;
+  }
+
+  hdr("Generating: byline → formula-byline");
+
+  if (!is_dir($cfgDir)) {
+    mkdir($cfgDir, 0755, true);
+  }
+  if (!is_dir($templateDir)) {
+    mkdir($templateDir, 0755, true);
+  }
+
+  if (!file_exists($recipeYml)) {
+    file_put_contents($recipeYml, <<<YML
+name: '🦄 🌈  Formula: Byline'
+description: 'Provides a reusable Byline paragraph type for displaying authors alongside created and updated dates.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+  - formula-profile
+
+config:
+  strict: false
+YML
+ . "\n");
+    ok('recipe.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/paragraphs.paragraphs_type.byline.yml")) {
+    file_put_contents("{$cfgDir}/paragraphs.paragraphs_type.byline.yml", <<<YML
+langcode: en
+status: true
+dependencies: {  }
+id: byline
+label: Byline
+icon_uuid: null
+icon_default: null
+description: 'Reusable editorial metadata block for authors, created dates, and updated dates.'
+behavior_plugins: {  }
+YML
+ . "\n");
+    ok('paragraphs.paragraphs_type.byline.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/field.storage.paragraph.field_authors.yml")) {
+    file_put_contents("{$cfgDir}/field.storage.paragraph.field_authors.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - paragraphs
+id: paragraph.field_authors
+field_name: field_authors
+entity_type: paragraph
+type: entity_reference
+settings:
+  target_type: node
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+YML
+ . "\n");
+    ok('field.storage.paragraph.field_authors.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/field.storage.paragraph.field_created_date.yml")) {
+    file_put_contents("{$cfgDir}/field.storage.paragraph.field_created_date.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - paragraphs
+id: paragraph.field_created_date
+field_name: field_created_date
+entity_type: paragraph
+type: datetime
+settings:
+  datetime_type: datetime
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+YML
+ . "\n");
+    ok('field.storage.paragraph.field_created_date.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/field.storage.paragraph.field_updated_date.yml")) {
+    file_put_contents("{$cfgDir}/field.storage.paragraph.field_updated_date.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - paragraphs
+id: paragraph.field_updated_date
+field_name: field_updated_date
+entity_type: paragraph
+type: datetime
+settings:
+  datetime_type: datetime
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+YML
+ . "\n");
+    ok('field.storage.paragraph.field_updated_date.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/field.field.paragraph.byline.field_authors.yml")) {
+    file_put_contents("{$cfgDir}/field.field.paragraph.byline.field_authors.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_authors
+    - node.type.profile
+    - paragraphs.paragraphs_type.byline
+  module:
+    - field_config_cardinality
+third_party_settings:
+  field_config_cardinality:
+    cardinality_config: '-1'
+    cardinality_label_config: false
+    unlimited_not_required: ''
+    limited_not_required: ''
+    limited_required: ''
+id: paragraph.byline.field_authors
+field_name: field_authors
+entity_type: paragraph
+bundle: byline
+label: Authors
+description: 'Select one or more Profile entries to display in the byline.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      profile: profile
+    sort:
+      field: title
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference
+YML
+ . "\n");
+    ok('field.field.paragraph.byline.field_authors.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/field.field.paragraph.byline.field_created_date.yml")) {
+    file_put_contents("{$cfgDir}/field.field.paragraph.byline.field_created_date.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_created_date
+    - paragraphs.paragraphs_type.byline
+  module:
+    - datetime
+    - field_config_cardinality
+third_party_settings:
+  field_config_cardinality:
+    cardinality_config: '1'
+    cardinality_label_config: false
+    unlimited_not_required: ''
+    limited_not_required: ''
+    limited_required: ''
+id: paragraph.byline.field_created_date
+field_name: field_created_date
+entity_type: paragraph
+bundle: byline
+label: 'Created date'
+description: 'Optional created or published date displayed in the byline.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime
+YML
+ . "\n");
+    ok('field.field.paragraph.byline.field_created_date.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/field.field.paragraph.byline.field_updated_date.yml")) {
+    file_put_contents("{$cfgDir}/field.field.paragraph.byline.field_updated_date.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_updated_date
+    - paragraphs.paragraphs_type.byline
+  module:
+    - datetime
+    - field_config_cardinality
+third_party_settings:
+  field_config_cardinality:
+    cardinality_config: '1'
+    cardinality_label_config: false
+    unlimited_not_required: ''
+    limited_not_required: ''
+    limited_required: ''
+id: paragraph.byline.field_updated_date
+field_name: field_updated_date
+entity_type: paragraph
+bundle: byline
+label: 'Updated date'
+description: 'Optional updated date displayed in the byline.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime
+YML
+ . "\n");
+    ok('field.field.paragraph.byline.field_updated_date.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/core.entity_form_display.paragraph.byline.default.yml")) {
+    file_put_contents("{$cfgDir}/core.entity_form_display.paragraph.byline.default.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.byline.field_authors
+    - field.field.paragraph.byline.field_created_date
+    - field.field.paragraph.byline.field_updated_date
+    - paragraphs.paragraphs_type.byline
+  module:
+    - datetime
+id: paragraph.byline.default
+targetEntityType: paragraph
+bundle: byline
+mode: default
+content:
+  field_authors:
+    type: entity_reference_autocomplete
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_created_date:
+    type: datetime_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_updated_date:
+    type: datetime_default
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true
+YML
+ . "\n");
+    ok('core.entity_form_display.paragraph.byline.default.yml');
+  }
+
+  if (!file_exists("{$cfgDir}/core.entity_view_display.paragraph.byline.default.yml")) {
+    file_put_contents("{$cfgDir}/core.entity_view_display.paragraph.byline.default.yml", <<<YML
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.byline.field_authors
+    - field.field.paragraph.byline.field_created_date
+    - field.field.paragraph.byline.field_updated_date
+    - paragraphs.paragraphs_type.byline
+  module:
+    - datetime
+id: paragraph.byline.default
+targetEntityType: paragraph
+bundle: byline
+mode: default
+content:
+  field_authors:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_created_date:
+    type: datetime_default
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_updated_date:
+    type: datetime_default
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  search_api_excerpt: true
+YML
+ . "\n");
+    ok('core.entity_view_display.paragraph.byline.default.yml');
+  }
+
+  if (!file_exists($twigOut)) {
+    file_put_contents($twigOut, <<<TWIG
+{%- embed '{$themeName}:byline' with {
+  authors_label: 'By',
+  created_label: 'Created',
+  updated_label: 'Updated',
+  _authors: content.field_authors,
+  _created_date: content.field_created_date,
+  _updated_date: content.field_updated_date,
+} only -%}
+  {%- block authors_block -%}
+    {% if _authors %}
+      <div class="c-byline__authors">
+        <span class="c-byline__authors-label">{{ authors_label }}</span>
+        <div class="c-byline__authors-content">{{ _authors }}</div>
+      </div>
+    {% endif %}
+  {%- endblock -%}
+
+  {%- block dates_block -%}
+    {% if _created_date or _updated_date %}
+      <div class="c-byline__dates">
+        <ul class="c-byline__dates-list">
+          {% if _created_date %}
+            <li class="c-byline__date-item c-byline__date-item--created">
+              <span class="c-byline__date-label">{{ created_label }}</span>
+              <span class="c-byline__date-value">{{ _created_date }}</span>
+            </li>
+          {% endif %}
+
+          {% if _updated_date %}
+            <li class="c-byline__date-item c-byline__date-item--updated">
+              <span class="c-byline__date-label">{{ updated_label }}</span>
+              <span class="c-byline__date-value">{{ _updated_date }}</span>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endif %}
+  {%- endblock -%}
+{%- endembed -%}
+TWIG
+ . "\n");
+    ok('paragraph--byline.html.twig');
   }
 }
 

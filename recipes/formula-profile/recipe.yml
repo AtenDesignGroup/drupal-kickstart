@@ -1,0 +1,9 @@
+name: '🦄 🌈  Formula: Profile'
+description: 'Provides a Profile content type with a primary image field for author and person content.'
+type: 'Site'
+
+recipes:
+  - formula-media
+
+config:
+  strict: false
