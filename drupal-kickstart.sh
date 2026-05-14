@@ -141,6 +141,7 @@ fi
 # 2. PROMPT COLLECTION (skipped when resuming)
 # =============================================================================
 if [[ "$RESUME" == "yes" ]]; then
+  DK_PROFILE="${DK_PROFILE:-minimal}"
   # Derive theme path from loaded values — no prompts needed
   DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
   DK_THEME_DESC="${DK_THEME_DESC:-${DK_THEME_NAME}}"
@@ -208,6 +209,9 @@ else
   prompt_yn DK_WIRE_COMPONENTS "Wire prototype components (paragraph recipes + Twig templates)?" "$DEFAULT_WIRE"
 fi
 
+# Ensure profile always has a usable value.
+DK_PROFILE="${DK_PROFILE:-minimal}"
+
 # =============================================================================
 # 3. PERSIST VALUES TO .kickstart.env (skipped on resume — file already exists)
 # =============================================================================
@@ -216,6 +220,7 @@ if [[ "$RESUME" != "yes" ]]; then
 # Drupal Kickstart — saved configuration
 # Generated: $(date)
 DK_DDEV_NAME="${DK_DDEV_NAME}"
+DK_PROFILE="${DK_PROFILE}"
 DK_THEME_NAME="${DK_THEME_NAME}"
 DK_THEME_DESC="${DK_THEME_DESC}"
 DK_THEME_ABBREVIATED="${DK_THEME_ABBREVIATED}"
@@ -254,6 +259,7 @@ fi
 header "Review — Please Confirm Your Settings"
 echo
 echo -e "    ${BOLD}Project name    :${RESET} ${DK_DDEV_NAME}"
+echo -e "    ${BOLD}Install profile :${RESET} ${DK_PROFILE}"
 echo -e "    ${BOLD}Theme name      :${RESET} ${DK_THEME_NAME}"
 echo -e "    ${BOLD}Theme display   :${RESET} ${DK_THEME_DESC}"
 if [[ -n "$DK_THEME_ABBREVIATED" ]]; then
@@ -479,8 +485,13 @@ fi
 # =============================================================================
 header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
-# Uninstall the Stark theme, which is enabled by default in the minimal profile.
-ddev drush theme:uninstall stark
+# Uninstall Stark only when the selected profile enabled it.
+if ddev drush php:eval '$themes = \Drupal::config("core.extension")->get("theme") ?? []; exit((int)!isset($themes["stark"]));'; then
+  ddev drush theme:uninstall stark
+  info "Stark theme uninstalled"
+else
+  info "Stark theme not enabled for profile ${DK_PROFILE} — skipping uninstall"
+fi
 # Allow installation of optional recipes (skipped in CI)
 if [[ "${CI:-}" != "true" ]]; then
   ddev recipe
