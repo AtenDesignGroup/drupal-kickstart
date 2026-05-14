@@ -163,6 +163,10 @@ else
       | tr -cd '[:alnum:]_' \
       | sed 's/^[0-9_]*//; s/_*$//'
   }
+
+  DEFAULT_PROFILE="${DK_PROFILE:-minimal}"
+  prompt DK_PROFILE "Drupal install profile (e.g. minimal, standard, demo_umami)" "$DEFAULT_PROFILE"
+
   DEFAULT_THEME="$(sanitize_machine_name "${DK_THEME_NAME:-${DK_DDEV_NAME}_theme}")"
   prompt DK_THEME_NAME "Theme name (machine name)" "$DEFAULT_THEME"
   # Sanitize whatever the user typed as well
@@ -436,8 +440,8 @@ mkdir -p web/sites/default/files
 chmod 755 web/sites/default/files
 info "Public files directory ensured (web/sites/default/files)"
 
-SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install minimal
-info "Drupal installed via ddev site-install (minimal profile)"
+SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install "${DK_PROFILE:-minimal}"
+info "Drupal installed (profile: ${DK_PROFILE:-minimal}, admin: ${ADMIN_USER})"
 
 # drush site:install rewrites settings.php, removing the settings.ddev.php
 # include. Re-run setup-settings to restore it.
@@ -521,6 +525,8 @@ echo -e "${GREEN}${BOLD}========================================================
 echo
 echo -e "  ${BOLD}Site URL        :${RESET} https://${DK_DDEV_NAME}.ddev.site"
 echo -e "  ${BOLD}Theme path      :${RESET} ${DK_THEME_PATH}"
+echo -e "  ${BOLD}Admin username  :${RESET} ${DK_DRUPAL_ADMIN_USERNAME}"
+echo -e "  ${BOLD}Admin password  :${RESET} ${DK_DRUPAL_ADMIN_PASSWORD}"
 if [[ -n "$DK_COMMIT_PREFIX" ]]; then
   echo -e "  ${BOLD}Commit format   :${RESET} ${DK_COMMIT_PREFIX}-123: My commit message"
 fi
