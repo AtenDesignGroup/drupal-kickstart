@@ -1,0 +1,9 @@
+uuid: e9f39635-53be-4c4e-b9cc-0904d12ff096
+langcode: en
+status: true
+dependencies: {  }
+name: 'Profile type'
+vid: profile_type
+description: null
+weight: 0
+new_revision: false

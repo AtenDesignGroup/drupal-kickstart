@@ -1,0 +1,21 @@
+uuid: fdd1e58a-2a54-4905-b982-be7dea4dce4c
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+    - search_api_exclude
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+  search_api_exclude:
+    enabled: false
+name: Profile
+type: profile
+description: 'Profile content type used for people and content related information.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: true

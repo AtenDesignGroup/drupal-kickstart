@@ -1,0 +1,10 @@
+uuid: e1bf008a-5e51-4c30-b3ee-3f60f2f952ef
+langcode: en
+status: true
+dependencies: {  }
+id: byline
+label: Byline
+icon_uuid: null
+icon_default: null
+description: 'Adds a byline to a post Byline blocks are typically used on News posts to display metadata and authorship for the News post.'
+behavior_plugins: {  }

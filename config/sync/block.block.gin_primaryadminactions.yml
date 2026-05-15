@@ -1,18 +1,18 @@
-uuid: d6aeea95-85bb-4ab3-96f6-f52ffb4f4d6c
+uuid: b049c574-20c6-4b1e-8445-e72dd737e3d5
 langcode: en
 status: true
 dependencies:
   theme:
     - gin
-id: gin_local_actions
+id: gin_primaryadminactions
 theme: gin
 region: pre_content
-weight: -10
+weight: -3
 provider: null
 plugin: local_actions_block
 settings:
   id: local_actions_block
-  label: 'Local actions'
+  label: 'Primary admin actions'
   label_display: '0'
   provider: core
 visibility: {  }
