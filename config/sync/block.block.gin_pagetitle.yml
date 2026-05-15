@@ -1,0 +1,18 @@
+uuid: f10205d3-1a33-43b7-baa0-b7511ecaf316
+langcode: en
+status: true
+dependencies:
+  theme:
+    - gin
+id: gin_pagetitle
+theme: gin
+region: header
+weight: -1
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  label_display: '0'
+  provider: core
+visibility: {  }

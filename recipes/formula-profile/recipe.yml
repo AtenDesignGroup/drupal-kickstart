@@ -1,0 +1,22 @@
+name: '🦄 🌈  Formula: Profile'
+description: 'Recipe to build profile functionality in Drupal.'
+type: 'Site'
+
+recipes:
+  - formula-media
+  - formula-paragraphs
+
+install:
+  # Core modules required by this recipe's config dependencies.
+  - node
+  - taxonomy
+  - options
+  - link
+  - menu_ui
+
+  # Contrib modules required by this recipe's config dependencies.
+  - search_api_exclude
+  - field_config_cardinality
+
+config:
+  strict: false

@@ -9,7 +9,7 @@ dependencies:
 id: dk_start_theme_notificationmessages
 theme: dk_start_theme
 region: alert
-weight: -2
+weight: -1
 provider: null
 plugin: notification_message
 settings:

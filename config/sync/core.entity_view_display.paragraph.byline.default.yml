@@ -1,0 +1,44 @@
+uuid: 8af6be0f-48d8-4a21-8ad4-766b9d3b0c33
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.byline.field_authors
+    - field.field.paragraph.byline.field_created_date
+    - field.field.paragraph.byline.field_updated_date
+    - paragraphs.paragraphs_type.byline
+  module:
+    - datetime
+id: paragraph.byline.default
+targetEntityType: paragraph
+bundle: byline
+mode: default
+content:
+  field_authors:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_created_date:
+    type: datetime_default
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_updated_date:
+    type: datetime_default
+    label: hidden
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 1
+    region: content
+hidden:
+  search_api_excerpt: true
