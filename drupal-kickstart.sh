@@ -387,7 +387,7 @@ if [[ ! -f "web/index.php" ]]; then
   info "Running composer create-project in container..."
   # Set platform.php before create-project so Composer resolves against the configured PHP version
   # from the start rather than using the container's detected version.
-  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:^11.2' /tmp/dp --no-interaction"
+  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:~11.3.16' /tmp/dp --no-interaction"
   ddev exec bash -c "rsync -a /tmp/dp/ /var/www/html/"
   ddev composer config platform.php ${DK_PHP_VERSION}
   info "Drupal scaffold created (11.2.x, platform.php ${DK_PHP_VERSION})"
