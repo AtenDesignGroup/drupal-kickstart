@@ -1,0 +1,34 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Breadcrumbs
+description: Breadcrumbs component
+status: 'stable'
+slots:
+  items_block: { title: Breadcrumbs Items Block }
+props:
+  type: object
+  properties:
+    id:
+      type: string
+      title: Accessible Nav ID
+      description: HTML id shared between the nav aria-labelledby and its visually-hidden heading.
+    items:
+      type: array
+      title: Items
+      items:
+        type: object
+        properties:
+          text:
+            type: string
+            title: Text
+            examples:
+              - "Home"
+          url:
+            type: string
+            title: Title
+            examples:
+              - "/"
+          is_current_page:
+            type: boolean
+            title: Current page
+            examples:
+              - false

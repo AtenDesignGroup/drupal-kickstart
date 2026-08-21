@@ -1,0 +1,22 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Pullquote
+status: 'experimental'
+description: A Pullquote Component
+slots:
+  pullquote: { title: Pullquote Content }
+  citation: { title: Pullquote Citation }
+props:
+  type: object
+  properties:
+    text:
+      type: ['string', 'null']
+      title: Quote
+      description: The quote paragraph
+      examples:
+        - 'Example quote paragraph. Interdum risus tortor turpis gravida sed. Risus sit et egestas tellus ac sed.'
+    credit:
+      type: ['string', 'null']
+      title: Quote Credit
+      description: The optional second quote credit.
+      examples:
+        - Example Quote Credit

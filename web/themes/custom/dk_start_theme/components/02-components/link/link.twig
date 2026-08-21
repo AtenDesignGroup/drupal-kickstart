@@ -1,0 +1,14 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-link'
+] %}
+
+<a href="{{link.url}}" {{ attributes.addClass(classes)|without('href') }}>
+  {{ link.title }}
+  {% if icon %}
+    <span class='c-link__icon'>
+      {{ include('dk_start_theme:icon', {id: icon|default('arrow-right')}, with_context = false) }}
+    </span>
+  {% endif %}
+</a>

@@ -1,0 +1,25 @@
+uuid: 95fb062e-2533-4987-afb5-9902715421ed
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_alert_type
+    - paragraphs.paragraphs_type.alert
+  module:
+    - options
+_core:
+  default_config_hash: teAcbGHtGxeTs9krtr8k7IWMBQNG3wYD5G14GM8-nBs
+id: paragraph.alert.field_alert_type
+field_name: field_alert_type
+entity_type: paragraph
+bundle: alert
+label: 'Alert Type'
+description: 'The severity level of the alert.'
+required: true
+translatable: false
+default_value:
+  -
+    value: status
+default_value_callback: ''
+settings: {  }
+field_type: list_string

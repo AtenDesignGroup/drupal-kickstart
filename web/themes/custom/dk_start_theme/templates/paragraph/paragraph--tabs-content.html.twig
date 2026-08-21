@@ -1,0 +1,14 @@
+{%- set items = [] -%}
+{%- for item in paragraph.field_tab_items -%}
+  {%- set child = item.entity -%}
+  {%- set items = items|merge([{
+    id:      'tab-' ~ paragraph.id() ~ '-' ~ loop.index0,
+    title:   child.field_title.value,
+    content: child.field_formatted_text.processed,
+  }]) -%}
+{%- endfor -%}
+
+{{- include('dk_start_theme:tabs-content', {
+  items: items,
+  'data-tabs-breakpoint': 768,
+}) -}}

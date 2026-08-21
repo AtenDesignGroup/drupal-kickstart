@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: Tabs Content Item'
-description: 'Child paragraph for the tabs-content component. Rendered via embed of the DK_THEME_NAME SDC tabs-content component.'
+description: 'Child paragraph for the tabs-content component. Rendered via embed of the dk_start_theme SDC tabs-content component.'
 type: 'Paragraphs'
 
 recipes:

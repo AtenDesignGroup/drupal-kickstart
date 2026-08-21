@@ -1,0 +1,19 @@
+{# Build slides array — iterate numeric deltas of multi-value media field. #}
+{%- set slides_items = [] -%}
+{%- for delta, item in content.field_slides -%}
+  {%- if delta|slice(0, 1) != '#' -%}
+    {%- set slides_items = slides_items|merge([{attributes: {}, content: item|render}]) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{{- include('dk_start_theme:slideshow', {
+  heading: content.field_title|render|striptags|trim,
+  slides: slides_items,
+  options: {
+    type: 'slide',
+    perPage: 1,
+    pagination: true,
+    autoplay: false,
+  }
+}) -}}
+

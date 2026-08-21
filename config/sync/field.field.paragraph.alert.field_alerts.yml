@@ -1,0 +1,26 @@
+uuid: 681ca904-e737-4268-9830-1b2364840bad
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_alerts
+    - filter.format.plain_text
+    - paragraphs.paragraphs_type.alert
+  module:
+    - text
+_core:
+  default_config_hash: BjxIYdc53-joCoFooKR20dJs4Q6lHg5udaFDAiMqAps
+id: paragraph.alert.field_alerts
+field_name: field_alerts
+entity_type: paragraph
+bundle: alert
+label: 'Alert Messages'
+description: 'One message per item. Renders as a list when more than one is provided.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats:
+    - plain_text
+field_type: text_long

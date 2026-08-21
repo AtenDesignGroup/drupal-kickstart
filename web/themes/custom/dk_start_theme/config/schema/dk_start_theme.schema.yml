@@ -1,0 +1,8 @@
+# Schema for the configuration files of the dk_start_theme theme.
+dk_start_theme.settings:
+  type: theme_settings
+  label: 'dk_start_theme settings'
+  mapping:
+    display_back_to_top:
+      type: boolean
+      label: 'Display a back to top button on the site'

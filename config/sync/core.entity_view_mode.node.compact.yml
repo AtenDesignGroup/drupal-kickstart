@@ -1,0 +1,11 @@
+uuid: 1ec03a60-b464-4d61-8440-ebb318c88d32
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.compact
+label: Compact
+description: null
+targetEntityType: node
+cache: true

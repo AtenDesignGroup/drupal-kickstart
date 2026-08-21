@@ -1,0 +1,25 @@
+uuid: 0f07e0d7-7058-42da-9f9b-f21850a6f496
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_variant
+    - paragraphs.paragraphs_type.teaser
+  module:
+    - options
+_core:
+  default_config_hash: Xwp4PJ4cjxXg1qsxAbj-loVZ0XLGOpZfs_SpQUMgzxE
+id: paragraph.teaser.field_variant
+field_name: field_variant
+entity_type: paragraph
+bundle: teaser
+label: Variant
+description: 'Visual display variant. Card shows media above content; Panel overlays content on background media.'
+required: false
+translatable: false
+default_value:
+  -
+    value: card
+default_value_callback: ''
+settings: {  }
+field_type: list_string

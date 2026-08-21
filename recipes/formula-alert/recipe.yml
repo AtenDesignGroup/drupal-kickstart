@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: Alerts'
-description: 'Provides a Alerts paragraph type wired to the DK_THEME_NAME SDC alert component.'
+description: 'Provides a Alerts paragraph type wired to the dk_start_theme SDC alert component.'
 type: 'Paragraphs'
 
 recipes:

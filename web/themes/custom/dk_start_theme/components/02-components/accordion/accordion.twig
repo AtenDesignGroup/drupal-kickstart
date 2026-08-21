@@ -1,0 +1,41 @@
+{#
+/**
+ * @file
+ * Components - Accordion
+ *
+ * Available props:
+ * - attributes: [array] Any custom attributes needed for this component.
+ * - id: [string] Machine name representing a single accordion element.
+ * - heading: [string] Title of single accordion element.
+ *
+ * Available slots:
+ * - trigger: Any content needing to take on the heading/button/trigger of the accordion.
+ * - content: Any content needing to be placed under the Accordion panel.
+ */
+#}
+
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-accordion',
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  {% block trigger %}
+    <h3 id="accordion-{{ id }}" class="c-accordion__heading">
+      <button type="button"
+              aria-expanded="false"
+              class="c-accordion__trigger"
+              aria-controls="accordion-content-{{ id }}">
+        {{ heading }}
+      </button>
+    </h3>
+  {% endblock %}
+
+  <div id="accordion-content-{{ id }}"
+       class="c-accordion__content"
+       role="region"
+       aria-labelledby="accordion-{{ id }}">
+    {% block content %}{% endblock %}
+  </div>
+</div>

@@ -1,0 +1,25 @@
+uuid: 6a015e44-dfaa-4eca-8434-29779f827d34
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.main
+  module:
+    - system
+  theme:
+    - dk_start_theme
+id: dk_start_theme_mainnavigation
+theme: dk_start_theme
+region: navigation
+weight: -2
+provider: null
+plugin: 'system_menu_block:main'
+settings:
+  id: 'system_menu_block:main'
+  label: 'Main navigation'
+  label_display: visible
+  provider: system
+  level: 1
+  depth: null
+  expand_all_items: false
+visibility: {  }

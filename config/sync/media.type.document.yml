@@ -1,0 +1,16 @@
+uuid: 8500a976-8643-4d64-bc8e-e6b54991701a
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: nEBbwQxN3Y4sWiAcRmujHq1vdVg7NSZtP8VfPif6oL8
+id: document
+label: Document
+description: 'Use local files for reusable media (PDFs, spreadsheets, etc).'
+source: file
+queue_thumbnail_downloads: false
+new_revision: false
+source_configuration:
+  source_field: field_media_document
+field_map:
+  thumbnail: thumbnail

@@ -90,10 +90,19 @@ $settings['config_exclude_modules'] = [
 // Redis caching — enabled via REDIS_ENABLED env var, set by setup-pantheon
 // after the redis module has been installed by the formula-pantheon recipe.
 if (!defined('MAINTENANCE_MODE') && getenv('REDIS_ENABLED') === 'true') {
-  $settings['redis.connection']['interface'] = 'PhpRedis';
-  $settings['redis.connection']['host'] = 'redis';
-  $settings['cache']['default'] = 'cache.backend.redis';
-  $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
+  // Register the Redis module PSR-4 namespace so class_exists() works before
+  // the full Drupal module autoloader is active.
+  $class_loader->addPsr4('Drupal\\redis\\', 'modules/contrib/redis/src');
+
+  if (extension_loaded('redis') && class_exists('Drupal\\redis\\ClientFactory')) {
+    $settings['redis.connection']['interface'] = 'PhpRedis';
+    $settings['redis.connection']['host'] = 'redis';
+    $settings['cache']['default'] = 'cache.backend.redis';
+    // redis.services.yml defines redis.factory, which example.services.yml
+    // depends on for cache_tags.invalidator.checksum. Load it first.
+    $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/redis.services.yml';
+    $settings['container_yamls'][] = DRUPAL_ROOT . '/modules/contrib/redis/example.services.yml';
+  }
 }
 
 // Override a key locally.

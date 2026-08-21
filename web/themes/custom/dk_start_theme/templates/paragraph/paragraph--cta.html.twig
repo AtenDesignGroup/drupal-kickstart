@@ -1,0 +1,11 @@
+{%- set _link = content.field_link[0] is defined ? content.field_link[0] : null -%}
+
+{%- set _props = {
+  title: content.field_title|render|striptags|trim,
+  text: content.field_formatted_text
+} -%}
+{%- if _link -%}
+  {%- set _props = _props|merge({link: {title: _link['#title'], url: _link['#url'].toString()}}) -%}
+{%- endif -%}
+
+{{- include('dk_start_theme:cta', _props) -}}

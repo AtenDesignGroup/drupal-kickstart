@@ -1,0 +1,31 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: 'Video'
+status: 'experimental'
+description: 'A simple video component'
+slots:
+  media_block: { title: Video Content }
+  caption_block: { title: Video Caption }
+props:
+  type: object
+  properties:
+    title:
+      type: ['string', 'null']
+      title: 'Video Title'
+      description: 'The title for the video.'
+      examples:
+        - 'YouTube Example'
+        - 'Vimeo Example'
+    media:
+      type: ['string', 'null']
+      title: 'Video URL'
+      description: 'The embed url for either YouTube or Vimeo.'
+      examples:
+        - 'https://youtu.be/0RWs6uxR9yg'
+        - 'https://player.vimeo.com/video/728948316'
+    caption:
+      type: ['string', 'null']
+      title: 'Caption Text'
+      description: 'The caption text for video.'
+      examples:
+        - 'In exercitation in tempor ea enim elit id consequat.'
+        - 'Nostrud in excepteur cupidatat eu consequat consequat proident ut occaecat reprehenderit do do ipsum. Fugiat incididunt culpa exercitation sit ad nisi laborum esse deserunt dolor in laborum.'

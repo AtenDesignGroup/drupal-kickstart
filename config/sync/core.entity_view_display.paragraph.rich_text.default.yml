@@ -1,0 +1,30 @@
+uuid: 39ed743c-6429-4949-94b2-f3d823ca3684
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.rich_text.field_formatted_text
+    - paragraphs.paragraphs_type.rich_text
+  module:
+    - nomarkup
+    - text
+_core:
+  default_config_hash: F5_FxK8c0MmpyXK51XpwJ-G36DkCLWZ1rxEOPf-yixI
+id: paragraph.rich_text.default
+targetEntityType: paragraph
+bundle: rich_text
+mode: default
+content:
+  field_formatted_text:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

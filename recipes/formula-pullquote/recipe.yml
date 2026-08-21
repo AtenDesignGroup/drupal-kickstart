@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: Pullquote'
-description: 'Provides a Pullquote paragraph type wired to the DK_THEME_NAME SDC pullquote component.'
+description: 'Provides a Pullquote paragraph type wired to the dk_start_theme SDC pullquote component.'
 type: 'Paragraphs'
 
 recipes:

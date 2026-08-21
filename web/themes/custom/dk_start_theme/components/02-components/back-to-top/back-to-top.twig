@@ -1,0 +1,12 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-back-to-top',
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  <a class='c-back-to-top__inner' href='#top'>
+    {{ include('dk_start_theme:icon', {id: iconType|default('arrow-up')}, with_context = false) }}
+    <span class='visually-hidden'>{{ text|default('Back to Top') }}</span>
+  </a>
+</div>

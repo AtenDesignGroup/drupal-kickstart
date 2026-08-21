@@ -1,0 +1,30 @@
+@use 'partials' as *;
+
+.c-back-to-top {
+  display: flex;
+  justify-content: right;
+}
+
+.c-back-to-top__inner {
+  background-color: black;
+  border-radius: 50%;
+  box-shadow: 0px 2px 16px -8px #231f20;
+  box-sizing: content-box;
+  display: flex;
+  height: rem(24px);
+  line-height: 1;
+  transition: all 0.35s ease-in-out;
+  padding: rem(16px);
+  will-change: transform;
+  width: rem(24px);
+
+  .c-icon {
+    background-color: white;
+    block-size: 24px;
+    inline-size: 24px;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}

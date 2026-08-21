@@ -1,0 +1,32 @@
+//
+// WYSIWYG
+//
+// This file is used to scope styles to CKEditor 5.
+// Any other file imported here will be postprocessed and scoped
+// with the .ck-content class. See postcss.config.js in the theme
+// root for more information and configuration options.
+//
+//
+// - 01 - Imports
+//
+
+//------------------------------------
+//  01 - Imports
+//------------------------------------
+
+@use './reset';
+@use './forms';
+@use './headings.scss';
+@use './layout';
+@use './links';
+@use './lists';
+@use './media';
+@use './page';
+@use './tables';
+@use './text';
+@use '../../00-base/src/colors';
+@use '../../00-base/src/grid';
+@use '../../00-base/src/layers';
+@use '../../00-base/src/sizes';
+@use '../../00-base/src/spacing';
+@use '../../00-base/src/typography';

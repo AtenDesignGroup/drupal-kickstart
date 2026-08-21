@@ -1,0 +1,64 @@
+//
+//  Elements - Tables
+//
+
+//  Imports
+@use 'partials' as *;
+
+//  Base
+table {
+  @include type-scale(label, 16);
+  inline-size: 100%;
+  max-width: 100%;
+  border-spacing: 0;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+thead {
+  & th {
+    vertical-align: bottom;
+  }
+
+  & th,
+  & td {
+    border-bottom: 1px solid var(--dk-color-dark);
+  }
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--dk-color-dark);
+  font-weight: var(--dk-fw-bold);
+}
+
+// Remove top border from thead by default
+caption + thead tr:first-child th,
+caption + thead tr:first-child td,
+colgroup + thead tr:first-child th,
+colgroup + thead tr:first-child td,
+thead:first-child tr:first-child th,
+thead:first-child tr:first-child td {
+  border-top: 0;
+}
+
+// Account for multiple tbody instances
+tbody + tbody {
+  border-top: 2px solid var(--dk-color-dark);
+}
+
+tr.even {
+  background-color: var(--dk-color-gray-200);
+}
+
+//  Table Wrap
+.js-table-wrapper {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}

@@ -1,0 +1,26 @@
+uuid: c27803c3-0037-4a17-963a-901d1efcca15
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_formatted_text
+    - filter.format.plain_text
+    - paragraphs.paragraphs_type.video
+  module:
+    - text
+_core:
+  default_config_hash: 0VULW2ja0ONk-ixEnrbioViITGd_n1V1CBTFJhTLIGI
+id: paragraph.video.field_formatted_text
+field_name: field_formatted_text
+entity_type: paragraph
+bundle: video
+label: 'Video Embed URL'
+description: 'The embed URL for either YouTube or Vimeo (e.g. https://player.vimeo.com/video/123456).'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats:
+    - plain_text
+field_type: text_long

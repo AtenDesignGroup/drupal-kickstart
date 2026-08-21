@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: spacer'
-description: 'Provides a spacer paragraph type wired to the DK_THEME_NAME SDC spacer component.'
+description: 'Provides a spacer paragraph type wired to the dk_start_theme SDC spacer component.'
 type: 'Paragraphs'
 
 recipes:

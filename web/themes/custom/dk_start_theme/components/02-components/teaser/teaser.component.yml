@@ -1,0 +1,35 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Teaser
+status: 'experimental'
+description: A Teaser component
+props:
+  type: object
+  properties:
+    variant:
+      type: ['string', 'null']
+      title: Variant
+      enum:
+        - card
+        - panel
+    title:
+      type: ['string', 'null']
+      title: 'Title'
+      examples:
+        - 'A new exhibit opens at the Student Visitor Center'
+    media:
+      type: ['string', 'null']
+      title: Media
+      description: 'Rendered media markup (image, video, etc.) displayed above the teaser content.'
+    link:
+      type: 'object'
+      title: 'More Link'
+      properties:
+        text:
+          type: ['string', 'null']
+        url:
+          type: ['string', 'null']
+    body:
+      title: Body
+      type: ['string', 'null']
+      examples:
+        - '<p>The human body is a marvel and does so amazing things for us everyday.</p>'

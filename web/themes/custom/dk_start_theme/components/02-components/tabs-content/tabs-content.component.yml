@@ -1,0 +1,32 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Tabs Content
+status: stable
+group: Components
+props:
+  type: object
+  properties:
+    items:
+      title: Items
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            title: Tab ID
+            description: Unique machine name used for aria-controls and tab panel id.
+          title:
+            type: string
+            title: Tab Title
+            description: Label shown in the tab trigger button.
+          content:
+            type: string
+            title: Tab Content
+            description: Body content rendered inside the tab panel.
+slots:
+  content:
+    title: Content
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/once

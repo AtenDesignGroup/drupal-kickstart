@@ -1,5 +1,5 @@
 name: '🦄 🌈  Formula: Accordion'
-description: 'Provides an Accordion paragraph type (container + accordion_item child) wired to the DK_THEME_NAME SDC accordion component via embed.'
+description: 'Provides an Accordion paragraph type (container + accordion_item child) wired to the dk_start_theme SDC accordion component via embed.'
 type: 'Paragraphs'
 
 recipes:

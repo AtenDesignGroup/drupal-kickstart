@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override to display an Remote Video Media item.
+ *
+ * Available variables:
+ * - No additional variables are available for this Media entity.
+ *
+ * @see template_preprocess_media()
+ * @ingroup themeable
+ */
+#}
+
+{% extends 'media.html.twig' %}
+
+{% set rendered_content = content|without(
+  'field_media_oembed_video',
+) %}
+
+{% block content %}
+  {{ content.field_media_oembed_video|field_value }}
+  {{ rendered_content }}
+{% endblock %}

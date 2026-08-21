@@ -1,0 +1,20 @@
+uuid: 7b399894-9dfb-48d6-88c4-250f0afdfc4d
+langcode: en
+status: true
+dependencies:
+  theme:
+    - dk_start_theme
+id: dk_start_theme_tabs
+theme: dk_start_theme
+region: alert
+weight: -2
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  label_display: '0'
+  provider: core
+  primary: true
+  secondary: true
+visibility: {  }

@@ -1,0 +1,11 @@
+{# Build alerts array from multi-value text_long field. #}
+{%- set alerts_items = [] -%}
+{%- for item in paragraph.field_alerts -%}
+  {%- set alerts_items = alerts_items|merge([item.value]) -%}
+{%- endfor -%}
+
+{{- include('dk_start_theme:alert', {
+  type: paragraph.field_alert_type.value|default('status'),
+  heading: content.field_title|render|striptags|trim,
+  alerts: alerts_items
+}) -}}

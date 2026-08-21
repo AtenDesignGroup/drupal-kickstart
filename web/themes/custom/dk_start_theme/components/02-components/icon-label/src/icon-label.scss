@@ -1,0 +1,25 @@
+//
+//  @file
+//  Elements - Icon Label
+//
+//
+
+//
+//  Imports
+//
+@use 'partials' as *;
+
+.e-icon-label {
+  align-items: var(--icon-label-alignment, center);
+  display: flex;
+  gap: var(--icon-label-gap, 8px);
+
+  .icon {
+    @include square(var(--icon-label-size, 24px));
+  }
+
+  svg {
+    @include square(100%);
+    fill: currentColor;
+  }
+}

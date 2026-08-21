@@ -1,0 +1,16 @@
+{% set attributes = create_attribute(attributes) %}
+{# See 01-elements/button.scss for styles. #}
+{% set classes = ['button'] %}
+
+<a href="{{ link.url }}" {{ attributes.addClass(classes) }}>
+
+  {% if icon_prefix %}
+    <span class='button__icon'>{{ icon_prefix }}</span>
+  {% endif %}
+
+  <span>{{ link.title }}</span>
+
+  {% if icon_suffix %}
+    <span class='button__icon'>{{ icon_suffix }}</span>
+  {% endif %}
+</a>

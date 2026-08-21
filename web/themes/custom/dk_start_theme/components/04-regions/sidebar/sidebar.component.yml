@@ -1,0 +1,16 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: 'Sidebar'
+status: 'experimental'
+slots:
+  sidebar_region: { title: 'Sidebar Region' }
+props:
+  type: object
+  properties:
+    class:
+      type: string
+      title: CSS Class
+      description: Additional CSS class(es) applied to the aside element.
+    sidebar_content:
+      type: string
+      title: 'Sidebar Content'
+      description: 'Rendered content for the sidebar region.'

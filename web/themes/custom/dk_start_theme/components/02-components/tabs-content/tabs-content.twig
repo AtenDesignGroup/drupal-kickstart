@@ -1,0 +1,54 @@
+{#
+/**
+ * @file
+ * Components - Tab Content
+ * This component will automatically, and responsively format a group of tab items
+ * with a title and content, into both a horizontal tabs group for desktop devices
+ * and accordion for smaller device sizes.
+ *
+ * Available props:
+ * - attributes: [string] Any custom attributes needed for this component.
+ * - items: [array] Expecting a grouping of tab items.
+ *      - id: [string] Expecting an unique identifying machine name.
+ *      - title: [string] Expecting the primary title for a tab group.
+ *      - content: [string] Expecting the primary content for a tab group.
+ *
+ * Available slots:
+ * - content
+ */
+#}
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-tabs-content'
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  <div role="tablist" class="c-tabs-content__navigation"></div>
+
+  {% block content %}
+    {% if items is not empty %}
+      {% for item in items %}
+        <div id="{{ item.id }}"
+             class="c-tabs-content__group {{ loop.index0 == 0 ? 'expanded' }}"
+             role="tabpanel"
+             aria-labelledby="tab-{{ item.id }}">
+          <button type="button"
+                  id="tab-{{ item.id }}"
+                  class="c-tabs-content__trigger {{ loop.index0 == 0 ? 'expanded' }}"
+                  role="tab"
+                  aria-haspopup="true"
+                  aria-selected="true"
+                  aria-expanded="true"
+                  aria-controls="{{ item.id }}">
+            {{ item.title }}
+          </button>
+
+          <div class="c-tabs-content__content">
+            {{ item.content }}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endblock %}
+</div>

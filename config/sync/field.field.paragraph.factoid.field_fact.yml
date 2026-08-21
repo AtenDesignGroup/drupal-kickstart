@@ -1,0 +1,21 @@
+uuid: dffbd699-6c3a-47be-becb-f98d6d69e50a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_fact
+    - paragraphs.paragraphs_type.factoid
+_core:
+  default_config_hash: WIozazGOJi9Eosh0L5_8vtyDG6y9xN2J6oHHqPTdmGA
+id: paragraph.factoid.field_fact
+field_name: field_fact
+entity_type: paragraph
+bundle: factoid
+label: Fact
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

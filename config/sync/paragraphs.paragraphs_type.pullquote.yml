@@ -1,0 +1,12 @@
+uuid: 7a031965-1d1e-4e5d-9524-95a1cb9c58ee
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: FtHeHFsTK7ArjpWNkHGR8dfgMZ8RVlirWbAyMl0OZEc
+id: pullquote
+label: Pullquote
+icon_uuid: null
+icon_default: null
+description: 'Use a <em>pullquote</em> to highlight a key passage of text.'
+behavior_plugins: {  }

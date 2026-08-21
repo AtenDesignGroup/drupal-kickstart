@@ -1,0 +1,32 @@
+uuid: 2692b435-0336-4160-9603-869f86a7aba5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_caption
+    - paragraphs.paragraphs_type.media
+  module:
+    - field_config_cardinality
+    - text
+third_party_settings:
+  field_config_cardinality:
+    cardinality_config: '1'
+    cardinality_label_config: false
+    unlimited_not_required: ''
+    limited_not_required: ''
+    limited_required: ''
+_core:
+  default_config_hash: _CRW0qsM_tQn8SZbP-qhVIA4lY8PZnjPThwkRyl83xA
+id: paragraph.media.field_caption
+field_name: field_caption
+entity_type: paragraph
+bundle: media
+label: Caption
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  allowed_formats: {  }
+field_type: text_long

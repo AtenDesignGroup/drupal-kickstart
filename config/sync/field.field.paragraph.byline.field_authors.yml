@@ -1,0 +1,38 @@
+uuid: d90ce8fe-75bd-40d9-a2d3-c6bceee7ab4f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_authors
+    - node.type.profile
+    - paragraphs.paragraphs_type.byline
+  module:
+    - field_config_cardinality
+third_party_settings:
+  field_config_cardinality:
+    cardinality_config: '1'
+    cardinality_label_config: false
+    unlimited_not_required: ''
+    limited_not_required: ''
+    limited_required: ''
+id: paragraph.byline.field_authors
+field_name: field_authors
+entity_type: paragraph
+bundle: byline
+label: Authors
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      profile: profile
+    sort:
+      field: title
+      direction: ASC
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

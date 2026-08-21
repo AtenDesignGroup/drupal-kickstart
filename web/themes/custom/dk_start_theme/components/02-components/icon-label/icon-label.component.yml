@@ -1,0 +1,19 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Icon Label
+status: stable
+group: Elements
+props:
+  type: object
+  properties:
+    hide_text:
+      title: Hide Text
+      type: boolean
+    icon_before:
+      title: Icon Before
+      type: string
+    icon_after:
+      title: Icon After
+      type: string
+    text:
+      title: Text
+      type: string

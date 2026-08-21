@@ -1,0 +1,29 @@
+uuid: df0667bc-4662-4ae9-8a5f-0edfbac5b412
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - paragraphs
+_core:
+  default_config_hash: Db9iYrqYBmTG5GDphVbB1j9VOA7wzgC-MhJCSF59zt4
+id: paragraph.field_variant
+field_name: field_variant
+entity_type: paragraph
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: card
+      label: Card
+    -
+      value: panel
+      label: Panel
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

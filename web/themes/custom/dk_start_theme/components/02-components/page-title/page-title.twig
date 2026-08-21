@@ -1,0 +1,9 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-page-title'
+] %}
+
+<h1 {{ attributes.addClass(classes) }}>
+  {{title}}
+</h1>

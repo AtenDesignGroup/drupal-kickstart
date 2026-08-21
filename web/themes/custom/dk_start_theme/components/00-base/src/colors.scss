@@ -1,0 +1,60 @@
+//
+// Base - Color
+//
+// - 01 - Theme Colors
+// - 02 - Grayscale
+// - 03 - Semantic Colors
+//
+
+
+//------------------------------------
+//  01 - Theme Colors
+//------------------------------------
+
+:root {
+  --dk-color-blue: #0d6efd;
+  --dk-color-indigo: #6610f2;
+  --dk-color-purple: #6f42c1;
+  --dk-color-pink: #d63384;
+  --dk-color-red: #dc3545;
+  --dk-color-orange: #fd7e14;
+  --dk-color-yellow: #ffc107;
+  --dk-color-green: #198754;
+  --dk-color-teal: #20c997;
+  --dk-color-cyan: #0dcaf0;
+}
+
+
+//------------------------------------
+//  02 - Grayscale
+//------------------------------------
+
+:root {
+  --dk-color-white: #ffffff;
+  --dk-color-gray-100: #f8f9fa;
+  --dk-color-gray-200: #e9ecef;
+  --dk-color-gray-300: #dee2e6;
+  --dk-color-gray-400: #ced4da;
+  --dk-color-gray-500: #adb5bd;
+  --dk-color-gray-600: #6c757d;
+  --dk-color-gray-700: #495057;
+  --dk-color-gray-800: #343a40;
+  --dk-color-gray-900: #212529;
+  --dk-color-black: #000000;
+}
+
+
+//------------------------------------
+//  03 - Semantic Colors
+//------------------------------------
+
+:root {
+  --dk-color-primary: var(--dk-color-blue);
+  --dk-color-secondary: var(--dk-color-gray-900);
+  --dk-color-success: var(--dk-color-green);
+  --dk-color-info: var(--dk-color-cyan);
+  --dk-color-warning: var(--dk-color-yellow);
+  --dk-color-danger: var(--dk-color-red);
+  --dk-color-light: var(--dk-color-gray-100);
+  --dk-color-dark: var(--dk-color-gray-900);
+}

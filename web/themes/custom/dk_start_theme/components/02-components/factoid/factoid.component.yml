@@ -1,0 +1,29 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Factoid
+status: stable
+description: 'A fact callout displaying an optional icon, a primary fact string, and a fact label.'
+group: Components
+props:
+  type: object
+  properties:
+    fact_icon:
+      type: ['array', 'string', 'null']
+      title: Fact icon
+      description: 'Optional rendered icon media field (Drupal render array) or string for demos.'
+      examples:
+        - ''
+        - '★'
+    fact:
+      type: ['string', 'null']
+      title: Fact
+      description: 'Primary fact text, such as "1.98B" or "30+".'
+      examples:
+        - '1.98B'
+        - '30+'
+    fact_label:
+      type: ['string', 'null']
+      title: Fact label
+      description: 'Supporting label shown beneath the fact.'
+      examples:
+        - 'Sponsored Research'
+        - 'Shared Instrumentation Facilities'

@@ -80,3 +80,6 @@ private/secrets.json
 
 # Pantheon Secrets local file
 private/pantheon_secrets/secrets.json
+.env
+!.ddev/solr/configsets/dev
+web/sites/default/settings.ddev.php

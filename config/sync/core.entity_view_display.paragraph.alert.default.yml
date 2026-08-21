@@ -1,0 +1,52 @@
+uuid: bd3db864-b1e7-4d71-8998-435f4fa52818
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.alert.field_alert_type
+    - field.field.paragraph.alert.field_alerts
+    - field.field.paragraph.alert.field_title
+    - paragraphs.paragraphs_type.alert
+  module:
+    - nomarkup
+    - options
+    - text
+_core:
+  default_config_hash: 8aIHp1o7tD03SRsLgC_2fIWFEFRIuWKQUZWc0ETxEbk
+id: paragraph.alert.default
+targetEntityType: paragraph
+bundle: alert
+mode: default
+content:
+  field_alert_type:
+    type: list_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_alerts:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 2
+    region: content
+  field_title:
+    type: string
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings:
+      nomarkup:
+        enabled: true
+        separator: '|'
+        referenced_entity: ''
+    weight: 1
+    region: content
+hidden:
+  search_api_excerpt: true

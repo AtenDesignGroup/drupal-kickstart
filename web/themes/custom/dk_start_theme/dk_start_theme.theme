@@ -1,0 +1,356 @@
+<?php
+
+/**
+ * @file
+ * Functions to support theming.
+ */
+
+use Drupal\block_content\BlockContentInterface;
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Extension\ThemeSettingsProvider;
+use Drupal\Core\Template\Attribute;
+use Drupal\Core\Url;
+use Drupal\views\ViewExecutable;
+
+/**
+ * Get a theme setting value.
+ *
+ * @param string $setting_name
+ *   The name of the theme setting to retrieve.
+ * @param mixed $default
+ *   The default value if the setting is not found.
+ *
+ * @return mixed
+ *   The theme setting value or default.
+ */
+function dk_start_theme_get_theme_setting($setting_name, $default = NULL) {
+  try {
+    /** @var \Drupal\Core\Extension\ThemeSettingsProvider $provider */
+    $provider = \Drupal::service(ThemeSettingsProvider::class);
+    return $provider->getSetting($setting_name) ?? $default;
+  }
+  catch (\Exception $e) {
+    return $default;
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for html.html.twig.
+ */
+function dk_start_theme_preprocess_html(&$variables) {
+  $slide_direction = dk_start_theme_get_theme_setting('mobile_menu_slide_direction');
+  if ($slide_direction) {
+    $variables['attributes']['class'][] = $slide_direction;
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function dk_start_theme_preprocess_checkboxes(&$variables) {
+  $variables['attributes']['class'][] = 'form-boolean-group';
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function dk_start_theme_preprocess_field(&$variables) {
+  $rich_field_types = ['text_with_summary', 'text', 'text_long'];
+
+  if (in_array($variables['field_type'], $rich_field_types, TRUE)) {
+    $variables['attributes']['class'][] = 'text-content';
+  }
+}
+
+/**
+ * Implements hook_preprocess_form_element().
+ */
+function dk_start_theme_preprocess_form_element(&$variables) {
+  if (in_array($variables['element']['#type'] ?? FALSE, ['checkbox', 'radio'], TRUE)) {
+    $variables['attributes']['class'][] = 'form-type-boolean';
+  }
+
+  if (!empty($variables['description']['attributes'])) {
+    $variables['description']['attributes']->addClass('form-item__description');
+  }
+
+  if ($variables['disabled']) {
+    $variables['label']['#attributes']['class'][] = 'is-disabled';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function dk_start_theme_preprocess_form_element_label(&$variables) {
+  $variables['attributes']['class'][] = 'form-item__label';
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function dk_start_theme_preprocess_input(&$variables) {
+  if (
+    !empty($variables['element']['#title_display']) &&
+    $variables['element']['#title_display'] === 'attribute' &&
+    !empty((string) $variables['element']['#title'])
+  ) {
+    $variables['attributes']['title'] = (string) $variables['element']['#title'];
+  }
+
+  $type_api = $variables['element']['#type'];
+  $type_html = $variables['attributes']['type'];
+  $text_types_html = [
+    'text',
+    'email',
+    'tel',
+    'number',
+    'search',
+    'password',
+    'date',
+    'time',
+    'file',
+    'color',
+    'datetime-local',
+    'url',
+    'month',
+    'week',
+  ];
+
+  if (in_array($type_html, $text_types_html, TRUE)) {
+    $variables['attributes']['class'][] = 'form-element';
+    $variables['attributes']['class'][] = Html::getClass('form-element--type-' . $type_html);
+    $variables['attributes']['class'][] = Html::getClass('form-element--api-' . $type_api);
+
+    if (!empty($variables['element']['#autocomplete_route_name'])) {
+      $variables['autocomplete_message'] = t('Loading…');
+    }
+  }
+
+  if (in_array($type_html, ['checkbox', 'radio'], TRUE)) {
+    $variables['attributes']['class'][] = 'form-boolean';
+    $variables['attributes']['class'][] = Html::getClass('form-boolean--type-' . $type_html);
+  }
+}
+
+/**
+ * Implements hook_preprocess_menu().
+ */
+function dk_start_theme_preprocess_menu(&$variables) {
+  $menu_name = $variables['menu_name'];
+  $attributes = &$variables['attributes'];
+
+  // Add base classes to our menu.
+  $attributes['class'][] = 'menu';
+  $attributes['class'][] = "menu--{$menu_name}";
+
+  dk_start_theme_prepare_menu_items($variables['items']);
+}
+
+/**
+ * Helper function to standardize gaps in the menu markup.
+ *
+ * @param array $items
+ *   The array of menu items.
+ */
+function dk_start_theme_prepare_menu_items(&$items) {
+  foreach ($items as &$item) {
+    if (!isset($item['url'])) {
+      continue;
+    }
+
+    $item['url'] = dk_start_theme_prepare_menu_url($item['url']);
+
+    // Add the data-plugin-id attribute based on the menu link's plugin ID.
+    // This is utilized in the menu components.
+    if (isset($item['original_link'])) {
+      $link_attributes = $item['url']->getOption('attributes') ?? [];
+      $link_attributes['data-plugin-id'] = Html::getUniqueId($item['original_link']->getPluginId());
+      $item['url']->setOption('attributes', $link_attributes);
+    }
+
+    // Set classes for the link wrapper.
+    $item_classes = ['menu__item'];
+
+    if ($item['is_expanded'] ?? FALSE) {
+      $item_classes[] = 'menu__item--expanded';
+    }
+
+    if ($item['is_collapsed'] ?? FALSE) {
+      $item_classes[] = 'menu__item--collapsed';
+    }
+
+    if ($item['in_active_trail'] ?? FALSE) {
+      $item_classes[] = 'menu__item--active-trail';
+    }
+
+    // Ensure the attributes key exists and is an Attribute object.
+    if (!isset($item['attributes'])) {
+      $item['attributes'] = new Attribute();
+    }
+    $item['attributes']->addClass($item_classes);
+    $item['link_type'] = $item['url']->getOption('link_type') ?? '';
+
+    if (!empty($item['below'])) {
+      dk_start_theme_prepare_menu_items($item['below']);
+    }
+  }
+}
+
+/**
+ * Process a menu URL object.
+ */
+function dk_start_theme_prepare_menu_url(Url $url): Url {
+  $attributes = $url->getOption('attributes') ?? [];
+
+  if (isset($attributes['class']) && is_string($attributes['class'])) {
+    $attributes['class'] = explode(' ', $attributes['class']);
+  }
+
+  $attributes['class'][] = 'menu__link';
+  $link_type = 'link';
+
+  if ($url->isRouted()) {
+    $link_type = match ($url->getRouteName()) {
+      '<nolink>' => 'nolink',
+      '<button>' => 'button',
+      default => 'link',
+    };
+  }
+
+  if ($link_type === 'button') {
+    $attributes['class'][] = 'menu__button';
+    $attributes['aria-haspopup'] = 'true';
+    $attributes['aria-expanded'] = 'false';
+  }
+
+  $url->setOption('attributes', $attributes);
+  $url->setOption('link_type', $link_type);
+
+  return $url;
+}
+
+/**
+ * Implements hook_preprocess_menu_link_content().
+ */
+function dk_start_theme_preprocess_menu_link_content(&$variables): void {
+  $menu_item = $variables['menu_link_content'];
+
+  $url = dk_start_theme_prepare_menu_url($menu_item->getUrlObject());
+
+  $variables['title'] = $menu_item->getTitle();
+  $variables['url'] = $url;
+  $variables['link_type'] = $url->getOption('link_type') ?? '';
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function dk_start_theme_preprocess_radios(&$variables) {
+  $variables['attributes']['class'][] = 'form-boolean-group';
+}
+
+/**
+ * Implements hook_preprocess_page() for dk_start_theme theme.
+ *
+ * NOTE: If you want to use this outside the footer, you need to
+ * rename this function to dk_start_theme_preprocess_page and adjust the
+ * region--footer.html.twig file and add the backToTop variable to the
+ * page.html.twig file.
+ */
+function dk_start_theme_preprocess_region__footer(array &$variables) {
+
+  if (dk_start_theme_get_theme_setting('display_back_to_top')) {
+    $variables['backToTop'] = [
+      '#type' => 'component',
+      '#component' => 'dk_start_theme:back-to-top',
+      '#props' => [
+        'text' => t('Back to Top'),
+      ],
+    ];
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function dk_start_theme_preprocess_select(&$variables) {
+  $variables['attributes']['class'][] = 'form-element';
+  $variables['attributes']['class'][] = $variables['element']['#multiple'] ?
+    'form-element--type-select-multiple' :
+    'form-element--type-select';
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function dk_start_theme_preprocess_textarea(&$variables) {
+  $variables['attributes']['class'][] = 'form-element';
+  $variables['attributes']['class'][] = 'form-element--type-textarea';
+  $variables['attributes']['class'][] = 'form-element--api-textarea';
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function dk_start_theme_theme_suggestions_block_alter(array &$suggestions, array $variables) {
+  $content = $variables['elements']['content'];
+
+  if (isset($content['#block_content']) && $content['#block_content'] instanceof BlockContentInterface) {
+    $suggestions[] = 'block__block_content__' . $content['#block_content']->bundle();
+  }
+}
+
+/**
+ * Implements theme_theme_suggestions_input_alter().
+ */
+function dk_start_theme_theme_suggestions_input_alter(&$suggestions, array $variables) {
+  $element = $variables['element'];
+
+  // Add Twig template suggestion based on data attributes. To use this, in a
+  // `hook_form_alter()` add an element to the `#attributes` array for
+  // `data-twig-suggestion`. `button` elements have a template already made.
+  if (isset($element['#attributes']['data-twig-suggestion'])) {
+    $suggestions[] = "input__{$element['#type']}__{$element['#attributes']['data-twig-suggestion']}";
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function dk_start_theme_theme_suggestions_taxonomy_term_alter(array &$suggestions, array $variables) {
+  $view_mode = $variables['elements']['#view_mode'];
+  $suggestions[] = 'taxonomy_term__' . $view_mode;
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ *
+ * @todo remove after these are resolved:
+ * https://www.drupal.org/project/drupal/issues/2270883
+ * https://www.drupal.org/project/drupal/issues/2766379
+ */
+function dk_start_theme_theme_suggestions_user_alter(array &$suggestions, array $variables) {
+  $view_mode = $variables['elements']['#view_mode'] ?? '';
+  if ($view_mode) {
+    $suggestions[] = 'user__' . $view_mode;
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter().
+ */
+function dk_start_theme_theme_suggestions_views_view_alter(array &$suggestions, array $variables) {
+  $view = $variables['view'];
+
+  if (
+    $view instanceof ViewExecutable
+    && $display = $view->current_display
+  ) {
+    $view_id = $view->id();
+    $original = $variables['theme_hook_original'];
+
+    $suggestions[] = "{$original}__$view_id";
+    $suggestions[] = "{$original}__{$view_id}__$display";
+  }
+}
