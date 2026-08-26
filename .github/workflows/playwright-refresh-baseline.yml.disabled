@@ -19,7 +19,7 @@ on:
 
 jobs:
   refresh-baseline:
-    uses: wetatvfm/aten-actions/.github/workflows/playwright.yml@main
+    uses: AtenDesignGroup/aten-actions/.github/workflows/playwright.yml@main
     with:
       playwright-path: 'tests/playwright'
       test-mode: 'baseline'
