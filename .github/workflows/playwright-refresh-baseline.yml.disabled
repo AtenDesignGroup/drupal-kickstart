@@ -1,6 +1,7 @@
 name: Playwright - Refresh Baseline Snapshots
 
 # Captures fresh reference screenshots from the stable baseline site (PLAYWRIGHT_BASELINE_URL).
+# PLAYWRIGHT_BASELINE_URL should be saved in Github Actions variables and use test or dev environment that resembles production static content. 
 # Run this manually when live content has changed and saved snapshots are out of date.
 # Also runs automatically every Monday at 2 AM UTC.
 
