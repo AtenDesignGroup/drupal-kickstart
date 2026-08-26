@@ -3,5 +3,5 @@
 ## Usage: test:live [flags] [args]
 ## Example: "test:live"
 ## Example: "test:live --last-failed"
-## Example: "BASE_URL=https://raleighnc.ddev.site test:live"
-cd "${DDEV_APPROOT}/tests/playwright" && BASE_URL=${BASE_URL:-https://raleighnc.gov} npm run test:live -- $@
+## Example: "BASE_URL=https://dk-start.ddev.site test:live"
+cd "${DDEV_APPROOT}/tests/playwright" && BASE_URL=${BASE_URL:-https://live-pantheonsite.io} npm run test:live -- $@
