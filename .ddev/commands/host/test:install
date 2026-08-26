@@ -1,0 +1,5 @@
+#!/bin/bash
+## Description: Install Playwright dependencies.
+## Usage: test:install [flags] [args]
+## Example: "test:install"
+cd "${DDEV_APPROOT}/tests/playwright" && npm install -- $@

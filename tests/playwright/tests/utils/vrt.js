@@ -18,10 +18,19 @@ const DEFAULT_SCREENSHOT_OPTIONS = {
 };
 
 /**
- * Maximum height for screenshots (Playwright limitation is 32767 pixels)
- * Using 32000 to provide a safe margin
+ * Build Playwright locator masks from selector strings.
+ *
+ * @param {Object} page - Playwright page object
+ * @param {string[]} [maskSelectors=[]] - CSS selectors to mask during screenshot assertions
+ * @returns {import('@playwright/test').Locator[]|undefined}
  */
-const MAX_SCREENSHOT_HEIGHT = 32000;
+function buildMaskLocators(page, maskSelectors = []) {
+  if (!Array.isArray(maskSelectors) || maskSelectors.length === 0) {
+    return undefined;
+  }
+
+  return maskSelectors.map((selector) => page.locator(selector));
+}
 
 /**
  * Merge user-provided screenshot options with defaults.
@@ -36,49 +45,6 @@ const MAX_SCREENSHOT_HEIGHT = 32000;
  */
 function mergeScreenshotOptions(overrides = {}) {
   return { ...DEFAULT_SCREENSHOT_OPTIONS, ...overrides };
-}
-
-/**
- * Apply clipping if page height exceeds maximum screenshot height.
- * Maintains full width while limiting height to prevent screenshot errors.
- *
- * @param {Object} page - Playwright page object
- * @param {Object} options - Screenshot options to potentially modify
- * @returns {Promise<Object>} - Modified options with clip if necessary
- *
- * @example
- * const options = await applyClipIfNeeded(page, { fullPage: true })
- * // If page is 40000px tall: { fullPage: false, clip: { x: 0, y: 0, width: 1920, height: 32000 } }
- * // If page is 2000px tall: { fullPage: true } (unchanged)
- */
-async function applyClipIfNeeded(page, options) {
-  // Only apply clipping if fullPage is enabled
-  if (!options.fullPage) {
-    return options;
-  }
-
-  // Get page dimensions
-  const dimensions = await page.evaluate(() => ({
-    width: document.documentElement.scrollWidth,
-    height: document.documentElement.scrollHeight
-  }));
-
-  // If height exceeds maximum, apply clipping
-  if (dimensions.height > MAX_SCREENSHOT_HEIGHT) {
-    console.log(`[VRT] Page height (${dimensions.height}px) exceeds maximum. Clipping to ${MAX_SCREENSHOT_HEIGHT}px.`);
-    return {
-      ...options,
-      fullPage: false,
-      clip: {
-        x: 0,
-        y: 0,
-        width: dimensions.width,
-        height: MAX_SCREENSHOT_HEIGHT
-      }
-    };
-  }
-
-  return options;
 }
 
 /**
@@ -185,8 +151,16 @@ function getScreenshotFilename(name, projectName, screenshotName) {
  *   { selector: ".nav", name: "nav" }
  * ])
  */
-async function captureScreenshots(page, name, projectName, globalScreenshotOptions = {}, screenshotsConfig) {
+async function captureScreenshots(
+  page,
+  name,
+  projectName,
+  globalScreenshotOptions = {},
+  screenshotsConfig,
+  maskSelectors = []
+) {
   const baseOptions = mergeScreenshotOptions(globalScreenshotOptions);
+  const mask = buildMaskLocators(page, maskSelectors);
 
   // Trigger lazy-loaded images by scrolling through the page
   await page.evaluate(async () => {
@@ -207,14 +181,33 @@ async function captureScreenshots(page, name, projectName, globalScreenshotOptio
     });
   });
 
-  // Brief pause to let lazy images start loading
-  await page.waitForTimeout(500);
+  // Return to top for deterministic full-page snapshots.
+  await page.evaluate(() => window.scrollTo(0, 0));
+
+  // Wait for pending images to either load/error (or timeout) before snapshot.
+  await page.evaluate(() =>
+    Promise.race([
+      Promise.all(
+        Array.from(document.images)
+          .filter((img) => !img.complete)
+          .map((img) => new Promise((resolve) => {
+            img.onload = img.onerror = () => resolve(null);
+          }))
+      ),
+      new Promise((resolve) => setTimeout(resolve, 5000)),
+    ])
+  );
+
+  // Brief settle wait for post-load animations / async content.
+  await page.waitForTimeout(1000);
 
   // If no screenshots config provided, capture full page
   if (!screenshotsConfig || screenshotsConfig.length === 0) {
     const filename = getScreenshotFilename(name, projectName);
-    const clippedOptions = await applyClipIfNeeded(page, baseOptions);
-    await expect(page).toHaveScreenshot(filename, clippedOptions);
+    await expect(page).toHaveScreenshot(filename, {
+      ...baseOptions,
+      ...(mask ? { mask } : {}),
+    });
     return;
   }
 
@@ -259,20 +252,22 @@ async function captureScreenshots(page, name, projectName, globalScreenshotOptio
     }
 
     // Merge global and per-screenshot options
-    const mergedOptions = { ...baseOptions, ...options };
-    const clippedOptions = await applyClipIfNeeded(page, mergedOptions);
+    const mergedOptions = {
+      ...baseOptions,
+      ...options,
+      ...(mask ? { mask } : {}),
+    };
 
     // Generate filename and capture screenshot
     const filename = getScreenshotFilename(name, projectName, elementName);
-    await expect(page.locator(selector)).toHaveScreenshot(filename, clippedOptions);
+    await expect(page.locator(selector)).toHaveScreenshot(filename, mergedOptions);
   }
 }
 
 module.exports = {
   DEFAULT_SCREENSHOT_OPTIONS,
-  MAX_SCREENSHOT_HEIGHT,
+  buildMaskLocators,
   mergeScreenshotOptions,
-  applyClipIfNeeded,
   normalizeUrlEntry,
   getScreenshotFilename,
   captureScreenshots

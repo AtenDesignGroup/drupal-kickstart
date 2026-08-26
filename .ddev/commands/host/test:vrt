@@ -1,0 +1,10 @@
+#!/bin/bash
+## Description: Run Playwright visual regression tests.
+## Usage: test:vrt [flags] [args]
+## Example: "test:vrt"
+## Example: "BASE_URL=https://raleighnc.ddev.site test:vrt"
+## Example: "BASE_URL=https://raleighnc.ddev.site test:vrt --last-failed"
+## Example: "BASE_URL=\"https://beta-test.raleighnc.gov/}\" AUTH_USERNAME=raleighnc AUTH_PASSWORD=raleighnc test:vrt"
+
+cd "${DDEV_APPROOT}/tests/playwright"
+npm run test:vrt -- $@

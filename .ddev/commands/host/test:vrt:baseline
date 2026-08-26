@@ -1,0 +1,9 @@
+#!/bin/bash
+## Description: Capture Playwright VRT baseline screenshots.
+## Usage: test:vrt:baseline [flags] [args]
+## Example: "test:vrt:baseline"
+## Example: "test:vrt:baseline --last-failed"
+## Example: "BASE_URL=https://raleighnc.ddev.site test:vrt:baseline"
+## Example: "BASE_URL=\"https://beta-test.raleighnc.gov/}\" AUTH_USERNAME=raleighnc AUTH_PASSWORD=raleighnc test:vrt:baseline"
+cd "${DDEV_APPROOT}/tests/playwright"
+npm run test:vrt:baseline -- $@
