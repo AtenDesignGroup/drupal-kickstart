@@ -1,12 +1,11 @@
 // Visual Regression Testing Spec
 const { test } = require('@playwright/test');
-const config = require('../../playwright.config');
 const visualRegressionUrls = require('../fixtures/visual_regression_urls.js');
-const { deleteTestUser } = require('../utils/auth');
-const { normalizeUrlEntry, captureScreenshots } = require('../utils/vrt');
-const { setupAuthentication } = require('../utils/drupal-auth');
+const { deleteTestUser } = require('../../utils/auth');
+const { normalizeUrlEntry, captureScreenshots } = require('../../utils/vrt');
+const { setupAuthentication } = require('../../utils/drupal-auth');
 
-const BASE_URL = config.use.baseURL;
+const BASE_URL = process.env.BASE_URL;
 
 for (const entry of visualRegressionUrls) {
   const testConfig = normalizeUrlEntry(entry);
@@ -39,7 +38,7 @@ for (const entry of visualRegressionUrls) {
 
       // Navigate to page once
       await page.goto(`${BASE_URL}${url}`, { waitUntil: 'load', timeout: 30000 });
-      await page.addStyleTag({ path: './tests/fixtures/vrt-overrides.css' });
+      await page.addStyleTag({ path: './tests/vrt/fixtures/vrt-overrides.css' });
       await page.waitForLoadState('domcontentloaded');
 
       // Wait for custom selector if specified (useful for AJAX-loaded content)

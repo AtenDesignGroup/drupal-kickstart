@@ -1,9 +1,8 @@
 // auth.js
 const crypto = require('crypto');
 const { executeDrush } = require('./drush');
-const config = require('../../playwright.config');
 
-const BASE_URL = config.use.baseURL;
+const BASE_URL = process.env.BASE_URL;
 
 /**
  * Validate that the specified roles exist in Drupal.
@@ -15,11 +14,19 @@ const BASE_URL = config.use.baseURL;
  * validateRoles(['editor', 'content_manager']);
  */
 async function validateRoles(roles) {
-  const roleList = executeDrush('role:list --format=json', { format: 'json' });
-  const validRoles = Object.keys(roleList);
-
+ // 1. Define the native Drupal PHP snippet to extract raw machine names
+  const phpCode = "print implode(',', array_keys(\\Drupal\\user\\Entity\\Role::loadMultiple()));";
+  
+  // 2. Execute via php:eval to bypass brittle Drush formatting flags completely
+  // Note: Wrapped in executeDrush if your helper handles it, or use execSync directly
+  const rawOutput = executeDrush(`php:eval "${phpCode}"`); 
+  
+  // 3. Clean up the output string and parse it into an array
+  const validRoles = rawOutput.trim().split(',').filter(Boolean);
+  
+  // 4. Run your original filtering logic to catch invalid options
   const invalidRoles = roles.filter(role => !validRoles.includes(role));
-
+  
   if (invalidRoles.length > 0) {
     throw new Error(
       `Invalid role(s): ${invalidRoles.join(', ')}\n` +
@@ -190,12 +197,39 @@ function getOneTimeLoginUrl(uid) {
 async function loginAsUser(page, uid) {
   const loginUrl = getOneTimeLoginUrl(uid);
 
-  console.log(`Logging in as user ${uid}`);
+  await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
 
-  // Navigate to one-time login URL
-  await page.goto(loginUrl, { waitUntil: 'networkidle', timeout: 30000 });
+  // One-time login should redirect away from tokenized URL to a real page.
+  await page.waitForURL((url) => !url.href.includes('/user/reset/'), {
+    timeout: 30000,
+  });
 
-  console.log(`Successfully logged in as user ${uid}`);
+  // Wait for stable page content first (less brittle than body class checks).
+  await page.locator('main').first().waitFor({ state: 'visible', timeout: 15000 });
+
+  // Brief settle for post-redirect UI updates.
+  await page.waitForTimeout(500);
+
+  // Best-effort: some pages keep network activity alive.
+  try {
+    await page.waitForLoadState('networkidle', { timeout: 5000 });
+  } catch {
+    // Continue even if network never goes idle.
+  }
+
+  // Robust auth verification: Drupal session cookie should exist.
+  const cookies = await page.context().cookies();
+  const hasDrupalSessionCookie = cookies.some(({ name }) => /^S?SESS/.test(name));
+  if (!hasDrupalSessionCookie) {
+    throw new Error('Login did not establish a Drupal session cookie.');
+  }
+
+  // Guard against ending up back on a login/reset URL.
+  const currentUrl = page.url();
+  if (currentUrl.includes('/user/login') || currentUrl.includes('/user/reset/')) {
+    throw new Error(`Login did not complete successfully. Current URL: ${currentUrl}`);
+  }
+
 }
 
 /**
@@ -210,7 +244,7 @@ async function loginAsUser(page, uid) {
 async function deleteTestUser(uid) {
   console.log(`Deleting test user ${uid}`);
 
-  executeDrush(`user:cancel ${uid} --delete-content -y`);
+  executeDrush(`user:cancel --uid=${uid} --delete-content -y`);
 
   console.log(`Deleted test user ${uid}`);
 }

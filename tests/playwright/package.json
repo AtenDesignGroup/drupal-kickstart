@@ -5,7 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
-    "test:baseline": "npx playwright test --update-snapshots",
+    "test:e2e": "npx playwright test --project=e2e",
+    "test:vrt": "npx playwright test tests/vrt/specs",
+    "test:vrt:baseline": "npx playwright test tests/vrt/specs --update-snapshots",
+    "test:a11y": "npx playwright test --project=a11y",
+    "test:live": "npx playwright test --project=live",
+    "test:headed": "npx playwright test --headed --project=e2e",
+    "test:debug": "npx playwright test --debug --project=e2e",
+    "test:ui": "npx playwright test --ui",
     "test:report": "npx playwright show-report"
   },
   "author": "AtenDesignGroup",
@@ -14,6 +21,7 @@
     "@playwright/test": "^1.58.0"
   },
   "dependencies": {
+    "@axe-core/playwright": "^4.10.1",
     "dotenv": "^17.2.3"
   }
 }
