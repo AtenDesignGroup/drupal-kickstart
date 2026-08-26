@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: byline
+label: Byline
+icon_uuid: null
+icon_default: null
+description: 'Reusable editorial metadata block for authors, created dates, and updated dates.'
+behavior_plugins: {  }

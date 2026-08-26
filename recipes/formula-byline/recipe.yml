@@ -1,0 +1,10 @@
+name: '🦄 🌈  Formula: Byline'
+description: 'Provides a reusable Byline paragraph type for displaying authors alongside created and updated dates.'
+type: 'Paragraphs'
+
+recipes:
+  - formula-paragraphs
+  - formula-profile
+
+config:
+  strict: false

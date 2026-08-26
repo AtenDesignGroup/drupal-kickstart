@@ -1,0 +1,40 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.byline.field_authors
+    - field.field.paragraph.byline.field_created_date
+    - field.field.paragraph.byline.field_updated_date
+    - paragraphs.paragraphs_type.byline
+  module:
+    - datetime
+id: paragraph.byline.default
+targetEntityType: paragraph
+bundle: byline
+mode: default
+content:
+  field_authors:
+    type: entity_reference_autocomplete
+    weight: 2
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_created_date:
+    type: datetime_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_updated_date:
+    type: datetime_default
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true
