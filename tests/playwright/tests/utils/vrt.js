@@ -8,6 +8,14 @@
 const { expect } = require('@playwright/test');
 
 /**
+ * Maximum height for a single page screenshot.
+ *
+ * Kept below browser image-dimension limits to provide a safe clipping
+ * threshold for exceptionally tall pages.
+ */
+const MAX_SCREENSHOT_HEIGHT = 32_000;
+
+/**
  * Default screenshot options for visual regression tests.
  * These can be overridden globally via screenshotOptions or per-screenshot via screenshots[].options
  */
@@ -31,6 +39,56 @@ function buildMaskLocators(page, maskSelectors = []) {
 
   return maskSelectors.map((selector) => page.locator(selector));
 }
+
+/**
+ * Apply clipping if page height exceeds maximum screenshot height.
+ * Maintains full width while limiting height to prevent screenshot errors.
+ *
+ * @param {Object} page - Playwright page object
+ * @param {Object} options - Screenshot options to potentially modify
+ * @returns {Promise<Object>} - Modified options with clip if necessary
+ *
+ * @example
+ * const options = await applyClipIfNeeded(page, { fullPage: true })
+ * // If page is 40000px tall: { fullPage: false, clip: { x: 0, y: 0, width: 1920, height: 32000 } }
+ * // If page is 2000px tall: { fullPage: true } (unchanged)
+ */
+async function applyClipIfNeeded(page, options) {
+  // Only apply clipping if fullPage is enabled
+  if (!options.fullPage) {
+    return options;
+  }
+
+  // Get page dimensions
+  const dimensions = await page.evaluate(() => ({
+    width: Math.max(
+      document.documentElement.scrollWidth,
+      document.body?.scrollWidth ?? 0,
+    ),
+    height: Math.max(
+      document.documentElement.scrollHeight,
+      document.body?.scrollHeight ?? 0,
+    ),
+  }));
+
+  // If height exceeds maximum, apply clipping
+  if (dimensions.height > MAX_SCREENSHOT_HEIGHT) {
+    console.log(`[VRT] Page height (${dimensions.height}px) exceeds maximum. Clipping to ${MAX_SCREENSHOT_HEIGHT}px.`);
+    return {
+      ...options,
+      fullPage: false,
+      clip: {
+        x: 0,
+        y: 0,
+        width: dimensions.width,
+        height: MAX_SCREENSHOT_HEIGHT
+      }
+    };
+  }
+
+  return options;
+}
+
 
 /**
  * Merge user-provided screenshot options with defaults.
@@ -250,7 +308,6 @@ async function captureScreenshots(
         `Original error: ${error.message}`
       );
     }
-
     // Merge global and per-screenshot options
     const mergedOptions = {
       ...baseOptions,
@@ -265,9 +322,11 @@ async function captureScreenshots(
 }
 
 module.exports = {
+  MAX_SCREENSHOT_HEIGHT,
   DEFAULT_SCREENSHOT_OPTIONS,
   buildMaskLocators,
   mergeScreenshotOptions,
+  applyClipIfNeeded,
   normalizeUrlEntry,
   getScreenshotFilename,
   captureScreenshots
