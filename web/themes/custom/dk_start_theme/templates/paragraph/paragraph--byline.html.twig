@@ -1,0 +1,21 @@
+{%- set _created_date = content.field_created_date|render|striptags|trim -%}
+{%- set _updated_date = content.field_updated_date|render|striptags|trim -%}
+
+{%- set _authors = [] -%}
+{%- for item in paragraph.field_authors -%}
+  {%- if item.entity -%}
+    {%- set _authors = _authors|merge([{
+      'name': item.entity.label,
+      'url': path('entity.node.canonical', {'node': item.target_id}),
+    }]) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- include 'dk_start_theme:byline' with {
+  authors: _authors,
+  authors_label: 'By',
+  created_date: _created_date,
+  updated_date: _updated_date,
+  created_label: 'Created',
+  updated_label: 'Updated',
+} only -%}

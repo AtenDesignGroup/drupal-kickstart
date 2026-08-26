@@ -1,0 +1,57 @@
+{% set attributes = create_attribute(attributes) %}
+
+{% set classes = [
+  'c-byline'
+] %}
+
+<div {{ attributes.addClass(classes) }}>
+  {% block authors_block %}
+    {% if authors %}
+      <div class="c-byline__authors">
+        {% if authors_label %}
+          <span class="c-byline__authors-label">{{ authors_label }}</span>
+        {% endif %}
+
+        <ul class="c-byline__authors-list">
+          {% for author in authors %}
+            {% if author.name %}
+              <li class="c-byline__authors-item">
+                {% if author.url %}
+                  <a href="{{ author.url }}" class="c-byline__author-link">{{ author.name }}</a>
+                {% else %}
+                  <span class="c-byline__author-name">{{ author.name }}</span>
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  {% endblock %}
+
+  {% block dates_block %}
+    {% if created_date or updated_date %}
+      <div class="c-byline__dates">
+        <ul class="c-byline__dates-list">
+          {% if created_date %}
+            <li class="c-byline__date-item c-byline__date-item--created">
+              {% if created_label %}
+                <span class="c-byline__date-label">{{ created_label }}</span>
+              {% endif %}
+              <span class="c-byline__date-value">{{ created_date }}</span>
+            </li>
+          {% endif %}
+
+          {% if updated_date %}
+            <li class="c-byline__date-item c-byline__date-item--updated">
+              {% if updated_label %}
+                <span class="c-byline__date-label">{{ updated_label }}</span>
+              {% endif %}
+              <span class="c-byline__date-value">{{ updated_date }}</span>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endif %}
+  {% endblock %}
+</div>
