@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_updated_date
+    - paragraphs.paragraphs_type.byline
+  module:
+    - datetime
+    - field_config_cardinality
+third_party_settings:
+  field_config_cardinality:
+    cardinality_config: '1'
+    cardinality_label_config: false
+    unlimited_not_required: ''
+    limited_not_required: ''
+    limited_required: ''
+id: paragraph.byline.field_updated_date
+field_name: field_updated_date
+entity_type: paragraph
+bundle: byline
+label: 'Updated date'
+description: 'Optional updated date displayed in the byline.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

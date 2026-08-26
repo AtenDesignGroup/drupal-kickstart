@@ -1,0 +1,5 @@
+#!/bin/bash
+## Description: Show the Playwright HTML test report.
+## Usage: test:report
+## Example: "test:report"
+cd "${DDEV_APPROOT}/tests/playwright" && npx playwright show-report
