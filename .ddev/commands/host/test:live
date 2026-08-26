@@ -1,0 +1,7 @@
+#!/bin/bash
+## Description: Run Playwright live smoke tests against production.
+## Usage: test:live [flags] [args]
+## Example: "test:live"
+## Example: "test:live --last-failed"
+## Example: "BASE_URL=https://dk-start.ddev.site test:live"
+cd "${DDEV_APPROOT}/tests/playwright" && BASE_URL=${BASE_URL:-https://live-pantheonsite.io} npm run test:live -- $@

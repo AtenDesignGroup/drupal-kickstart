@@ -1,0 +1,5 @@
+#!/bin/bash
+## Description: Run Playwright UI mode (opens browser-based test runner).
+## Usage: test:ui [flags] [args]
+## Example: "test:ui"
+cd "${DDEV_APPROOT}/tests/playwright" && npx playwright test --ui --ui-host=0.0.0.0 --ui-port=9323 $@

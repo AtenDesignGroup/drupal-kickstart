@@ -1,0 +1,9 @@
+uuid: 576def76-5e87-48b6-9e07-5bcf2e522ab8
+langcode: en
+status: true
+dependencies: {  }
+name: Department
+vid: department
+description: null
+weight: 0
+new_revision: false

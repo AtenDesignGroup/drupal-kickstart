@@ -1,0 +1,8 @@
+#!/bin/bash
+## Description: Run Playwright end-to-end tests.
+## Usage: test:e2e [flags] [args]
+## Example: "test:e2e"
+## Example: "BASE_URL=https://dk-start.ddev.site test:e2e"
+## Example: "BASE_URL=https://dk-start.ddev.site test:e2e --last-failed"
+## Example: "BASE_URL=\"https://dev-dk-start.pantheonsite.io/\" test:e2e"
+cd "${DDEV_APPROOT}/tests/playwright" && npm run test:e2e -- $@

@@ -1,0 +1,69 @@
+uuid: ebfe8610-92f5-473f-9f49-4adee184e585
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.compact
+    - field.field.node.profile.field_credentials
+    - field.field.node.profile.field_department
+    - field.field.node.profile.field_email
+    - field.field.node.profile.field_first_name
+    - field.field.node.profile.field_job_title
+    - field.field.node.profile.field_last_name
+    - field.field.node.profile.field_name_prefix
+    - field.field.node.profile.field_organization
+    - field.field.node.profile.field_profile_image
+    - field.field.node.profile.field_profile_type
+    - field.field.node.profile.field_pronouns
+    - field.field.node.profile.field_website
+    - node.type.profile
+  module:
+    - layout_builder
+    - user
+third_party_settings:
+  layout_builder:
+    enabled: false
+    allow_custom: false
+id: node.profile.compact
+targetEntityType: node
+bundle: profile
+mode: compact
+content:
+  field_first_name:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_last_name:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_profile_image:
+    type: entity_reference_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_credentials: true
+  field_department: true
+  field_email: true
+  field_job_title: true
+  field_name_prefix: true
+  field_organization: true
+  field_profile_type: true
+  field_pronouns: true
+  field_website: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

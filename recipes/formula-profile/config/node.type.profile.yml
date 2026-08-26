@@ -13,7 +13,7 @@ third_party_settings:
     enabled: false
 name: Profile
 type: profile
-description: 'Profile content type for author and person entries referenced by bylines and other editorial metadata.'
+description: 'Profile content type used for people and content related information.'
 help: null
 new_revision: true
 preview_mode: 1

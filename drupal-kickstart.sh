@@ -141,6 +141,7 @@ fi
 # 2. PROMPT COLLECTION (skipped when resuming)
 # =============================================================================
 if [[ "$RESUME" == "yes" ]]; then
+  DK_PROFILE="${DK_PROFILE:-minimal}"
   # Derive theme path from loaded values — no prompts needed
   DK_THEME_PATH="web/themes/custom/${DK_THEME_NAME}"
   DK_THEME_DESC="${DK_THEME_DESC:-${DK_THEME_NAME}}"
@@ -163,6 +164,10 @@ else
       | tr -cd '[:alnum:]_' \
       | sed 's/^[0-9_]*//; s/_*$//'
   }
+
+  DEFAULT_PROFILE="${DK_PROFILE:-minimal}"
+  prompt DK_PROFILE "Drupal install profile (e.g. minimal, standard, demo_umami)" "$DEFAULT_PROFILE"
+
   DEFAULT_THEME="$(sanitize_machine_name "${DK_THEME_NAME:-${DK_DDEV_NAME}_theme}")"
   prompt DK_THEME_NAME "Theme name (machine name)" "$DEFAULT_THEME"
   # Sanitize whatever the user typed as well
@@ -204,6 +209,9 @@ else
   prompt_yn DK_WIRE_COMPONENTS "Wire prototype components (paragraph recipes + Twig templates)?" "$DEFAULT_WIRE"
 fi
 
+# Ensure profile always has a usable value.
+DK_PROFILE="${DK_PROFILE:-minimal}"
+
 # =============================================================================
 # 3. PERSIST VALUES TO .kickstart.env (skipped on resume — file already exists)
 # =============================================================================
@@ -212,6 +220,7 @@ if [[ "$RESUME" != "yes" ]]; then
 # Drupal Kickstart — saved configuration
 # Generated: $(date)
 DK_DDEV_NAME="${DK_DDEV_NAME}"
+DK_PROFILE="${DK_PROFILE}"
 DK_THEME_NAME="${DK_THEME_NAME}"
 DK_THEME_DESC="${DK_THEME_DESC}"
 DK_THEME_ABBREVIATED="${DK_THEME_ABBREVIATED}"
@@ -250,6 +259,7 @@ fi
 header "Review — Please Confirm Your Settings"
 echo
 echo -e "    ${BOLD}Project name    :${RESET} ${DK_DDEV_NAME}"
+echo -e "    ${BOLD}Install profile :${RESET} ${DK_PROFILE}"
 echo -e "    ${BOLD}Theme name      :${RESET} ${DK_THEME_NAME}"
 echo -e "    ${BOLD}Theme display   :${RESET} ${DK_THEME_DESC}"
 if [[ -n "$DK_THEME_ABBREVIATED" ]]; then
@@ -377,7 +387,7 @@ if [[ ! -f "web/index.php" ]]; then
   info "Running composer create-project in container..."
   # Set platform.php before create-project so Composer resolves against the configured PHP version
   # from the start rather than using the container's detected version.
-  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:^11.2' /tmp/dp --no-interaction"
+  ddev exec bash -c "rm -rf /tmp/dp && composer create-project 'drupal/recommended-project:~11.3.16' /tmp/dp --no-interaction"
   ddev exec bash -c "rsync -a /tmp/dp/ /var/www/html/"
   ddev composer config platform.php ${DK_PHP_VERSION}
   info "Drupal scaffold created (11.2.x, platform.php ${DK_PHP_VERSION})"
@@ -436,8 +446,8 @@ mkdir -p web/sites/default/files
 chmod 755 web/sites/default/files
 info "Public files directory ensured (web/sites/default/files)"
 
-SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install minimal
-info "Drupal installed via ddev site-install (minimal profile)"
+SITE_NAME="${DK_DDEV_NAME}" ACCOUNT_NAME="${ADMIN_USER}" ACCOUNT_PASS="${ADMIN_PASS}" ddev site-install "${DK_PROFILE:-minimal}"
+info "Drupal installed (profile: ${DK_PROFILE:-minimal}, admin: ${ADMIN_USER})"
 
 # drush site:install rewrites settings.php, removing the settings.ddev.php
 # include. Re-run setup-settings to restore it.
@@ -475,8 +485,13 @@ fi
 # =============================================================================
 header "Applying Drupal Base Recipe"
 ddev recipe formula-foundational
-# Uninstall the Stark theme, which is enabled by default in the minimal profile.
-ddev drush theme:uninstall stark
+# Uninstall Stark only when the selected profile enabled it.
+if ddev drush php:eval '$themes = \Drupal::config("core.extension")->get("theme") ?? []; exit((int)!isset($themes["stark"]));'; then
+  ddev drush theme:uninstall stark
+  info "Stark theme uninstalled"
+else
+  info "Stark theme not enabled for profile ${DK_PROFILE} — skipping uninstall"
+fi
 # Allow installation of optional recipes (skipped in CI)
 if [[ "${CI:-}" != "true" ]]; then
   ddev recipe
@@ -521,6 +536,8 @@ echo -e "${GREEN}${BOLD}========================================================
 echo
 echo -e "  ${BOLD}Site URL        :${RESET} https://${DK_DDEV_NAME}.ddev.site"
 echo -e "  ${BOLD}Theme path      :${RESET} ${DK_THEME_PATH}"
+echo -e "  ${BOLD}Admin username  :${RESET} ${DK_DRUPAL_ADMIN_USERNAME}"
+echo -e "  ${BOLD}Admin password  :${RESET} ${DK_DRUPAL_ADMIN_PASSWORD}"
 if [[ -n "$DK_COMMIT_PREFIX" ]]; then
   echo -e "  ${BOLD}Commit format   :${RESET} ${DK_COMMIT_PREFIX}-123: My commit message"
 fi

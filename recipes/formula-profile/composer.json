@@ -1,16 +1,16 @@
 {
-    "name": "aten/formula-basic-page",
-    "description": "Recipe for basic page.",
+    "name": "aten/formula-profile",
+    "description": "Recipe for profile.",
     "type": "drupal-recipe",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Seth Hill",
-            "email": "seth@atendesigngroup.com"
+            "name": "Greg Carlson",
+            "email": "greg@atendesigngroup.com"
         }
     ],
     "require": {
-        "drupal/metatag": "*",
-        "drupal/pathauto": "*"
+        "drupal/field_config_cardinality": "^4.0.1",
+        "drupal/search_api_exclude": "^2.0"
     }
 }

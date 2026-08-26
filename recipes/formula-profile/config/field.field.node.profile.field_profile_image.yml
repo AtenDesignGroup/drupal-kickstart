@@ -19,7 +19,7 @@ field_name: field_profile_image
 entity_type: node
 bundle: profile
 label: 'Profile Image'
-description: 'Primary image used when displaying this profile in bylines, teasers, and profile content.'
+description: 'Headshot or profile image shown on profile listings and detail pages.'
 required: false
 translatable: false
 default_value: {  }
