@@ -100,7 +100,7 @@ jobs:
             "phpcs.xml"
             "phpunit.xml"
             "eslint.config.js"
-            ".github/workflows/"
+            ".github/workflows/*.yml.disabled"
             ".stylelintrc.cjs"
             ".stylelintignore"
             "AGENTS.md"
