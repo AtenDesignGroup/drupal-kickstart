@@ -1,0 +1,35 @@
+name: Playwright - Refresh Baseline Snapshots
+
+# Captures fresh reference screenshots from the stable baseline site (PLAYWRIGHT_BASELINE_URL).
+# PLAYWRIGHT_BASELINE_URL should be saved in Github Actions variables and use test or dev environment that resembles production static content. 
+# Run this manually when live content has changed and saved snapshots are out of date.
+# Also runs automatically every Monday at 2 AM UTC.
+
+on:
+  workflow_dispatch:
+    inputs:
+      sync_environment_from_live:
+        description: 'Sync the baseline environment from live before capturing snapshots. Check this if live content has changed since the last sync.'
+        required: false
+        type: boolean
+        default: false
+
+  # Runs at 2 AM UTC every Monday
+  schedule:
+    - cron: '0 2 * * 1'
+
+jobs:
+  refresh-baseline:
+    uses: AtenDesignGroup/aten-actions/.github/workflows/playwright.yml@main
+    with:
+      playwright-path: 'tests/playwright'
+      test-mode: 'baseline'
+      playwright-browsers: 'chromium webkit'
+      refresh-environment: ${{ (github.event_name == 'schedule' || inputs.sync_environment_from_live) && 'true' || 'false' }}
+      refresh-source-environment: ${{ vars.PANTHEON_MULTIDEV_CLONE_ENV }}
+      baseline-url: ${{ vars.PLAYWRIGHT_BASELINE_URL }}
+      pantheon-site: ${{ vars.PANTHEON_SITE }}
+      artifact-retention-days: 7
+    secrets:
+      pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}

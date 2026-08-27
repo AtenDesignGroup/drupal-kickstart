@@ -1,0 +1,54 @@
+# This workflow is designed to run Drupal tests for specified modules and test types.
+# It can be triggered manually via the GitHub Actions interface or called from other workflows.
+# Add your custom modules to the 'module' input options and specify the test types you want to run (unit, kernel, or both).
+
+name: Drupal Tests
+
+on:
+  workflow_call:
+    inputs:
+      module:
+        description: 'Module to test (leave empty to run all)'
+        required: false
+        type: string
+        default: 'all'
+      test_type:
+        description: 'Type of tests to run (unit, kernel, both)'
+        required: false
+        type: string
+        default: 'both'
+  workflow_dispatch:
+    inputs:
+      module:
+        description: 'Module to test'
+        required: false
+        type: choice
+        options:
+          - 'all'
+          - 'custom_module_1'
+          - 'custom_module_2'
+        default: 'all'
+      test_type:
+        description: 'Type of tests to run'
+        required: false
+        type: choice
+        options:
+          - 'unit'
+          - 'kernel'
+          - 'both'
+        default: 'both'
+        
+jobs:
+  drupal-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - 'all'
+          - 'custom_module_1'
+          - 'custom_module_2'
+    uses: AtenDesignGroup/aten-actions/.github/workflows/drupal-tests.yml@drupal-tests
+    with:
+      module: ${{ matrix.module }}
+      test-type: ${{ inputs.test_type || 'both' }}
+      php-version: '8.3'
