@@ -99,6 +99,7 @@ jobs:
             "phpcs.xml"
             "phpunit.xml"
             "eslint.config.js"
+            ".github/workflows/"
             ".stylelintrc.cjs"
             ".stylelintignore"
             "AGENTS.md"
