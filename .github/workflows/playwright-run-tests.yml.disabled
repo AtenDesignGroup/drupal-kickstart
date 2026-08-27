@@ -1,0 +1,36 @@
+name: Playwright - Run Visual Regression & Accessibility Tests
+
+# Compares a target environment against saved baseline screenshots.
+# Run this against a multidev or PR environment to catch visual regressions.
+# Requires baseline snapshots to exist — run "Playwright - Refresh Baseline Snapshots" first if needed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Pantheon multidev or PR URL to compare with the baseline screenshots.'
+        required: true
+        default: 'https://test-mysite.pantheonsite.io'
+      sync_environment_from_live:
+        description: 'Sync the target environment from live before running tests. Check this if the environment content is out of date.'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run-tests:
+    uses: AtenDesignGroup/aten-actions/.github/workflows/playwright.yml@main
+    with:
+      playwright-path: 'tests/playwright'
+      test-mode: 'test'
+      test-url: ${{ inputs.target_url }}
+      pantheon-site: ${{ vars.PANTHEON_SITE }}
+      playwright-browsers: 'chromium webkit'
+      refresh-environment: ${{ inputs.sync_environment_from_live && 'true' || 'false' }}
+      refresh-source-environment: ${{ vars.PANTHEON_MULTIDEV_CLONE_ENV }}
+      test-command: 'test:vrt+ally'
+      allow-live-environment: 'false'
+    secrets:
+      pantheon-machine-token: ${{ secrets.PANTHEON_MACHINE_TOKEN }}
+      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      github-token: ${{ secrets.GHPAC_TOKEN }}

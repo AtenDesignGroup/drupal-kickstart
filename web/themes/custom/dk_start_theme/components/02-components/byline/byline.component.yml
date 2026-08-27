@@ -1,0 +1,62 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Byline
+status: stable
+description: 'A metadata component for displaying author information alongside created and updated dates.'
+group: Components
+slots:
+  authors_block:
+    title: Authors block
+  dates_block:
+    title: Dates block
+props:
+  type: object
+  properties:
+    authors_label:
+      type: ['string', 'null']
+      title: Authors label
+      description: 'Optional label displayed before the list of authors.'
+      examples:
+        - 'By'
+        - 'Contributors'
+    authors:
+      type: ['array', 'null']
+      title: Authors
+      description: 'Optional array of author objects used for default rendering when the authors slot is not overridden.'
+      items:
+        type: object
+        properties:
+          name:
+            type: ['string', 'null']
+            title: Author name
+            examples:
+              - 'Magdalena Abakanowicz'
+          url:
+            type: ['string', 'null']
+            title: Author URL
+            examples:
+              - '/profiles/magdalena-abakanowicz'
+    created_label:
+      type: ['string', 'null']
+      title: Created label
+      description: 'Optional label displayed before the created date.'
+      examples:
+        - 'Created'
+        - 'Published'
+    created_date:
+      type: ['string', 'null']
+      title: Created date
+      description: 'Optional created or published date text.'
+      examples:
+        - 'March 27, 2024 at 10:00 AM PST'
+    updated_label:
+      type: ['string', 'null']
+      title: Updated label
+      description: 'Optional label displayed before the updated date.'
+      examples:
+        - 'Updated'
+    updated_date:
+      type: ['string', 'null']
+      title: Updated date
+      description: 'Optional updated date text.'
+      examples:
+        - 'April 2, 2024 at 8:30 AM PST'

@@ -8,6 +8,14 @@
 const { expect } = require('@playwright/test');
 
 /**
+ * Maximum height for a single page screenshot.
+ *
+ * Kept below browser image-dimension limits to provide a safe clipping
+ * threshold for exceptionally tall pages.
+ */
+const MAX_SCREENSHOT_HEIGHT = 32_000;
+
+/**
  * Default screenshot options for visual regression tests.
  * These can be overridden globally via screenshotOptions or per-screenshot via screenshots[].options
  */
@@ -18,24 +26,18 @@ const DEFAULT_SCREENSHOT_OPTIONS = {
 };
 
 /**
- * Maximum height for screenshots (Playwright limitation is 32767 pixels)
- * Using 32000 to provide a safe margin
+ * Build Playwright locator masks from selector strings.
+ *
+ * @param {Object} page - Playwright page object
+ * @param {string[]} [maskSelectors=[]] - CSS selectors to mask during screenshot assertions
+ * @returns {import('@playwright/test').Locator[]|undefined}
  */
-const MAX_SCREENSHOT_HEIGHT = 32000;
+function buildMaskLocators(page, maskSelectors = []) {
+  if (!Array.isArray(maskSelectors) || maskSelectors.length === 0) {
+    return undefined;
+  }
 
-/**
- * Merge user-provided screenshot options with defaults.
- * Performs shallow merge to allow partial overrides.
- *
- * @param {Object} [overrides={}] - User-provided screenshot options
- * @returns {Object} - Merged screenshot options
- *
- * @example
- * mergeScreenshotOptions({ maxDiffPixelRatio: 0.05 })
- * // Returns: { fullPage: true, animations: 'disabled', maxDiffPixelRatio: 0.05 }
- */
-function mergeScreenshotOptions(overrides = {}) {
-  return { ...DEFAULT_SCREENSHOT_OPTIONS, ...overrides };
+  return maskSelectors.map((selector) => page.locator(selector));
 }
 
 /**
@@ -59,8 +61,14 @@ async function applyClipIfNeeded(page, options) {
 
   // Get page dimensions
   const dimensions = await page.evaluate(() => ({
-    width: document.documentElement.scrollWidth,
-    height: document.documentElement.scrollHeight
+    width: Math.max(
+      document.documentElement.scrollWidth,
+      document.body?.scrollWidth ?? 0,
+    ),
+    height: Math.max(
+      document.documentElement.scrollHeight,
+      document.body?.scrollHeight ?? 0,
+    ),
   }));
 
   // If height exceeds maximum, apply clipping
@@ -79,6 +87,22 @@ async function applyClipIfNeeded(page, options) {
   }
 
   return options;
+}
+
+
+/**
+ * Merge user-provided screenshot options with defaults.
+ * Performs shallow merge to allow partial overrides.
+ *
+ * @param {Object} [overrides={}] - User-provided screenshot options
+ * @returns {Object} - Merged screenshot options
+ *
+ * @example
+ * mergeScreenshotOptions({ maxDiffPixelRatio: 0.05 })
+ * // Returns: { fullPage: true, animations: 'disabled', maxDiffPixelRatio: 0.05 }
+ */
+function mergeScreenshotOptions(overrides = {}) {
+  return { ...DEFAULT_SCREENSHOT_OPTIONS, ...overrides };
 }
 
 /**
@@ -185,8 +209,16 @@ function getScreenshotFilename(name, projectName, screenshotName) {
  *   { selector: ".nav", name: "nav" }
  * ])
  */
-async function captureScreenshots(page, name, projectName, globalScreenshotOptions = {}, screenshotsConfig) {
+async function captureScreenshots(
+  page,
+  name,
+  projectName,
+  globalScreenshotOptions = {},
+  screenshotsConfig,
+  maskSelectors = []
+) {
   const baseOptions = mergeScreenshotOptions(globalScreenshotOptions);
+  const mask = buildMaskLocators(page, maskSelectors);
 
   // Trigger lazy-loaded images by scrolling through the page
   await page.evaluate(async () => {
@@ -207,14 +239,33 @@ async function captureScreenshots(page, name, projectName, globalScreenshotOptio
     });
   });
 
-  // Brief pause to let lazy images start loading
-  await page.waitForTimeout(500);
+  // Return to top for deterministic full-page snapshots.
+  await page.evaluate(() => window.scrollTo(0, 0));
+
+  // Wait for pending images to either load/error (or timeout) before snapshot.
+  await page.evaluate(() =>
+    Promise.race([
+      Promise.all(
+        Array.from(document.images)
+          .filter((img) => !img.complete)
+          .map((img) => new Promise((resolve) => {
+            img.onload = img.onerror = () => resolve(null);
+          }))
+      ),
+      new Promise((resolve) => setTimeout(resolve, 5000)),
+    ])
+  );
+
+  // Brief settle wait for post-load animations / async content.
+  await page.waitForTimeout(1000);
 
   // If no screenshots config provided, capture full page
   if (!screenshotsConfig || screenshotsConfig.length === 0) {
     const filename = getScreenshotFilename(name, projectName);
-    const clippedOptions = await applyClipIfNeeded(page, baseOptions);
-    await expect(page).toHaveScreenshot(filename, clippedOptions);
+    await expect(page).toHaveScreenshot(filename, {
+      ...baseOptions,
+      ...(mask ? { mask } : {}),
+    });
     return;
   }
 
@@ -257,20 +308,23 @@ async function captureScreenshots(page, name, projectName, globalScreenshotOptio
         `Original error: ${error.message}`
       );
     }
-
     // Merge global and per-screenshot options
-    const mergedOptions = { ...baseOptions, ...options };
-    const clippedOptions = await applyClipIfNeeded(page, mergedOptions);
+    const mergedOptions = {
+      ...baseOptions,
+      ...options,
+      ...(mask ? { mask } : {}),
+    };
 
     // Generate filename and capture screenshot
     const filename = getScreenshotFilename(name, projectName, elementName);
-    await expect(page.locator(selector)).toHaveScreenshot(filename, clippedOptions);
+    await expect(page.locator(selector)).toHaveScreenshot(filename, mergedOptions);
   }
 }
 
 module.exports = {
-  DEFAULT_SCREENSHOT_OPTIONS,
   MAX_SCREENSHOT_HEIGHT,
+  DEFAULT_SCREENSHOT_OPTIONS,
+  buildMaskLocators,
   mergeScreenshotOptions,
   applyClipIfNeeded,
   normalizeUrlEntry,

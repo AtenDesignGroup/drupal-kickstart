@@ -1,0 +1,49 @@
+@use 'partials' as *;
+
+.c-byline {
+  @include type-scale(body, small);
+  display: flex;
+  flex-wrap: wrap;
+  gap: rem(12px) rem(16px);
+  align-items: center;
+}
+
+.c-byline__authors,
+.c-byline__dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: rem(8px);
+}
+
+.c-byline__authors-list,
+.c-byline__dates-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: rem(8px);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.c-byline__authors-label,
+.c-byline__date-label {
+  font-weight: var(--prototype-fw-bold);
+}
+
+.c-byline__authors-item,
+.c-byline__date-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: rem(4px);
+}
+
+.c-byline__date-item + .c-byline__date-item::before {
+  content: '•';
+  margin-right: rem(4px);
+}
+
+.c-byline__author-link {
+  text-decoration-thickness: from-font;
+}

@@ -1,0 +1,10 @@
+#!/bin/bash
+## Description: Run Playwright visual regression tests.
+## Usage: test:vrt [flags] [args]
+## Example: "test:vrt"
+## Example: "BASE_URL=https://dk-start.ddev.site test:vrt"
+## Example: "BASE_URL=https://dk-start.ddev.site test:vrt --last-failed"
+## Example: "BASE_URL=\"https://dev-dk-start.pantheonsite.io/}\" test:vrt"
+
+cd "${DDEV_APPROOT}/tests/playwright"
+npm run test:vrt -- $@
