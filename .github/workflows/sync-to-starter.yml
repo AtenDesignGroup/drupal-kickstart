@@ -90,6 +90,7 @@ jobs:
             "assets/"
             "docs/"
             "patches/"
+            "tests/"
             ".ddev/commands/"
             ".ddev/wire-components.php"
             "drupal-kickstart.sh"
