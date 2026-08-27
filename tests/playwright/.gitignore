@@ -1,5 +1,7 @@
 node_modules/
 playwright-report/
 test-results/
-tests/**/*-snapshots/
+dist/
 .env
+tests/**/*-snapshots/
+.auth/
