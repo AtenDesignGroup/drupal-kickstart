@@ -67,15 +67,17 @@ else
   warn "pantheon.yml already exists — skipped"
 fi
 
-# quicksilver → web/private/pantheon/quicksilver
+# quicksilver → web/private/scripts/quicksilver
+# pantheon.yml hook paths resolve against the docroot (web_docroot: true),
+# so this must match the private/scripts/quicksilver/... paths declared there.
 QS_SRC="${ASSETS}/quicksilver"
-QS_DEST="${PROJECT_ROOT}/web/private/pantheon/quicksilver"
+QS_DEST="${PROJECT_ROOT}/web/private/scripts/quicksilver"
 if [[ ! -d "$QS_DEST" ]]; then
   mkdir -p "$QS_DEST"
   cp -r "${QS_SRC}/." "$QS_DEST/"
-  info "quicksilver → web/private/pantheon/quicksilver"
+  info "quicksilver → web/private/scripts/quicksilver"
 else
-  warn "web/private/pantheon/quicksilver already exists — skipped"
+  warn "web/private/scripts/quicksilver already exists — skipped"
 fi
 
 # pantheon_secrets → private/pantheon_secrets
